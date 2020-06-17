@@ -1,0 +1,5 @@
+{
+	"displayName":"UIElements Samples",
+	"description": "Collection of samples used in the UIElements documentation.",
+	"createSeparatePackage": false
+}

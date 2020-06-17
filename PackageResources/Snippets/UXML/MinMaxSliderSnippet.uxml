@@ -1,0 +1,9 @@
+<UXML xmlns="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <MinMaxSlider
+        label="UXML Field"
+        name="the-uxml-field"
+        min-value="0"
+        max-value="20"
+        low-limit="-10"
+        high-limit="40" />
+</UXML>

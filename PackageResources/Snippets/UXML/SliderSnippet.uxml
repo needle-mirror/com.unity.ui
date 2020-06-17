@@ -1,0 +1,9 @@
+<UXML xmlns="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <Slider
+        label="UXML Slider"
+        name="the-uxml-slider"
+        low-value="0"
+        high-value="100"
+        page-size="1"
+        value="42.2" />
+</UXML>

@@ -1,0 +1,29 @@
+{
+    "name": "Unity.UIElements",
+    "references": [
+        "GUID:7104629240eb8a645904aa070efcaeb8",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UIE_PACKAGE"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.ui",
+            "expression": "",
+            "define": "UIE_PACKAGE"
+        },
+        {
+            "name": "com.unity.inputsystem",
+            "expression": "",
+            "define": "UNITY_INPUT_SYSTEM"
+        }
+    ],
+    "noEngineReferences": false
+}

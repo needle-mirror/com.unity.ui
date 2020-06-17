@@ -1,0 +1,46 @@
+.section-header {
+    -unity-text-align: middle-center;
+    flex: 1;
+    font-size: 14px;
+    margin-top: 10px;
+    padding-bottom: 5px;
+}
+
+.pages-stats-display {
+    flex-direction: row;
+}
+
+.alloc-stats-container {
+    flex: 1;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-top-width: 2px;
+    border-left-width : 1px;
+    border-bottom-width : 2px;
+    border-right-width : 1px;
+    border-color: #6d6d6d
+}
+
+.alloc-stats-container > Label {
+    -unity-text-align: middle-center;
+    font-size: 12px;
+    padding-bottom: 8px;
+}
+
+.page-stats {
+    border-color: #555555;
+    border-top-width: 1px;
+    padding-bottom: 8px;
+    margin-top: 4px;
+}
+
+.page-stats > Label {
+    -unity-text-align: middle-center;
+    font-size: 12px;
+    padding-bottom: 8px;
+}
+
+HeapStats {
+    margin-left: 4px;
+    margin-right: 4px;
+}

@@ -1,0 +1,10 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <VisualElement class="background">
+        <VisualElement class="header">
+            <Label text="Drag And Drop Sample" class="header__label" />
+        </VisualElement>
+        <VisualElement class="drop-area">
+            <Label text="Drag an asset here..." class="drop-area__label" />
+        </VisualElement>
+    </VisualElement>
+</UXML>

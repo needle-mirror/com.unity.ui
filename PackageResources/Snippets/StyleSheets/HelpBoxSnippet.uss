@@ -1,0 +1,7 @@
+.some-styled-help-box {
+    height: 100px;
+}
+
+.some-styled-help-box .unity-help-box__label {
+    -unity-font-style: bold;
+}

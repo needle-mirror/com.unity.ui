@@ -1,0 +1,36 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="headerRow">
+        <ui:Label text="Assets to Create" class="headerLabel"></ui:Label>
+    </ui:VisualElement>
+
+    <ui:VisualElement class="row" name="cSharpRow">
+        <ui:Toggle label="C#" value="true" name="cSharpToggle"></ui:Toggle>
+        <ui:TextField name="cSharpTextField"></ui:TextField>
+    </ui:VisualElement>
+
+    <ui:VisualElement class="row" name="uxmlRow">
+        <ui:Toggle label="UXML" value="true" name="uxmlToggle"></ui:Toggle>
+        <ui:TextField name="uxmlTextField"></ui:TextField>
+    </ui:VisualElement>
+
+    <ui:VisualElement class="row" name="ussRow">
+        <ui:Toggle label="USS" value="true" name="ussToggle"></ui:Toggle>
+        <ui:TextField name="ussTextField"></ui:TextField>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="errorMessageBox">
+        <ui:Image name="warningIcon"></ui:Image>
+        <ui:VisualElement class="verticalContainer">
+            <ui:Label name="errorLabel"></ui:Label>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <ui:VisualElement class="footerRow">
+        <ui:VisualElement class="container">
+            <ui:Toggle label="Open files in Editor once created" value="false" name="openFilesToggle"></ui:Toggle>
+        </ui:VisualElement>
+        <ui:VisualElement class="container">
+            <ui:Button text="Confirm" class="confirmButton" name="confirmButton" ></ui:Button>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

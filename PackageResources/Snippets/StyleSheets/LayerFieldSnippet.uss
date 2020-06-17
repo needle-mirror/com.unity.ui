@@ -1,0 +1,7 @@
+.some-styled-field {
+    -unity-font-style: bold;
+}
+
+.some-styled-field .unity-base-field__input {
+    -unity-font-style: italic;
+}

@@ -1,0 +1,141 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace UnityEngine.UIElements
+{
+    [UnityEngine.AddComponentMenu(@"UI Toolkit/Event System (UI Toolkit)")] public class EventSystem : UnityEngine.MonoBehaviour
+    {
+        public UnityEngine.UIElements.InputWrapper inputOverride { get; set; }
+        public bool isAppFocused { get; }
+        protected EventSystem() {}
+    }
+
+    public interface INavigationEvent
+    {
+    }
+
+    public class InputWrapper : UnityEngine.MonoBehaviour
+    {
+        public virtual UnityEngine.Vector2 compositionCursorPos { get; set; }
+        public virtual string compositionString { get; }
+        public virtual UnityEngine.IMECompositionMode imeCompositionMode { get; set; }
+        public virtual UnityEngine.Vector2 mousePosition { get; }
+        public virtual bool mousePresent { get; }
+        public virtual UnityEngine.Vector2 mouseScrollDelta { get; }
+        public virtual int touchCount { get; }
+        public virtual bool touchSupported { get; }
+        public InputWrapper() {}
+        public virtual float GetAxisRaw(string axisName);
+        public virtual bool GetButtonDown(string buttonName);
+        public virtual bool GetMouseButton(int button);
+        public virtual bool GetMouseButtonDown(int button);
+        public virtual bool GetMouseButtonUp(int button);
+        public virtual UnityEngine.Touch GetTouch(int index);
+    }
+
+    public class NavigationCancelEvent : UnityEngine.UIElements.NavigationEventBase<UnityEngine.UIElements.NavigationCancelEvent>
+    {
+        public NavigationCancelEvent() {}
+    }
+
+    public abstract class NavigationEventBase<T> : UnityEngine.UIElements.EventBase<T>, UnityEngine.UIElements.INavigationEvent where T : UnityEngine.UIElements.NavigationEventBase<T>, new()
+    {
+        protected NavigationEventBase() {}
+        protected virtual void Init();
+    }
+
+    public class NavigationMoveEvent : UnityEngine.UIElements.NavigationEventBase<UnityEngine.UIElements.NavigationMoveEvent>
+    {
+        public UnityEngine.UIElements.NavigationMoveEvent.Direction direction { get; }
+        public UnityEngine.Vector2 move { get; }
+        public NavigationMoveEvent() {}
+        public static UnityEngine.UIElements.NavigationMoveEvent GetPooled(UnityEngine.Vector2 moveVector);
+        protected virtual void Init();
+        public enum Direction
+        {
+            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Down = 4;
+            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Left = 1;
+            public const UnityEngine.UIElements.NavigationMoveEvent.Direction None = 0;
+            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Right = 3;
+            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Up = 2;
+            public int value__;
+        }
+    }
+
+    public class NavigationSubmitEvent : UnityEngine.UIElements.NavigationEventBase<UnityEngine.UIElements.NavigationSubmitEvent>
+    {
+        public NavigationSubmitEvent() {}
+    }
+
+    [System.Obsolete(@"PanelRenderer will be removed in a future release. Use UIDocument with PanelSettings instead.")] [UnityEngine.AddComponentMenu(@"UI Toolkit/Panel Renderer")] [UnityEngine.ExecuteInEditMode] public class PanelRenderer : UnityEngine.MonoBehaviour
+    {
+        public UnityEngine.UIElements.VisualTreeAsset uxml;
+        public float fallbackDpi { get; set; }
+        public float match { get; set; }
+        public UnityEngine.UIElements.IPanel panel { get; }
+        public System.Func<System.Collections.Generic.IEnumerable<UnityEngine.Object>> postUxmlReload { get; set; }
+        public float referenceDpi { get; set; }
+        public UnityEngine.Vector2Int referenceResolution { get; set; }
+        public float scale { get; set; }
+        public UnityEngine.UIElements.PanelScaleModes scaleMode { get; set; }
+        public UnityEngine.UIElements.PanelScreenMatchModes screenMatchMode { get; set; }
+        public UnityEngine.RenderTexture targetTexture { get; set; }
+        public UnityEngine.UIElements.StyleSheet themeStyleSheet { get; set; }
+        public UnityEngine.UIElements.VisualElement visualTree { get; }
+        public PanelRenderer() {}
+        protected void OnDestroy();
+        protected void OnDisable();
+        protected void OnEnable();
+        protected void OnValidate();
+        public void RecreateUIFromUxml();
+        protected void Reset();
+        protected virtual void Validate();
+    }
+
+    public enum PanelScaleModes
+    {
+        public const UnityEngine.UIElements.PanelScaleModes ConstantPhysicalSize = 1;
+        public const UnityEngine.UIElements.PanelScaleModes ConstantPixelSize = 0;
+        public const UnityEngine.UIElements.PanelScaleModes ScaleWithScreenSize = 2;
+        public int value__;
+    }
+
+    public enum PanelScreenMatchModes
+    {
+        public const UnityEngine.UIElements.PanelScreenMatchModes Expand = 2;
+        public const UnityEngine.UIElements.PanelScreenMatchModes MatchWidthOrHeight = 0;
+        public const UnityEngine.UIElements.PanelScreenMatchModes Shrink = 1;
+        public int value__;
+    }
+
+    [UnityEngine.CreateAssetMenu(fileName = @"PanelSettings", menuName = @"UI Toolkit/Panel Settings Asset")] public class PanelSettings : UnityEngine.ScriptableObject
+    {
+        public float fallbackDpi { get; set; }
+        public float match { get; set; }
+        public float referenceDpi { get; set; }
+        public UnityEngine.Vector2Int referenceResolution { get; set; }
+        public float scale { get; set; }
+        public UnityEngine.UIElements.PanelScaleModes scaleMode { get; set; }
+        public UnityEngine.UIElements.PanelScreenMatchModes screenMatchMode { get; set; }
+        public float sortingOrder { get; set; }
+        public UnityEngine.RenderTexture targetTexture { get; set; }
+        public UnityEngine.UIElements.StyleSheet themeStyleSheet { get; set; }
+        public void OrderByHierarchy();
+        public void SetScreenToPanelSpaceFunction(System.Func<UnityEngine.Vector2, UnityEngine.Vector2> screentoPanelSpaceFunction);
+    }
+
+    public static class RuntimePanelUtils
+    {
+        public static UnityEngine.Vector2 CameraTransformWorldToPanel(UnityEngine.UIElements.IPanel panel, UnityEngine.Vector3 worldPosition, UnityEngine.Camera camera);
+        public static UnityEngine.Rect CameraTransformWorldToPanelRect(UnityEngine.UIElements.IPanel panel, UnityEngine.Vector3 worldPosition, UnityEngine.Vector2 worldSize, UnityEngine.Camera camera);
+        public static UnityEngine.Vector2 ScreenToPanel(UnityEngine.UIElements.IPanel panel, UnityEngine.Vector2 screenPosition);
+    }
+
+    [UnityEngine.AddComponentMenu(@"UI Toolkit/UI Document")] [UnityEngine.DisallowMultipleComponent] [UnityEngine.ExecuteAlways] public sealed class UIDocument : UnityEngine.MonoBehaviour
+    {
+        public UnityEngine.UIElements.PanelSettings panelSettings { get; set; }
+        public UnityEngine.UIElements.UIDocument parentUI { get; }
+        public UnityEngine.UIElements.VisualElement rootVisualElement { get; }
+        public UnityEngine.UIElements.VisualTreeAsset visualTreeAsset { get; set; }
+    }
+}

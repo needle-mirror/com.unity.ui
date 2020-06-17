@@ -1,0 +1,15 @@
+.unity-panel-settings-inspector--empty-space--height {
+    height: 10px;
+}
+
+.unity-panel-settings-inspector--empty-space--middle-width {
+    flex-grow: 1;
+}
+
+.unity-panel-settings-inspector--empty-space--right-width {
+    width: 50px;
+}
+
+.unity-panel-settings-inspector--empty-space--left-width {
+    width: 140px;
+}

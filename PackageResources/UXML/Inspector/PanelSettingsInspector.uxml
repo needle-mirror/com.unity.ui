@@ -1,0 +1,35 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <uie:ObjectField label="Theme Style Sheet" allow-scene-objects="false" name="themeStyleSheet" binding-path="themeUss" tooltip="The main style sheet file to give styles to Unity provided elements (buttons, etc.).">
+    </uie:ObjectField>
+    <uie:ObjectField label="Target Texture" allow-scene-objects="false" name="targetTexture" binding-path="m_TargetTexture" tooltip="An optional texture onto which the panel should be rendered.">
+    </uie:ObjectField>
+    <uie:FloatField label="Sort Order" value="0" name="sortingOrder" binding-path="m_SortingOrder" tooltip="Defines the sorting order to the panel created by this PanelSettings, in relation to other panels.">
+    </uie:FloatField>
+    <uie:EnumField label="Scale Mode" value="Constant Pixel Size" name="scaleMode" binding-path="m_ScaleMode" tooltip="Determines how elements in the panel are scaled.">
+    </uie:EnumField>
+    <ui:Foldout text="Scale Mode Parameters">
+        <ui:VisualElement name="scaleModeConstantPixelSize">
+            <uie:FloatField label="Scale" value="1" binding-path="m_Scale" tooltip="A uniform scale that prepends the panel transform. Can only have positive values." />
+        </ui:VisualElement>
+        <ui:VisualElement name="scaleModeScaleWithScreenSize">
+            <uie:EnumField label="Screen Match Mode" value="Match Width Or Height" binding-path="m_ScreenMatchMode" name="screenMatchMode" tooltip="A mode used to scale the Panel area if the aspect ratio of the current resolution does not fit the reference resolution." />
+            <uie:Vector2IntField label="Reference Resolution" x="1200" y="800" binding-path="m_ReferenceResolution" tooltip="The resolution the UI is designed for. If the screen resolution is larger, the UI will be scaled up, and if it&apos;s smaller, the UI will be scaled down." />
+            <ui:Foldout text="Screen Match Mode Parameters" name="screenMatchModeMatchWidthOrHeight">
+                <ui:VisualElement>
+                    <ui:Slider picking-mode="Ignore" label="Match" value="0" high-value="1" show-input-field="true" binding-path="m_Match" tooltip="Determines if the scaling is using the width or height as reference, or a mix in between." />
+                    <ui:VisualElement style="flex-direction: row;">
+                        <ui:VisualElement class="unity-panel-settings-inspector--empty-space--left-width unity-panel-settings-inspector--empty-space--height" />
+                        <ui:Label text="Width" />
+                        <ui:VisualElement class="unity-panel-settings-inspector--empty-space--middle-width unity-panel-settings-inspector--empty-space--height" />
+                        <ui:Label text="Height" style="padding-right: 10px;" />
+                        <ui:VisualElement class="unity-panel-settings-inspector--empty-space--right-width unity-panel-settings-inspector--empty-space--height" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:Foldout>
+        </ui:VisualElement>
+        <ui:VisualElement name="scaleModeConstantPhysicalSize">
+            <uie:FloatField label="Reference DPI" value="96" binding-path="m_ReferenceDpi" tooltip="Reference DPI to use." />
+            <uie:FloatField label="Fallback DPI" value="96" binding-path="m_FallbackDpi" tooltip="The DPI to assume if the screen DPI is not known." />
+        </ui:VisualElement>
+    </ui:Foldout>
+</ui:UXML>

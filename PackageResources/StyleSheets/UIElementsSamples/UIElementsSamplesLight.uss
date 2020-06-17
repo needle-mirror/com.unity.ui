@@ -1,0 +1,36 @@
+/**********************************************************************************************************************/
+/* Snippet Content                                                                                                    */
+/**********************************************************************************************************************/
+
+.unity-snippet-code__code-line-numbers {
+    color: rgb(100, 100, 100);
+}
+
+.unity-snippet-code__code_outer_container {
+    border-color: #999999;
+    background-color: rgb(211, 211, 211);
+}
+
+.unity-base-text-field .unity-snippet-code__input {
+    background-color: rgb(211, 211, 211);
+}
+
+.unity-base-text-field .unity-snippet-code__input:focus {
+    background-color: rgb(211, 211, 211);
+}
+
+.unity-samples-explorer__demo-container {
+    border-color: #999999;
+}
+
+/**********************************************************************************************************************/
+/* Splitter                                                                                                           */
+/**********************************************************************************************************************/
+
+#unity-debugger-splitter-dragline-anchor {
+    background-color: #999999;
+}
+
+#unity-debugger-splitter-dragline {
+    background-color: rgba(0, 0, 0, 0);
+}

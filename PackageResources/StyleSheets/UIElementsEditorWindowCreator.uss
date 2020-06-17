@@ -1,0 +1,66 @@
+.headerRow {
+    margin-bottom: 6px;
+    border-bottom-width: 1px;
+    border-color: rgb(37, 37, 37);
+    background-color: rgb(59, 59, 59);
+    padding-bottom: 5px;
+    padding-top: 6px;
+}
+
+.unity-label.headerLabel {
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-left: 6px;
+}
+
+
+.row {
+    margin: 4px;
+    flex-direction: row;
+}
+
+.row > .unity-toggle > .unity-base-field__label {
+    min-width: 45px;
+}
+
+.unity-base-text-field {
+    margin-right: 0;
+    margin-left: 0;
+    flex: 1;
+}
+
+#errorMessageBox {
+    border-width: 1px;
+    border-color: rgb(37, 37, 37);
+    border-radius: 4px;
+    flex-direction: row;
+    padding-right: 5px;
+    padding-left: 5px;
+    margin-top: 4px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.verticalContainer {
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.unity-label#errorLabel {
+    font-size: 10px;
+    -unity-text-align: middle-left;
+}
+
+.footerRow {
+    flex-direction: row;
+    margin-top: 10px;
+    justify-content: flex-end;
+}
+
+.confirmButton {
+    margin-right: 16px;
+    margin-left: 16px;
+    width: 65px;
+    height: 20px;
+}

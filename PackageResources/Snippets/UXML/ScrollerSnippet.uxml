@@ -1,0 +1,7 @@
+<UXML xmlns="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <Scroller
+        name="the-uxml-scroller"
+        direction="Horizontal"
+        low-value="0"
+        high-value="100" />
+</UXML>

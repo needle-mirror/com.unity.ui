@@ -1,0 +1,363 @@
+/**********************************************************************************************************************/
+/* Panel                                                                                                              */
+/**********************************************************************************************************************/
+
+#panelSelectPopup {
+    min-width: 200px;
+}
+
+/**********************************************************************************************************************/
+/* Style debugger
+/**********************************************************************************************************************/
+
+StylesDebugger {
+    flex: 1 0 0;
+}
+
+.unity-style-debugger-search {
+    flex: 1;
+}
+
+.unity-style-debugger-toggle {
+    flex: 0.3 0 0;
+}
+
+.unity-style-debugger-toggle .unity-text-element {
+    -unity-text-align: middle-center;
+    flex: 1;
+    min-width: auto;
+}
+
+.unity-style-field > .unity-base-field {
+    flex: 1;
+    min-width: 300px;
+}
+
+.unity-style-field > .unity-base-field.unity-vector2-field {
+    min-width: 160px;
+    padding-left: 15px;
+    flex: 0.8 0 auto;
+}
+
+.unity-style-field > .unity-base-field.unity-vector2-field > .unity-vector2-field__label {
+    min-width: auto;
+}
+
+.unity-style-field > .unity-base-field.unity-vector2-field .unity-float-field__label {
+    min-width: 20px;
+}
+
+.unity-composite-field__field-spacer {
+    flex: 0 1 0;
+}
+
+.unity-style-field .unity-base-field__label {
+    min-width: 200px;
+}
+
+.unity-style-field {
+    flex-direction: row;
+}
+
+.unity-style-field__specifity-label {
+    min-width: 200px;
+}
+
+/**********************************************************************************************************************/
+/* Box Model                                                                                                          */
+/**********************************************************************************************************************/
+
+.box-model {
+    flex-direction: row;
+    border-width: 1px;
+    border-color: rgb(0, 0, 0);
+}
+
+.box-model-view {
+    flex-direction: row;
+}
+
+.box-model-view-container {
+    padding: 10px;
+    flex-shrink: 0;
+}
+
+.box-model-container-margin {
+    background-color: rgb(249, 204, 152);
+}
+
+.box-model-container-border {
+    background-color: rgb(253, 221, 155);
+}
+
+.box-model-container-padding {
+    background-color: rgb(196, 208, 139);
+}
+
+.box-model-container-content {
+    background-color: rgb(140, 182, 193);
+    justify-content: center;
+}
+
+.box-model.box-model-white {
+    background-color: rgb(255, 255, 255);
+}
+
+.box-model-side {
+    align-self: stretch;
+    flex-direction: row;
+}
+
+.box-model-title {
+    position: absolute;
+    padding-top: 2px;
+    padding-left: 4px;
+    color: rgb(0,0,0);
+}
+
+.box-model-center {
+    flex-direction: column;
+}
+
+.box-model-center-top {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.box-model-center-content {
+    min-width: 200px;
+}
+
+.box-model-center-bottom {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.box-model-content-text-container {
+    flex-direction: row;
+}
+
+.box-model-content-text-container > Label {
+    color: rgb(0,0,0);
+    align-self: center;
+    padding-top: 2px;
+    padding-left: 4px;
+}
+
+.box-model-textfield {
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    align-self: center;
+    overflow: visible;
+    flex: 0 0 auto;
+}
+
+.box-model-textfield > #unity-text-input {
+    color: black;
+    background-image: none;
+    background-color: transparent;
+    border-color: transparent;
+    padding: 2px;
+    border-width: 0;
+    border-radius: 0;
+    flex: 0 0 auto;
+    -unity-text-align: middle-center;
+}
+
+.box-model-textfield > #unity-text-input:focus {
+    background-image: none;
+    background-color:white;
+    color: black;
+    padding: 2px;
+    border-width: 0;
+    border-radius: 0;
+}
+
+.box-model-textfield > #unity-text-input:hover {
+    padding: 2px;
+    border-width: 0;
+    border-radius: 0;
+}
+
+.box-model-content-text-container > .box-model-textfield {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.box-model-content-text-container > .box-model-textfield > #unity-text-input {
+    align-self: center;
+    min-width: 34px;
+}
+
+#BoxModelViewLayer2 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.box-model-textfield-top-bottom-spacer {
+    height: 30px;
+}
+
+/**********************************************************************************************************************/
+/* TreeView                                                                                                           */
+/**********************************************************************************************************************/
+
+.unity-treeview-listview {
+    --unity-item-height: 19;
+}
+
+#unity-treeview-item {
+    flex-direction: row;
+    flex: 1 0 0;
+    align-items: center;
+}
+
+#unity-treeview-item-child-expander {
+    width: 20px;
+}
+
+#unity-treeview-item-child-expander > Label {
+    -unity-text-align: middle-center;
+}
+
+#unity-treeview-item-content {
+    flex-direction: row;
+    flex: 1 0 0;
+}
+
+.unity-debugger-highlight {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+
+.unity-debugger-tree-item-type {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.unity-debugger-tree-item-label-cont {
+    padding-left: 0;
+    margin-right: 4px;
+    margin-left: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-right: 0;
+    flex-shrink: 0;
+}
+
+.unity-debugger-tree-item-label {
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: 0;
+    margin-left: 0;
+    -unity-font: resource("Fonts/consola.ttf");
+    font-size: 14px;
+    -unity-text-align: middle-center;
+}
+
+.unity-toggle {
+    margin-bottom: 0;
+}
+
+/**********************************************************************************************************************/
+/* Splitter                                                                                                           */
+/**********************************************************************************************************************/
+
+#unity-debugger-splitter {
+    flex: 1 0 0;
+    flex-direction: row;
+}
+
+#unity-debugger-splitter__right-pane {
+    flex: 1 0 0;
+}
+
+#unity-debugger-splitter-dragline-anchor {
+    width: 1px;
+    background-color: rgb(100, 100, 100);
+}
+
+#unity-debugger-splitter-dragline {
+    width: 10px;
+    background-color: rgba(0, 0, 0, 0);
+    left: -5px;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+    cursor: resize-horizontal;
+}
+
+/**********************************************************************************************************************/
+/* Search Bar                                                                                                         */
+/**********************************************************************************************************************/
+
+.unity-treeview-searchbar {
+    flex-direction: row;
+    border-color: rgb(100, 100, 100);
+    border-top-width: 1px;
+    overflow: hidden;
+}
+
+.unity-treeview-searchbar-field {
+    flex: 1 0 0;
+    height: 18px;
+    margin-bottom: 3px;
+    padding-top: 2px;
+}
+
+.unity-treeview-searchbar-field > #unity-text-input {
+    background-color: transparent;
+    background-image: none;
+    border-width: 0;
+    padding: 1px 2px 0px 2px;
+}
+
+.unity-treeview-searchbar-field > #unity-text-input:active {
+    background-color: transparent;
+    background-image: none;
+    border-width: 0;
+    padding: 1px 2px 0px 2px;
+}
+
+.unity-treeview-searchbar-field > #unity-text-input:focus {
+    background-color: transparent;
+    background-image: none;
+    border-width: 0;
+    padding: 1px 2px 0px 2px;
+}
+
+.unity-treeview-searchbar-button {
+    margin: 1px;
+    padding-left: 6px;
+    padding-top: 2px;
+    padding-right: 6px;
+    padding-bottom: 0;
+    border-width: 0;
+    background-image: none;
+}
+
+.unity-treeview-searchbar-button:hover {
+    background-image: none;
+}
+
+.unity-treeview-searchbar-button:hover:active {
+    background-image: none;
+}
+
+.unity-treeview-searchbar-label {
+    padding-top: 3px;
+    padding-left: 4px;
+}
+
+.unity-treeview-searchbar-label-help {
+    position: absolute;
+    left: 0;
+}
+
+.unity-treeview-searchbar-hidden {
+    position: absolute;
+    visibility: hidden;
+}

@@ -1,0 +1,19 @@
+{
+    "name": "Unity.UIElements.Samples.Editor",
+    "references": [
+        "GUID:20f56f721c9feeb4bb67916c3c3e62ff",
+        "GUID:34238c0f6ff869d4c8956e27b1b27707",
+        "GUID:db9d9b6bb175f184585111dbdcfaedec"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

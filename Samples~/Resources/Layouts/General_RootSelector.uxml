@@ -1,0 +1,10 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <VisualElement>
+        <VisualElement>
+            <Label class="label1" text="Label 1" />
+        </VisualElement>
+        <VisualElement>
+            <Label class="label2" text="Label 2"/>
+        </VisualElement>
+    </VisualElement>
+</UXML>

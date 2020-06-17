@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:HelpBox name="drivenByParentWarning" message-type="Info" class="unity-ui-document-inspector--with-parent" text="The Panel Settings instance is set by the Parent and cannot be directly changed" />
+    <uie:ObjectField label="Panel Settings" name="panelSettingsField" binding-path="m_PanelSettings" tooltip="The PanelSettings instance to be used to display the UI in its panel.">
+    </uie:ObjectField>
+    <uie:ObjectField label="Parent UI Document" allow-scene-objects="false" name="parentField" binding-path="m_ParentUI">
+    </uie:ObjectField>
+    <uie:ObjectField label="Source Asset" allow-scene-objects="true" name="sourceAssetField" binding-path="sourceAsset" tooltip="The UI Document asset that contains the UI to be shown">
+    </uie:ObjectField>
+</ui:UXML>

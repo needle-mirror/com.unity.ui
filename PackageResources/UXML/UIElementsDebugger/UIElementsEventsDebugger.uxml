@@ -1,0 +1,72 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uei="UnityEditor.Experimental.UIElements" xmlns:dbg="UnityEditor.Experimental.UIElements.Debugger">
+    <ui:VisualElement name="eventsDebugger">
+        <uei:VisualSplitter name="verticalSplitter" splitter-size="8">
+            <ui:VisualElement name="eventsLogContainer">
+                <ui:VisualElement name="toolbar">
+                    <dbg:EventTypeSelectField name="filter-event-type" />
+                    <ui:Button name="refresh" text="Refresh" />
+                    <ui:Button name="clear-logs" text="Clear Logs" />
+                    <ui:Button name="replay-selected-events" text="Replay Selected Events" />
+                </ui:VisualElement>
+                <ui:VisualElement name="eventInfoContainer">
+                    <ui:Label name="log-count" text="0 event" />
+                    <ui:Label name="selection-count" text="(0 selected)" />
+                    <ui:Toggle name="autoscroll" label="Autoscroll" />
+                </ui:VisualElement>
+                <ui:ListView name="eventsLog"/>
+                <ui:VisualElement name="eventCallbacksContainer">
+                    <ui:Label name="eventCallbacksTitle" text="Event Callbacks"/>
+                    <ui:VisualElement name="scrollViewContainer">
+                        <ui:ScrollView name="eventCallbacksScrollView" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="eventPropagationPathsAndInfoContainer">
+                    <ui:VisualElement name="eventPropagationPathsContainer">
+                        <ui:Label name="eventPropagationPathsTitle" text="Event Propagation Paths"/>
+                        <ui:VisualElement name="scrollViewContainer">
+                            <ui:ScrollView name="eventPropagationPathsScrollView">
+                                <ui:Label name="eventPropagationPaths"/>
+                            </ui:ScrollView>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="eventbaseInfoContainer">
+                        <ui:Label name="eventbaseInfoTitle" text="Event Information"/>
+                        <ui:VisualElement name="scrollViewContainer">
+                            <ui:ScrollView name="eventbaseInfoScrollView">
+                                <ui:Label name="eventbaseInfo"/>
+                            </ui:ScrollView>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="eventTimeline">
+                    <ui:VisualElement name="eventTimelineTitle">
+                        <ui:Label name="eventTimelineTitleLabel" text="Timeline"/>
+                        <ui:Label name="eventTimelineTitleLegend" text="Legend"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="scrollViewContainer">
+                        <ui:ScrollView name="eventTimelineScrollView">
+                            <ui:Label name="eventTimelineLabel"/>
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="eventsRightSideContainer">
+                <ui:VisualElement name="eventsRegistrationsContainer">
+                    <ui:Label name="eventsRegistrationTitle" text="Registered Event Callbacks"/>
+                    <ui:VisualElement name="scrollViewContainer">
+                        <ui:ScrollView name="eventsRegistrationsScrollView">
+                            <ui:Label name="eventsRegistrationMessage" text="Event Registrations"/>
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="eventsHistogramContainer">
+                    <ui:Label name="eventsHistogramTitle" text="Histogram"/>
+                    <ui:VisualElement name="scrollViewContainer">
+                        <ui:ScrollView name="eventsHistogramScrollView">
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </uei:VisualSplitter>
+    </ui:VisualElement>
+</ui:UXML>

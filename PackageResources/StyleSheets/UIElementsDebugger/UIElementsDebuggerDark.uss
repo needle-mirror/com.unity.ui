@@ -1,0 +1,35 @@
+/**********************************************************************************************************************/
+/* TreeView                                                                                                           */
+/**********************************************************************************************************************/
+
+.unity-debugger-highlight {
+    background-color: rgb(225, 69, 69)
+}
+
+.unity-debugger-tree-item-name {
+    color: #93B3F8;
+}
+
+.unity-debugger-tree-item-classlist {
+    color: rgb(200, 200, 100);
+}
+
+/**********************************************************************************************************************/
+/* Search Bar                                                                                                         */
+/**********************************************************************************************************************/
+
+.unity-treeview-searchbar-button {
+    background-color: rgb(50, 50, 50);
+}
+
+.unity-treeview-searchbar-button:hover {
+    background-color: rgb(70, 70, 70);
+}
+
+.unity-treeview-searchbar-button:hover:active {
+    background-color: rgb(100, 100, 100);
+}
+
+.unity-treeview-searchbar-label {
+    color: rgb(120, 120, 120);
+}

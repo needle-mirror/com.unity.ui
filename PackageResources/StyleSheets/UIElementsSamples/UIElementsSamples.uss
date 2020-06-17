@@ -1,0 +1,201 @@
+/**********************************************************************************************************************/
+/* Explorer Window                                                                                                    */
+/**********************************************************************************************************************/
+
+.unity-samples-explorer {
+    flex-grow: 1;
+}
+
+.unity-samples-explorer__tree-view {
+    flex-grow: 1;
+}
+
+.unity-samples-explorer__content-container {
+    flex-grow: 1;
+}
+
+.unity-samples-explorer__tree-item {
+    flex-direction: row;
+    flex-grow: 1;
+    flex-shrink: 0;
+    flex-basis: 0;
+}
+
+.unity-samples-explorer__tree-item-label {
+    flex-grow: 1;
+    -unity-text-align: middle-left;
+}
+
+/**********************************************************************************************************************/
+/* Category Content                                                                                                   */
+/**********************************************************************************************************************/
+
+.unity-samples-explorer__category_scroll_view {
+    flex-grow: 1;
+}
+
+.unity-samples-explorer__category_title {
+    -unity-font-style: bold;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.unity-samples-explorer__category_panel {
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-bottom: 8px;
+}
+
+/**********************************************************************************************************************/
+/* Snippet Content                                                                                                    */
+/**********************************************************************************************************************/
+
+.unity-snippet-code__title {
+    -unity-font-style: bold;
+    margin-top: 8px;
+}
+
+.unity-snippet-code__code {
+    height: auto;
+}
+
+.unity-snippet-code__code-text {
+    border-width: 1px;
+    padding: 4px;
+}
+
+.unity-snippet-code__code-line-numbers {
+    min-width: 30px;
+    -unity-text-align: upper-right;
+    -unity-font: resource("Consola");
+    font-size: 13px;
+    padding: 6px;
+}
+
+.unity-snippet-code__code_outer_container {
+    flex-direction: row;
+    border-width: 1px;
+}
+
+.unity-snippet-code__code_container {
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.unity-base-text-field .unity-snippet-code__input {
+    -unity-font: resource("Consola");
+    font-size: 13px;
+    background-image: none;
+}
+
+.unity-base-text-field .unity-snippet-code__input:focus {
+    background-image: none;
+}
+
+.unity-samples-explorer__demo-container {
+    flex-shrink: 0;
+    border-bottom-width: 1px;
+    padding: 8px;
+}
+
+.unity-samples-explorer__snippets-container {
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-bottom: 8px;
+}
+
+/**********************************************************************************************************************/
+/* Styles Explorer                                                                                                    */
+/**********************************************************************************************************************/
+
+.unity-samples-window__styles-explorer {
+    flex-grow: 1;
+}
+
+.unity-styles-explorer__scroll_view_container {
+    flex-grow: 1;
+    min-width: 345px;
+}
+
+.unity-samples-window__style-panel {
+    flex-grow: 1;
+    flex-shrink: 0;
+}
+
+.unity-samples-window__style-panel--dark {
+    color: rgba(217,217,217,0.95);
+    background-color: rgb(56, 56, 56);
+}
+
+.unity-samples-window__style-panel--light {
+    color: #000;
+    background-color: rgb(194, 194, 194);
+}
+
+.unity-samples-window__style-section {
+    flex-shrink: 0;
+    margin-left: 8px;
+    margin-right: 8px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.unity-samples-window__style-section-label {
+    -unity-font-style: bold;
+}
+
+.unity-samples-window__style-section-inner-container {
+    flex-direction: row;
+}
+
+.unity-samples-window__style-section-main-container {
+    flex-grow: 1;
+    flex-basis: 1px;
+}
+
+.unity-samples-window__style-section-secondary-container {
+    flex-grow: 1;
+    flex-basis: 1px;
+}
+
+.unity-samples-window__style-foldout {
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+}
+
+.unity-samples-window__style-panel--dark .unity-samples-window__style-foldout {
+    border-color: rgb(194, 194, 194);
+}
+
+.unity-samples-window__style-panel--light .unity-samples-window__style-foldout {
+    border-color: rgb(56, 56, 56);
+}
+
+/**********************************************************************************************************************/
+/* Splitter                                                                                                           */
+/**********************************************************************************************************************/
+
+#unity-debugger-splitter {
+    flex: 1 0 0;
+    flex-direction: row;
+}
+
+#unity-debugger-splitter__right-pane {
+    flex: 1 0 0;
+}
+
+#unity-debugger-splitter-dragline-anchor {
+    width: 1px;
+}
+
+#unity-debugger-splitter-dragline {
+    width: 10px;
+    left: -5px;
+    top: 0px;
+    bottom: 0px;
+    position: absolute;
+    cursor: resize-horizontal;
+    background-color: rgba(0, 0, 0, 0);
+}

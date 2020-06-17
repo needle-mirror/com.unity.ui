@@ -1,0 +1,47 @@
+/**********************************************************************************************************************/
+/* TreeView                                                                                                           */
+/**********************************************************************************************************************/
+
+.unity-debugger-highlight {
+    background-color: rgb(225, 69, 69)
+}
+
+.unity-debugger-tree-item-name {
+    color: rgb(0, 51, 160);
+}
+
+.unity-debugger-tree-item-classlist {
+    color: rgb(172, 77, 0);
+}
+
+.unity-list-view__item--selected .unity-debugger-tree-item-label {
+    color: #ffffff;
+}
+
+.unity-list-view__item--selected .unity-debugger-tree-item-name {
+    color: rgb(190, 211, 255);
+}
+
+.unity-list-view__item--selected .unity-debugger-tree-item-classlist {
+    color: #ffcba0;
+}
+
+/**********************************************************************************************************************/
+/* Search Bar                                                                                                         */
+/**********************************************************************************************************************/
+
+.unity-treeview-searchbar-button {
+    background-color: rgb(209, 209, 209);
+}
+
+.unity-treeview-searchbar-button:hover {
+    background-color: rgb(158, 158, 158);
+}
+
+.unity-treeview-searchbar-button:hover:active {
+    background-color: rgb(100, 100, 100);
+}
+
+.unity-treeview-searchbar-label {
+    color: rgb(120, 120, 120);
+}

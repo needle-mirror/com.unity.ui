@@ -1,0 +1,3 @@
+.some-styled-scroller {
+    height: 100px;
+}
