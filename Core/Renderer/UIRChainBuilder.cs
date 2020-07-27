@@ -470,9 +470,6 @@ namespace UnityEngine.UIElements.UIR
         {
             s_MarkerRender.Begin();
 
-            if (BeforeDrawChain != null)
-                BeforeDrawChain(this);
-
             Material standardMaterial = GetStandardMaterial();
             ((BaseVisualElementPanel)panel).InvokeUpdateMaterial(standardMaterial);
 
@@ -546,8 +543,6 @@ namespace UnityEngine.UIElements.UIR
                 (panel as BaseVisualElementPanel)?.OnVersionChanged(m_FirstTextElement, VersionChangeType.Transform); // Force a window refresh
             s_MarkerTextRegen.End();
         }
-
-        public event Action<RenderChain> BeforeDrawChain;
 
         #region UIElements event handling callbacks
         public void UIEOnChildAdded(VisualElement parent, VisualElement ve, int index)

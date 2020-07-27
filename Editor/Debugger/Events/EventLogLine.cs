@@ -1,6 +1,6 @@
 using UnityEngine.UIElements;
 
-namespace Unity.UIElements.Editor.Debugger
+namespace UnityEditor.UIElements.Debugger
 {
     class EventLogLine
     {

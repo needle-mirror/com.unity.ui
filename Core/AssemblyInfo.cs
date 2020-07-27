@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using UnityEngine;
 
 
 // General Information about an assembly is controlled through the following
@@ -36,11 +37,15 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: InternalsVisibleTo("UnityEditor")]
+[assembly: InternalsVisibleTo("UnityEditor.UIElementsModule")]
+[assembly: InternalsVisibleTo("UnityEngine.UIElementsGameObjectsModule")]
 [assembly: InternalsVisibleTo("Unity.UIElements")]
 [assembly: InternalsVisibleTo("Unity.UIElements.InputSystem")]
 [assembly: InternalsVisibleTo("Unity.UIElements.Editor")]
 [assembly: InternalsVisibleTo("Unity.UIElements.EditorTests")]
 [assembly: InternalsVisibleTo("Unity.UIElements.PlayModeTests")]
+[assembly: InternalsVisibleTo("UnityEngine.UIElementsGameObjectsModule")]
+[assembly: InternalsVisibleTo("UnityEditor.UIElementsGameObjectsModule")]
 [assembly: InternalsVisibleTo("Assembly-CSharp-testable")]
 [assembly: InternalsVisibleTo("Assembly-CSharp-Editor-testable")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] // for Moq
@@ -77,3 +82,5 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Unity.InternalAPIEngineBridgeDev.003")]
 [assembly: InternalsVisibleTo("Unity.InternalAPIEngineBridgeDev.004")]
 [assembly: InternalsVisibleTo("Unity.InternalAPIEngineBridgeDev.005")]
+
+[assembly: UnityEngineModuleAssembly]

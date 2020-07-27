@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace UnityEngine.UIElements
 {
@@ -15,6 +17,7 @@ namespace UnityEngine.UIElements
                 {
                     s_Factories = new Dictionary<string, List<IUxmlFactory>>();
                     RegisterEngineFactories();
+                    RegisterUserFactories();
                 }
 
                 return s_Factories;
@@ -30,7 +33,7 @@ namespace UnityEngine.UIElements
                 {
                     if (f.GetType() == factory.GetType())
                     {
-                        throw new ArgumentException("A factory of this type was already registered");
+                        throw new ArgumentException($"A factory for the type {factory.GetType().FullName} was already registered");
                     }
                 }
                 factoryList.Add(factory);
@@ -89,6 +92,33 @@ namespace UnityEngine.UIElements
             {
                 RegisterFactory(factory);
             }
+        }
+
+        internal static void RegisterUserFactories()
+        {
+#if !UNITY_EDITOR
+            HashSet<string> userAssemblies = new HashSet<string>(ScriptingRuntime.GetAllUserAssemblies());
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
+            {
+                if (!(userAssemblies.Contains(assembly.GetName().Name + ".dll"))
+                    || assembly.GetName().Name == "UnityEngine.UIElementsModule")
+                    continue;
+
+                var types = assembly.GetTypes();
+                foreach (Type type in types)
+                {
+                    if (!typeof(IUxmlFactory).IsAssignableFrom(type)
+                        || type.IsInterface
+                        || type.IsAbstract
+                        || type.IsGenericType)
+                        continue;
+
+                    var factory = (IUxmlFactory)Activator.CreateInstance(type);
+                    RegisterFactory(factory);
+                }
+            }
+#endif
         }
     }
 }

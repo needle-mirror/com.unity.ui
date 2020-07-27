@@ -1,4 +1,4 @@
-#if UNITY_2020_2_OR_NEWER
+#if !UIE_PACKAGE || UNITY_2020_2_OR_NEWER
 //#define ENABLE_STYLE_SHEET_BUILDER_LOGS
 using System.Collections.Generic;
 
@@ -45,6 +45,7 @@ namespace UnityEngine.UIElements.StyleSheets
         List<StyleSelector> m_CurrentSelectors = new List<StyleSelector>();
         StyleProperty m_CurrentProperty;
         StyleRule m_CurrentRule;
+        List<StyleSheet.ImportStruct> m_Imports = new List<StyleSheet.ImportStruct>();
 
         public StyleProperty currentProperty => m_CurrentProperty;
 
@@ -113,6 +114,11 @@ namespace UnityEngine.UIElements.StyleSheets
             };
             m_CurrentProperties.Add(m_CurrentProperty);
             return m_CurrentProperty;
+        }
+
+        public void AddImport(StyleSheet.ImportStruct importStruct)
+        {
+            m_Imports.Add(importStruct);
         }
 
         public void AddValue(float value)
@@ -198,6 +204,10 @@ namespace UnityEngine.UIElements.StyleSheets
             writeTo.assets = m_Assets.ToArray();
             writeTo.scalableImages = m_ScalableImages.ToArray();
             writeTo.complexSelectors = m_ComplexSelectors.ToArray();
+
+            writeTo.imports = m_Imports.ToArray();
+            if (writeTo.imports.Length > 0)
+                writeTo.FlattenImportedStyleSheetsRecursive();
         }
 
         void RegisterVariable(string value)

@@ -1,82 +1,72 @@
 using System;
 using System.IO;
 using System.Linq;
-using JetBrains.Annotations;
-using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Button = UnityEngine.UIElements.Button;
 
-namespace Unity.UIElements.Editor
+namespace UnityEditor.UIElements
 {
     class UIElementsEditorWindowCreator : EditorWindow
     {
-#if UIE_PACKAGE
-        const string k_UIElementsEditorWindowCreatorStyleSheetPath = "Packages/com.unity.ui/PackageResources/StyleSheets/UIElementsEditorWindowCreator.uss";
-        const string k_UIElementsEditorWindowCreatorUxmlPath = "Packages/com.unity.ui/PackageResources/UXML/UIElementsEditorWindowCreator.uxml";
-#else
-        const string k_UIElementsEditorWindowCreatorStyleSheetPath = "StyleSheets/UIElementsEditorWindowCreator.uss";
-        const string k_UIElementsEditorWindowCreatorUxmlPath = "UXML/UIElementsEditorWindowCreator.uxml";
-#endif
+        const string k_UIElementsEditorWindowCreatorStyleSheetPath = "UIPackageResources/StyleSheets/UIElementsEditorWindowCreator.uss";
+        const string k_UIElementsEditorWindowCreatorUxmlPath = "UIPackageResources/UXML/UIElementsEditorWindowCreator.uxml";
 
         VisualElement m_Root;
         VisualElement m_ErrorMessageBox;
-        string m_CSharpName = string.Empty;
-        string m_UxmlName = string.Empty;
-        string m_UssName = string.Empty;
-        string m_Folder = string.Empty;
-        string m_ErrorMessage = string.Empty;
+        string m_CSharpName = String.Empty;
+        string m_UxmlName = String.Empty;
+        string m_UssName = String.Empty;
+
+        string m_Folder = String.Empty;
+
+        string m_ErrorMessage = String.Empty;
 
         bool m_IsCSharpEnable = true;
         bool m_IsUssEnable = true;
         bool m_IsUxmlEnable = true;
 
-#if UIE_PACKAGE
-        [UsedImplicitly, CommandHandler(nameof(CreateTemplateEditorWindow))]
-        private static void CreateTemplateEditorWindow(CommandExecuteContext c)
-        {
-            OpenCreateTemplateEditorWindow();
-        }
-
-#else
-
-        [MenuItem("Assets/Create/UIElements/Editor Window", false, 701, false)]
+        [MenuItem("Assets/Create/UI Toolkit/Editor Window", false, 701, false)]
         public static void CreateTemplateEditorWindow()
         {
             if (CommandService.Exists(nameof(CreateTemplateEditorWindow)))
                 CommandService.Execute(nameof(CreateTemplateEditorWindow), CommandHint.Menu);
             else
             {
-                OpenCreateTemplateEditorWindow();
+                UIElementsEditorWindowCreator editorWindow = GetWindow<UIElementsEditorWindowCreator>(true, "UI Toolkit Editor Window Creator");
+                editorWindow.maxSize = new Vector2(Styles.K_WindowWidth, Styles.K_WindowHeight);
+                editorWindow.minSize = new Vector2(Styles.K_WindowWidth, Styles.K_WindowHeight);
+                editorWindow.init();
             }
-        }
-
-#endif
-
-        public static void OpenCreateTemplateEditorWindow()
-        {
-            var editorWindow = GetWindow<UIElementsEditorWindowCreator>(true, "UIElements Editor Window Creator");
-            editorWindow.maxSize = new Vector2(Styles.K_WindowWidth, Styles.K_WindowHeight);
-            editorWindow.minSize = new Vector2(Styles.K_WindowWidth, Styles.K_WindowHeight);
-            editorWindow.init();
         }
 
         public void init()
         {
             m_Folder = string.Empty;
-            if (Selection.activeObject != null)
+
+            if (!ProjectWindowUtil.TryGetActiveFolderPath(out m_Folder))
             {
-                m_Folder = AssetDatabase.GetAssetPath(Selection.activeObject);
-                if (!AssetDatabase.IsValidFolder(m_Folder))
-                    m_Folder = string.Empty;
+                if (Selection.activeObject != null)
+                {
+                    m_Folder = AssetDatabase.GetAssetPath(Selection.activeObject);
+
+                    if (!AssetDatabase.IsValidFolder(m_Folder))
+                    {
+                        m_Folder = Path.GetDirectoryName(m_Folder);
+                    }
+
+                    if (!AssetDatabase.IsValidFolder(m_Folder))
+                    {
+                        m_Folder = string.Empty;
+                    }
+                }
             }
 
             if (string.IsNullOrEmpty(m_Folder))
-                ProjectWindowUtil.TryGetActiveFolderPath(out m_Folder);
-
-            if (string.IsNullOrEmpty(m_Folder) || m_Folder.Equals("Assets"))
+            {
                 m_Folder = "Assets/Editor";
+            }
         }
 
         public void OnEnable()
@@ -84,7 +74,8 @@ namespace Unity.UIElements.Editor
             // After the c# file has been created and the domain.reload executed, we want to close the window
             if (m_CSharpName != "" && ClassExists())
             {
-                EditorApplication.ExecuteMenuItem("Window/UIElements/" + m_CSharpName);
+                EditorApplication.ExecuteMenuItem("Window/Project/" + m_CSharpName);
+
                 EditorApplication.CallbackFunction handler = null;
                 handler = () =>
                 {
@@ -295,6 +286,11 @@ namespace Unity.UIElements.Editor
                 return false;
             }
 
+            if (!IsValidPath())
+            {
+                return false;
+            }
+
             if (m_IsCSharpEnable && (!Validate(m_CSharpName, ".cs") || ClassExists()))
             {
                 return false;
@@ -307,6 +303,17 @@ namespace Unity.UIElements.Editor
 
             if (m_IsUxmlEnable && !Validate(m_UxmlName, ".uxml"))
             {
+                return false;
+            }
+
+            return true;
+        }
+
+        bool IsValidPath()
+        {
+            if (m_Folder.Split('/').Contains("Editor") == false)
+            {
+                m_ErrorMessage = "The target path must be located inside an Editor folder";
                 return false;
             }
 

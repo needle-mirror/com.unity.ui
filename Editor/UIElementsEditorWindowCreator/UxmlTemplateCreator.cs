@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using JetBrains.Annotations;
-using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Unity.UIElements.Editor
+namespace UnityEditor.UIElements
 {
     static partial class UIElementsTemplate
     {
@@ -35,33 +32,19 @@ namespace Unity.UIElements.Editor
             return filePath;
         }
 
-#if UIE_PACKAGE
-        [UsedImplicitly, CommandHandler(nameof(CreateUXMLTemplate))]
-        private static void CreateUXMLTemplate(CommandExecuteContext c)
-        {
-            CreateUXMAsset();
-        }
-
-#else
-
-        [MenuItem("Assets/Create/UIElements/UXML Template", false, 610, false)]
+        [MenuItem("Assets/Create/UI Toolkit/UI Document", false, 610, false)]
         public static void CreateUXMLTemplate()
         {
             if (CommandService.Exists(nameof(CreateUXMLTemplate)))
                 CommandService.Execute(nameof(CreateUXMLTemplate), CommandHint.Menu);
             else
-                CreateUXMAsset();
-        }
-
-#endif
-
-        private static void CreateUXMAsset()
-        {
-            var folder = GetCurrentFolder();
-            var path = AssetDatabase.GenerateUniqueAssetPath(folder + "/NewUXMLTemplate.uxml");
-            var contents = CreateUXMLTemplate(folder);
-            var icon = EditorGUIUtility.IconContent<VisualTreeAsset>().image as Texture2D;
-            ProjectWindowUtil.CreateAssetWithContent(path, contents, icon);
+            {
+                var folder = GetCurrentFolder();
+                var path = AssetDatabase.GenerateUniqueAssetPath(folder + "/NewUXMLTemplate.uxml");
+                var contents = CreateUXMLTemplate(folder);
+                var icon = EditorGUIUtility.IconContent<VisualTreeAsset>().image as Texture2D;
+                ProjectWindowUtil.CreateAssetWithContent(path, contents, icon);
+            }
         }
 
         public static string CreateUXMLTemplate(string folder, string uxmlContent = "")

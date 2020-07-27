@@ -192,6 +192,7 @@ namespace UnityEngine.UIElements
             m_ForceReblitAll = false;
             m_ColorSpace = QualitySettings.activeColorSpace;
             UIRUtility.Destroy(atlas);
+            atlas = null;
 
             s_MarkerReset.End();
 
@@ -335,7 +336,7 @@ namespace UnityEngine.UIElements
                 case TextureFormat.ASTC_HDR_8x8:        // HDR
                 case TextureFormat.ASTC_HDR_10x10:      // HDR
                 case TextureFormat.ASTC_HDR_12x12:      // HDR
-#if UNITY_2020_2_OR_NEWER
+#if !UIE_PACKAGE || UNITY_2020_2_OR_NEWER
                 case TextureFormat.RG32:                // HDR
                 case TextureFormat.RGB48:               // HDR
                 case TextureFormat.RGBA64:              // HDR
@@ -423,7 +424,10 @@ namespace UnityEngine.UIElements
             if (atlas.width != m_Allocator.physicalWidth || atlas.height != m_Allocator.physicalHeight)
             {
                 RenderTexture newAtlas = CreateAtlasTexture();
-                m_Blitter.BlitOneNow(newAtlas, atlas, new RectInt(0, 0, atlas.width, atlas.height), new Vector2Int(0, 0), false, Color.white);
+                if (newAtlas == null)
+                    Debug.LogErrorFormat("Failed to allocate a render texture for the dynamic atlas. Current Size = {0}x{1}. Requested Size = {2}x{3}.", atlas.width, atlas.height, m_Allocator.physicalWidth, m_Allocator.physicalHeight);
+                else
+                    m_Blitter.BlitOneNow(newAtlas, atlas, new RectInt(0, 0, atlas.width, atlas.height), new Vector2Int(0, 0), false, Color.white);
                 UIRUtility.Destroy(atlas);
                 atlas = newAtlas;
             }

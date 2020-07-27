@@ -168,7 +168,7 @@ namespace UnityEngine.UIElements
         {
             get
             {
-                return showHorizontal || (contentContainer.layout.width - layout.width > 0);
+                return showHorizontal || (scrollableWidth > 0);
             }
         }
 
@@ -176,7 +176,7 @@ namespace UnityEngine.UIElements
         {
             get
             {
-                return showVertical || (contentContainer.layout.height - layout.height > 0);
+                return showVertical || (scrollableHeight > 0);
             }
         }
 
@@ -217,12 +217,12 @@ namespace UnityEngine.UIElements
 
         private float scrollableWidth
         {
-            get { return contentContainer.layout.width - contentViewport.layout.width; }
+            get { return contentContainer.boundingBox.width - contentViewport.layout.width; }
         }
 
         private float scrollableHeight
         {
-            get { return contentContainer.layout.height - contentViewport.layout.height; }
+            get { return contentContainer.boundingBox.height - contentViewport.layout.height; }
         }
 
         // For inertia: how quickly the scrollView stops from moving after PointerUp.
@@ -304,6 +304,9 @@ namespace UnityEngine.UIElements
             var t = contentContainer.transform.position;
 
             var offset = scrollOffset;
+            if (needsVertical)
+                offset.y += contentContainer.resolvedStyle.top;
+
             t.x = GUIUtility.RoundToPixelGrid(-offset.x);
             t.y = GUIUtility.RoundToPixelGrid(-offset.y);
             contentContainer.transform.position = t;
@@ -385,6 +388,16 @@ namespace UnityEngine.UIElements
 
         private float GetDeltaDistance(float viewMin, float viewMax, float childBoundaryMin, float childBoundaryMax)
         {
+            var viewSize = viewMax - viewMin;
+            var childSize = childBoundaryMax - childBoundaryMin;
+            if (childSize > viewSize)
+            {
+                if (viewMin > childBoundaryMin && childBoundaryMax > viewMax)
+                    return 0f;
+
+                return childBoundaryMin > viewMin ? childBoundaryMin - viewMin : childBoundaryMax - viewMax;
+            }
+
             float deltaDistance = childBoundaryMax - viewMax;
             if (deltaDistance < -1)
             {
@@ -463,6 +476,10 @@ namespace UnityEngine.UIElements
             hierarchy.Add(contentViewport);
 
             m_ContentContainer = new VisualElement() {name = "unity-content-container"};
+            // Content container overflow is set to scroll which clip but we need to disable clipping in this case
+            // or else absolute elements might not be shown. The viewport is in charge of clipping.
+            // See case 1247583
+            m_ContentContainer.disableClipping = true;
             m_ContentContainer.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
             m_ContentContainer.AddToClassList(contentUssClassName);
             m_ContentContainer.usageHints = UsageHints.GroupTransform;
@@ -896,15 +913,15 @@ namespace UnityEngine.UIElements
 
         void UpdateScrollers(bool displayHorizontal, bool displayVertical)
         {
-            float horizontalFactor = contentContainer.layout.width > Mathf.Epsilon ? contentViewport.layout.width / contentContainer.layout.width : 1f;
-            float verticalFactor = contentContainer.layout.height > Mathf.Epsilon ? contentViewport.layout.height / contentContainer.layout.height : 1f;
+            float horizontalFactor = contentContainer.boundingBox.width > Mathf.Epsilon ? contentViewport.layout.width / contentContainer.boundingBox.width : 1f;
+            float verticalFactor = contentContainer.boundingBox.height > Mathf.Epsilon ? contentViewport.layout.height / contentContainer.boundingBox.height : 1f;
 
             horizontalScroller.Adjust(horizontalFactor);
             verticalScroller.Adjust(verticalFactor);
 
             // Set availability
-            horizontalScroller.SetEnabled(contentContainer.layout.width - contentViewport.layout.width > 0);
-            verticalScroller.SetEnabled(contentContainer.layout.height - contentViewport.layout.height > 0);
+            horizontalScroller.SetEnabled(contentContainer.boundingBox.width - contentViewport.layout.width > 0);
+            verticalScroller.SetEnabled(contentContainer.boundingBox.height - contentViewport.layout.height > 0);
 
             // Expand content if scrollbars are hidden
             contentViewport.style.marginRight = displayVertical ? verticalScroller.layout.width : 0;
@@ -947,7 +964,7 @@ namespace UnityEngine.UIElements
         void OnScrollWheel(WheelEvent evt)
         {
             var oldValue = verticalScroller.value;
-            if (contentContainer.layout.height - layout.height > 0)
+            if (contentContainer.boundingBox.height - layout.height > 0)
             {
                 if (evt.delta.y < 0)
                     verticalScroller.ScrollPageUp(Mathf.Abs(evt.delta.y));

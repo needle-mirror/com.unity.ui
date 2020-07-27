@@ -93,10 +93,10 @@ namespace UnityEngine.UIElements
         /// </remarks>
         public static readonly int penPointerCount = 2;
 
-        internal static IEnumerable<int> hoveringPointers
+        internal static readonly int[] hoveringPointers =
         {
-            get { yield return mousePointerId; }
-        }
+            mousePointerId
+        };
     }
 
     /// <summary>
@@ -719,7 +719,7 @@ namespace UnityEngine.UIElements
             return e;
         }
 
-        public static T GetPooled(IMouseEvent triggerEvent)
+        internal static T GetPooled(IMouseEvent triggerEvent)
         {
             T e = GetPooled();
             if (triggerEvent != null)
@@ -753,7 +753,7 @@ namespace UnityEngine.UIElements
             return e;
         }
 
-        public new static T GetPooled(EventBase e)
+        internal new static T GetPooled(EventBase e)
         {
             if (e is IPointerEvent p)
                 return GetPooled(p);

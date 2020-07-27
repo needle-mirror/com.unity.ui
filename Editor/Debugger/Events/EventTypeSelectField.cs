@@ -7,7 +7,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Unity.UIElements.Editor.Debugger
+namespace UnityEditor.UIElements.Debugger
 {
     class StringValuePairs<T> : IComparable<StringValuePairs<T>>
     {

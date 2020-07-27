@@ -26,9 +26,15 @@ namespace UnityEngine.UIElements
         [Obsolete("VisualElement.cacheAsBitmap is deprecated and has no effect")]
         public bool cacheAsBitmap { get; set; }
 
+        internal bool disableClipping
+        {
+            get => (m_Flags & VisualElementFlags.DisableClipping) == VisualElementFlags.DisableClipping;
+            set => m_Flags = value ? m_Flags | VisualElementFlags.DisableClipping : m_Flags & ~VisualElementFlags.DisableClipping;
+        }
+
         internal bool ShouldClip()
         {
-            return computedStyle.overflow.value != OverflowInternal.Visible;
+            return computedStyle.overflow.value != OverflowInternal.Visible && !disableClipping;
         }
 
         // parent in visual tree

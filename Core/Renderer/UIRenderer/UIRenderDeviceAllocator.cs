@@ -347,7 +347,10 @@ namespace UnityEngine.UIElements.UIR
     {
         public Page(uint vertexMaxCount, uint indexMaxCount, uint maxQueuedFrameCount, bool mockPage)
         {
-            vertexMaxCount = Math.Min(vertexMaxCount, 1 << 16); // Because we use UInt16 as the index type
+            // The vertexMaxCount imposed here is only because we use UInt16 as the index type.
+            // The actual render device may not support 0xFFFF as an index but it is up to the device
+            // to limit the allocation size.
+            vertexMaxCount = Math.Min(vertexMaxCount, (1 << 16));
             vertices = new DataSet<Vertex>(Utility.GPUBufferType.Vertex, vertexMaxCount, maxQueuedFrameCount, 32, mockPage);
             indices = new DataSet<UInt16>(Utility.GPUBufferType.Index, indexMaxCount, maxQueuedFrameCount, 32, mockPage);
         }
@@ -483,6 +486,31 @@ namespace UnityEngine.UIElements.UIR
             // This is expected to be called no more than once per frame
             public void SendUpdates()
             {
+                #if UNITY_WEBGL
+                // Send the whole range in WebGL since it has quirks around partial updates.
+                // If the partial update is thought to cause a stall, it will release the buffer
+                // and create a new one with the requested update size, basically destroying our buffer.
+                SendFullRange();
+                #else
+                SendPartialRanges();
+                #endif
+            }
+
+            public void SendFullRange()
+            {
+                uint fullRangeBytes = (uint)(cpuData.Length * m_ElemStride);
+                updateRanges[(int)m_UpdateRangesBatchStart] = new GfxUpdateBufferRange() {
+                    source = new UIntPtr(cpuData.GetUnsafeReadOnlyPtr()),
+                    offsetFromWriteStart = 0,
+                    size = fullRangeBytes
+                };
+                gpuData?.UpdateRanges(updateRanges.Slice((int)m_UpdateRangesBatchStart, 1), (int)0, (int)fullRangeBytes);
+
+                ResetUpdateState();
+            }
+
+            public void SendPartialRanges()
+            {
                 if (m_UpdateRangesEnqueued == 0)
                     return;
 
@@ -516,9 +544,14 @@ namespace UnityEngine.UIElements.UIR
                         };
                     }
                 }
+
                 gpuData?.UpdateRanges(updateRanges.Slice((int)m_UpdateRangesBatchStart, (int)m_UpdateRangesEnqueued), (int)minByte, (int)maxByte);
 
-                // Reset state for upcoming updates
+                ResetUpdateState();
+            }
+
+            private void ResetUpdateState()
+            {
                 m_UpdateRangeMin = uint.MaxValue;
                 m_UpdateRangeMax = 0;
                 m_UpdateRangesEnqueued = 0;
@@ -544,6 +577,7 @@ namespace UnityEngine.UIElements.UIR
         public DataSet<Vertex> vertices;
         public DataSet<UInt16> indices;
         public Page next;
+        public int framesEmpty; // For how many consecutive frames has the page been empty?
     }
     #endregion
 }

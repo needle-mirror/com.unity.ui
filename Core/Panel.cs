@@ -496,11 +496,6 @@ namespace UnityEngine.UIElements
         private uint m_Version = 0;
         private uint m_RepaintVersion = 0;
 
-#pragma warning disable CS0649
-        internal static Action BeforeUpdaterChange;
-        internal static Action AfterUpdaterChange;
-#pragma warning restore CS0649
-
         ProfilerMarker m_MarkerBeforeUpdate;
         ProfilerMarker m_MarkerUpdate;
         ProfilerMarker m_MarkerLayout;

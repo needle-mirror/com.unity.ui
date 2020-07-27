@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Unity.UIElements.Editor.Debugger
+namespace UnityEditor.UIElements.Debugger
 {
     internal class DebuggerTreeView : VisualElement
     {

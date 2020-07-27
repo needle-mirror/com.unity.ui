@@ -5,7 +5,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Unity.UIElements.Editor.Debugger
+namespace UnityEditor.UIElements.Debugger
 {
     internal class DebuggerSelection
     {
@@ -154,7 +154,6 @@ namespace Unity.UIElements.Editor.Debugger
         [SerializeField]
         private DebuggerContext m_DebuggerContext;
 
-#if !UIE_PACKAGE
         [MenuItem(k_WindowPath, false, 3010, false)]
         private static void OpenUIElementsDebugger()
         {
@@ -176,16 +175,6 @@ namespace Unity.UIElements.Editor.Debugger
                 OpenAndInspectWindow(EditorWindow.focusedWindow);
             }
         }
-
-#else
-        [CommandHandler(nameof(OpenUIElementsDebugger))]
-        private static void OpenUIElementsDebugger(CommandExecuteContext c)
-        {
-            var debugWindow = c.data as EditorWindow;
-            OpenAndInspectWindow(debugWindow);
-        }
-
-#endif
 
         public static void OpenAndInspectWindow(EditorWindow window)
         {

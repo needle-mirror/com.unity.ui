@@ -20,21 +20,6 @@ namespace UnityEngine.UIElements
         static readonly string s_HorizontalClassName = "unity-two-pane-split-view--horizontal";
 
         /// <summary>
-        /// Determines the orientation of the two resizable panes.
-        /// </summary>
-        public enum Orientation
-        {
-            /// <summary>
-            /// Split view panes layout is left/right with vertical resizable split.
-            /// </summary>
-            Horizontal,
-            /// <summary>
-            /// Split view panes layout is top/bottom with horizontal resizable split.
-            /// </summary>
-            Vertical
-        }
-
-        /// <summary>
         /// Instantiates a <see cref="TwoPaneSplitView"/> using the data read from a UXML file.
         /// </summary>
         public new class UxmlFactory : UxmlFactory<TwoPaneSplitView, UxmlTraits> {}
@@ -46,7 +31,7 @@ namespace UnityEngine.UIElements
         {
             UxmlIntAttributeDescription m_FixedPaneIndex = new UxmlIntAttributeDescription { name = "fixed-pane-index", defaultValue = 0 };
             UxmlIntAttributeDescription m_FixedPaneInitialDimension = new UxmlIntAttributeDescription { name = "fixed-pane-initial-dimension", defaultValue = 100 };
-            UxmlEnumAttributeDescription<Orientation> m_Orientation = new UxmlEnumAttributeDescription<Orientation> { name = "orientation", defaultValue = Orientation.Horizontal };
+            UxmlEnumAttributeDescription<TwoPaneSplitViewOrientation> m_Orientation = new UxmlEnumAttributeDescription<TwoPaneSplitViewOrientation> { name = "orientation", defaultValue = TwoPaneSplitViewOrientation.Horizontal };
 
             public override IEnumerable<UxmlChildElementDescription> uxmlChildElementsDescription
             {
@@ -86,7 +71,7 @@ namespace UnityEngine.UIElements
 
         VisualElement m_Content;
 
-        Orientation m_Orientation;
+        TwoPaneSplitViewOrientation m_Orientation;
         int m_FixedPaneIndex;
         float m_FixedPaneInitialDimension;
 
@@ -123,7 +108,7 @@ namespace UnityEngine.UIElements
         /// <summary>
         /// Orientation of the split view.
         /// </summary>
-        public Orientation orientation
+        public TwoPaneSplitViewOrientation orientation
         {
             get => m_Orientation;
             set
@@ -168,7 +153,7 @@ namespace UnityEngine.UIElements
         public TwoPaneSplitView(
             int fixedPaneIndex,
             float fixedPaneStartDimension,
-            Orientation orientation) : this()
+            TwoPaneSplitViewOrientation orientation) : this()
         {
             Init(fixedPaneIndex, fixedPaneStartDimension, orientation);
         }
@@ -223,7 +208,7 @@ namespace UnityEngine.UIElements
             Init(m_FixedPaneIndex, m_FixedPaneInitialDimension, m_Orientation);
         }
 
-        internal void Init(int fixedPaneIndex, float fixedPaneInitialDimension, Orientation orientation)
+        internal void Init(int fixedPaneIndex, float fixedPaneInitialDimension, TwoPaneSplitViewOrientation orientation)
         {
             m_Orientation = orientation;
             m_FixedPaneIndex = fixedPaneIndex;
@@ -231,7 +216,7 @@ namespace UnityEngine.UIElements
 
             m_Content.RemoveFromClassList(s_HorizontalClassName);
             m_Content.RemoveFromClassList(s_VerticalClassName);
-            if (m_Orientation == Orientation.Horizontal)
+            if (m_Orientation == TwoPaneSplitViewOrientation.Horizontal)
                 m_Content.AddToClassList(s_HorizontalClassName);
             else
                 m_Content.AddToClassList(s_VerticalClassName);
@@ -239,7 +224,7 @@ namespace UnityEngine.UIElements
             // Create drag anchor line.
             m_DragLineAnchor.RemoveFromClassList(s_HandleDragLineAnchorHorizontalClassName);
             m_DragLineAnchor.RemoveFromClassList(s_HandleDragLineAnchorVerticalClassName);
-            if (m_Orientation == Orientation.Horizontal)
+            if (m_Orientation == TwoPaneSplitViewOrientation.Horizontal)
                 m_DragLineAnchor.AddToClassList(s_HandleDragLineAnchorHorizontalClassName);
             else
                 m_DragLineAnchor.AddToClassList(s_HandleDragLineAnchorVerticalClassName);
@@ -247,7 +232,7 @@ namespace UnityEngine.UIElements
             // Create drag
             m_DragLine.RemoveFromClassList(s_HandleDragLineHorizontalClassName);
             m_DragLine.RemoveFromClassList(s_HandleDragLineVerticalClassName);
-            if (m_Orientation == Orientation.Horizontal)
+            if (m_Orientation == TwoPaneSplitViewOrientation.Horizontal)
                 m_DragLine.AddToClassList(s_HandleDragLineHorizontalClassName);
             else
                 m_DragLine.AddToClassList(s_HandleDragLineVerticalClassName);
@@ -310,7 +295,7 @@ namespace UnityEngine.UIElements
             m_FlexedPane.style.width = StyleKeyword.Null;
             m_FlexedPane.style.height = StyleKeyword.Null;
 
-            if (m_Orientation == Orientation.Horizontal)
+            if (m_Orientation == TwoPaneSplitViewOrientation.Horizontal)
             {
                 m_FixedPane.style.width = m_FixedPaneInitialDimension;
                 m_FixedPane.style.height = StyleKeyword.Null;
@@ -327,7 +312,7 @@ namespace UnityEngine.UIElements
             m_FlexedPane.style.flexShrink = 0;
             m_FlexedPane.style.flexBasis = 0;
 
-            if (m_Orientation == Orientation.Horizontal)
+            if (m_Orientation == TwoPaneSplitViewOrientation.Horizontal)
             {
                 if (m_FixedPaneIndex == 0)
                     m_DragLineAnchor.style.left = m_FixedPaneInitialDimension;
@@ -372,7 +357,7 @@ namespace UnityEngine.UIElements
             var maxLength = this.resolvedStyle.width;
             var dragLinePos = m_DragLineAnchor.resolvedStyle.left;
             var activeElementPos = m_FixedPane.resolvedStyle.left;
-            if (m_Orientation == Orientation.Vertical)
+            if (m_Orientation == TwoPaneSplitViewOrientation.Vertical)
             {
                 maxLength = this.resolvedStyle.height;
                 dragLinePos = m_DragLineAnchor.resolvedStyle.top;
@@ -393,7 +378,7 @@ namespace UnityEngine.UIElements
                 }
                 else
                 {
-                    if (m_Orientation == Orientation.Horizontal)
+                    if (m_Orientation == TwoPaneSplitViewOrientation.Horizontal)
                         m_DragLineAnchor.style.left = activeElementPos;
                     else
                         m_DragLineAnchor.style.top = activeElementPos;
@@ -405,5 +390,20 @@ namespace UnityEngine.UIElements
         {
             get { return m_Content; }
         }
+    }
+
+    /// <summary>
+    /// Determines the orientation of the two resizable panes.
+    /// </summary>
+    public enum TwoPaneSplitViewOrientation
+    {
+        /// <summary>
+        /// Split view panes layout is left/right with vertical resizable split.
+        /// </summary>
+        Horizontal,
+        /// <summary>
+        /// Split view panes layout is top/bottom with horizontal resizable split.
+        /// </summary>
+        Vertical
     }
 }

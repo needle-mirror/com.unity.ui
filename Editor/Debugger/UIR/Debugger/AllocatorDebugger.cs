@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 using UnityEngine.UIElements.UIR;
 using static UnityEngine.UIElements.UIR.UIRenderDevice.AllocationStatistics;
 
-namespace Unity.UIElements.Editor.Debugger
+namespace UnityEditor.UIElements.Debugger
 {
     internal class AllocatorDebugger : UIRDebugger
     {

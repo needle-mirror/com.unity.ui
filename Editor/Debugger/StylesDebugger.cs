@@ -10,7 +10,7 @@ using UnityEngine.UIElements.StyleSheets;
 using UnityEngine.UIElements;
 using Cursor = UnityEngine.UIElements.Cursor;
 
-namespace Unity.UIElements.Editor.Debugger
+namespace UnityEditor.UIElements.Debugger
 {
     internal class StylesDebugger : VisualElement
     {
@@ -393,6 +393,19 @@ namespace Unity.UIElements.Editor.Debugger
                 string name = AssetDatabase.GetAssetPath(sheet);
                 if (string.IsNullOrEmpty(name) || sheet.isUnityStyleSheet)
                     name = sheet.name;
+
+                void RecursivePrintStyleSheetNames(StyleSheet importedSheet)
+                {
+                    for (int i = 0; i < importedSheet.imports.Length; i++)
+                    {
+                        var thisImportedSheet = importedSheet.imports[i].styleSheet;
+                        name += "\n(" + thisImportedSheet.name + ")";
+                        matchingContext.styleSheetStack.Add(thisImportedSheet);
+                        RecursivePrintStyleSheetNames(thisImportedSheet);
+                    }
+                }
+
+                RecursivePrintStyleSheetNames(sheet);
 
                 selectedElementStylesheets.Add(name);
                 matchingContext.styleSheetStack.Add(sheet);

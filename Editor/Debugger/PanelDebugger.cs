@@ -9,7 +9,7 @@ using UnityEngine.Serialization;
 
 using Toolbar = UnityEditor.UIElements.Toolbar;
 
-namespace Unity.UIElements.Editor.Debugger
+namespace UnityEditor.UIElements.Debugger
 {
     internal interface IPanelChoice
     {

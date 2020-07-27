@@ -6,7 +6,7 @@ using System.Xml;
 using System.Xml.Linq;
 using UnityEngine.UIElements;
 
-namespace Unity.UIElements.Editor.Debugger
+namespace UnityEditor.UIElements.Debugger
 {
     class UxmlExporter
     {

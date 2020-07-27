@@ -92,7 +92,6 @@ namespace UnityEngine.UIElements
             target.RegisterCallback<MouseDownEvent>(OnMouseDown);
             target.RegisterCallback<MouseMoveEvent>(OnMouseMove);
             target.RegisterCallback<MouseUpEvent>(OnMouseUp);
-            target.RegisterCallback<ClickEvent>(OnClick);
         }
 
         /// <summary>
@@ -103,7 +102,6 @@ namespace UnityEngine.UIElements
             target.UnregisterCallback<MouseDownEvent>(OnMouseDown);
             target.UnregisterCallback<MouseMoveEvent>(OnMouseMove);
             target.UnregisterCallback<MouseUpEvent>(OnMouseUp);
-            target.UnregisterCallback<ClickEvent>(OnClick);
         }
 
         /// <summary>
@@ -145,11 +143,6 @@ namespace UnityEngine.UIElements
                 ProcessUpEvent(evt, evt.localMousePosition, PointerId.mousePointerId);
         }
 
-        protected void OnClick(ClickEvent evt)
-        {
-            Invoke(evt);
-        }
-
         internal void SimulateSingleClick(EventBase evt, int delayMs = 100)
         {
             target.pseudoStates |= PseudoStates.Active;
@@ -173,11 +166,7 @@ namespace UnityEngine.UIElements
                 // Repeatable button clicks are performed on the MouseDown and at timer events
                 if (target.ContainsPoint(localPosition))
                 {
-                    using (ClickEvent clickEvt = ClickEvent.GetPooled(evt))
-                    {
-                        clickEvt.target = target;
-                        target.SendEvent(clickEvt);
-                    }
+                    Invoke(evt);
                 }
 
                 if (m_Repeater == null)
@@ -236,11 +225,7 @@ namespace UnityEngine.UIElements
                 // Non repeatable button clicks are performed on the MouseUp
                 if (target.ContainsPoint(localPosition))
                 {
-                    using (ClickEvent clickEvt = ClickEvent.GetPooled(evt))
-                    {
-                        clickEvt.target = target;
-                        target.SendEvent(clickEvt);
-                    }
+                    Invoke(evt);
                 }
             }
 

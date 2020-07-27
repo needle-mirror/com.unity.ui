@@ -11,7 +11,7 @@ using UnityEditor.UIElements.Debugger;
 using Cursor = UnityEngine.UIElements.Cursor;
 using Toolbar = UnityEditor.UIElements.Toolbar;
 
-namespace Unity.UIElements.Editor.Debugger
+namespace UnityEditor.UIElements.Debugger
 {
     internal struct StylePropertyInfo
     {

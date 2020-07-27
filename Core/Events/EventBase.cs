@@ -454,11 +454,6 @@ namespace UnityEngine.UIElements
         /// </summary>
         public Vector2 originalMousePosition { get; private set; }
 
-#if UNITY_INPUT_SYSTEM
-        internal InputSystem.InputAction inputSystemAction { get; set; }
-        internal InputSystem.InputControl inputSystemControl { get; set; }
-#endif
-
 #if UNITY_EDITOR
         internal EventDebugger eventLogger { get; set; }
 
@@ -510,11 +505,6 @@ namespace UnityEngine.UIElements
 
 #if UNITY_EDITOR
             eventLogger = null;
-#endif
-
-#if UNITY_INPUT_SYSTEM
-            inputSystemAction = null;
-            inputSystemControl = null;
 #endif
         }
 

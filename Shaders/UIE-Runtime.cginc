@@ -1,6 +1,4 @@
 #ifndef UNITY_UIE_INCLUDED
-// Upgrade NOTE: excluded shader from OpenGL ES 2.0 because it uses non-square matrices
-#pragma exclude_renderers gles
 #define UNITY_UIE_INCLUDED
 
 #ifndef UIE_SIMPLE_ATLAS
@@ -146,7 +144,7 @@ static const float kUIEVertexLastFlagValue = 10.0f; // Keep in track with UIR.Ve
 // transforms. It does not matter because in the event where there is no ancestor with a Group or Bone RenderHint, these transform
 // will be identities.
 
-static float3x4 uie_toWorldMat;
+static float4x4 uie_toWorldMat;
 
 // Returns the view-space offset that must be applied to the vertex to satisfy a minimum displacement constraint.
 // vertex               Coordinates of the vertex, in vertex-space.
@@ -227,18 +225,20 @@ void uie_vert_load_payload(appdata_t v)
     float2 row1UV = (xformTexel + float2(0, 1) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
     float2 row2UV = (xformTexel + float2(0, 2) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
 
-    uie_toWorldMat = float3x4(
+    uie_toWorldMat = float4x4(
         tex2Dlod(_ShaderInfoTex, float4(row0UV, 0, 0)),
         tex2Dlod(_ShaderInfoTex, float4(row1UV, 0, 0)),
-        tex2Dlod(_ShaderInfoTex, float4(row2UV, 0, 0)));
+        tex2Dlod(_ShaderInfoTex, float4(row2UV, 0, 0)),
+        float4(0, 0, 0, 1));
 
 #else // !UIE_SHADER_INFO_IN_VS
 
     int xformConstantIndex = (int)(v.idsFlags.x * 255.0f * 3.0f);
-    uie_toWorldMat = float3x4(
+    uie_toWorldMat = float4x4(
         _Transforms[xformConstantIndex + 0],
         _Transforms[xformConstantIndex + 1],
-        _Transforms[xformConstantIndex + 2]);
+        _Transforms[xformConstantIndex + 2],
+        float4(0, 0, 0, 1));
 
 #endif // UIE_SHADER_INFO_IN_VS
 }

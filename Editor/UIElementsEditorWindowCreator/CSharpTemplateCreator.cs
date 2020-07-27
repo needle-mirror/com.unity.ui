@@ -1,10 +1,11 @@
-namespace Unity.UIElements.Editor
+using System;
+namespace UnityEditor.UIElements
 {
     static partial class UIElementsTemplate
     {
         public static string CreateCSharpTemplate(string cSharpName, string uxmlName, string ussName, string folder)
         {
-            var csTemplate = string.Format(@"using UnityEditor;
+            string csTemplate = string.Format(@"using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
@@ -12,7 +13,7 @@ using UnityEditor.UIElements;
 
 public class {0} : EditorWindow
 {{
-    [MenuItem(""Window/UIElements/{0}"")]
+    [MenuItem(""Window/Project/{0}"")]
     public static void ShowExample()
     {{
         {0} wnd = GetWindow<{0}>();
@@ -28,7 +29,7 @@ public class {0} : EditorWindow
         VisualElement label = new Label(""Hello World! From C#"");
         root.Add(label);", cSharpName);
 
-            if (uxmlName != string.Empty)
+            if (uxmlName != String.Empty)
             {
                 csTemplate = csTemplate + string.Format(@"
 
@@ -38,7 +39,7 @@ public class {0} : EditorWindow
         root.Add(labelFromUXML);", folder, uxmlName);
             }
 
-            if (ussName != string.Empty)
+            if (ussName != String.Empty)
             {
                 csTemplate += string.Format(@"
 

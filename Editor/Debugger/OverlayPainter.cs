@@ -4,7 +4,7 @@ using UnityEngine.UIElements.Experimental;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Unity.UIElements.Editor.Debugger
+namespace UnityEditor.UIElements.Debugger
 {
     [Flags]
     internal enum OverlayContent

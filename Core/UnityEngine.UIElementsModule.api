@@ -177,7 +177,6 @@ namespace UnityEngine.UIElements
         public Clickable(System.Action<UnityEngine.UIElements.EventBase> handler) {}
         public Clickable(System.Action handler, long delay, long interval) {}
         protected void Invoke(UnityEngine.UIElements.EventBase evt);
-        protected void OnClick(UnityEngine.UIElements.ClickEvent evt);
         protected void OnMouseDown(UnityEngine.UIElements.MouseDownEvent evt);
         protected void OnMouseMove(UnityEngine.UIElements.MouseMoveEvent evt);
         protected void OnMouseUp(UnityEngine.UIElements.MouseUpEvent evt);
@@ -1415,8 +1414,6 @@ namespace UnityEngine.UIElements
         public virtual float twist { get; protected set; }
         protected PointerEventBase() {}
         public static T GetPooled(UnityEngine.Event systemEvent);
-        public static T GetPooled(UnityEngine.UIElements.EventBase e);
-        public static T GetPooled(UnityEngine.UIElements.IMouseEvent triggerEvent);
         public static T GetPooled(UnityEngine.UIElements.IPointerEvent triggerEvent);
         public static T GetPooled(UnityEngine.Touch touch, UnityEngine.EventModifiers modifiers = 0);
         protected virtual void Init();
@@ -2019,17 +2016,11 @@ namespace UnityEngine.UIElements
         public int fixedPaneIndex { get; set; }
         public float fixedPaneInitialDimension { get; set; }
         public UnityEngine.UIElements.VisualElement flexedPane { get; }
-        public UnityEngine.UIElements.TwoPaneSplitView.Orientation orientation { get; set; }
+        public UnityEngine.UIElements.TwoPaneSplitViewOrientation orientation { get; set; }
         public TwoPaneSplitView() {}
-        public TwoPaneSplitView(int fixedPaneIndex, float fixedPaneStartDimension, UnityEngine.UIElements.TwoPaneSplitView.Orientation orientation) {}
+        public TwoPaneSplitView(int fixedPaneIndex, float fixedPaneStartDimension, UnityEngine.UIElements.TwoPaneSplitViewOrientation orientation) {}
         public void CollapseChild(int index);
         public void UnCollapse();
-        public enum Orientation
-        {
-            public const UnityEngine.UIElements.TwoPaneSplitView.Orientation Horizontal = 0;
-            public int value__;
-            public const UnityEngine.UIElements.TwoPaneSplitView.Orientation Vertical = 1;
-        }
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.TwoPaneSplitView, UnityEngine.UIElements.TwoPaneSplitView.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -2040,6 +2031,13 @@ namespace UnityEngine.UIElements
             public UxmlTraits() {}
             public virtual void Init(UnityEngine.UIElements.VisualElement ve, UnityEngine.UIElements.IUxmlAttributes bag, UnityEngine.UIElements.CreationContext cc);
         }
+    }
+
+    public enum TwoPaneSplitViewOrientation
+    {
+        public const UnityEngine.UIElements.TwoPaneSplitViewOrientation Horizontal = 0;
+        public int value__;
+        public const UnityEngine.UIElements.TwoPaneSplitViewOrientation Vertical = 1;
     }
 
     public abstract class TypedUxmlAttributeDescription<T> : UnityEngine.UIElements.UxmlAttributeDescription
