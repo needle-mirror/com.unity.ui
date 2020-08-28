@@ -8,21 +8,12 @@ namespace UnityEngine.UIElements
     /// Use this class to handle input, and send events to a UI Toolkit runtime panel.
     /// </summary>
     [AddComponentMenu("UI Toolkit/Event System (UI Toolkit)")]
-    public class EventSystem : MonoBehaviour
+    public partial class EventSystem : MonoBehaviour
     {
-        [SerializeField] private string m_HorizontalAxis = "Horizontal";
-        [SerializeField] private string m_VerticalAxis = "Vertical";
-        [SerializeField] private string m_SubmitButton = "Submit";
-        [SerializeField] private string m_CancelButton = "Cancel";
-        [SerializeField] private float m_InputActionsPerSecond = 10;
-        [SerializeField] private float m_RepeatDelay = 0.5f;
-
         /// <summary>
         /// Returns true if the application has the focus. Events are sent only if this flag is set to true.
         /// </summary>
         public bool isAppFocused { get; private set; } = true;
-
-        private Event m_Event = new Event();
 
         /// <summary>
         /// Overrides the default input when NavigationEvents are sent.
@@ -30,8 +21,49 @@ namespace UnityEngine.UIElements
         /// <remarks>
         /// Use this override to bypass the default input system with your own input system.
         /// This is useful when you want to send fake input to the event system.
+        /// This property will be ignored if the New Input System is used.
         /// </remarks>
         public InputWrapper inputOverride { get; set; }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        protected EventSystem()
+        {
+        }
+
+        void OnApplicationFocus(bool hasFocus)
+        {
+            isAppFocused = hasFocus;
+        }
+
+        private bool ShouldIgnoreEventsOnAppNotFocused()
+        {
+            switch (SystemInfo.operatingSystemFamily)
+            {
+                case OperatingSystemFamily.Windows:
+                case OperatingSystemFamily.Linux:
+                case OperatingSystemFamily.MacOSX:
+#if UNITY_EDITOR
+                    if (UnityEditor.EditorApplication.isRemoteConnected)
+                        return false;
+#endif
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+#if !UNITY_INPUT_SYSTEM || !ENABLE_INPUT_SYSTEM
+        [SerializeField] private string m_HorizontalAxis = "Horizontal";
+        [SerializeField] private string m_VerticalAxis = "Vertical";
+        [SerializeField] private string m_SubmitButton = "Submit";
+        [SerializeField] private string m_CancelButton = "Cancel";
+        [SerializeField] private float m_InputActionsPerSecond = 10;
+        [SerializeField] private float m_RepeatDelay = 0.5f;
+
+        private Event m_Event = new Event();
+
 
         private InputWrapper m_DefaultInput;
 
@@ -63,13 +95,6 @@ namespace UnityEngine.UIElements
             }
         }
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        protected EventSystem()
-        {
-        }
-
         private RuntimePanel m_FocusedPanel;
 
         internal RuntimePanel focusedPanel
@@ -82,23 +107,6 @@ namespace UnityEngine.UIElements
                     m_FocusedPanel?.focusController.BlurLastFocusedElement();
                     m_FocusedPanel = value;
                 }
-            }
-        }
-
-        private bool ShouldIgnoreEventsOnAppNotFocused()
-        {
-            switch (SystemInfo.operatingSystemFamily)
-            {
-                case OperatingSystemFamily.Windows:
-                case OperatingSystemFamily.Linux:
-                case OperatingSystemFamily.MacOSX:
-#if UNITY_EDITOR
-                    if (UnityEditor.EditorApplication.isRemoteConnected)
-                        return false;
-#endif
-                    return true;
-                default:
-                    return false;
             }
         }
 
@@ -125,7 +133,12 @@ namespace UnityEngine.UIElements
                 }
                 else
                 {
-                    SendPositionBasedEvent(self => UIElementsRuntimeUtility.CreateEvent(self.m_Event), this);
+                    SendPositionBasedEvent(m_Event.mousePosition, m_Event.delta, (panelPosition, panelDelta, self) =>
+                    {
+                        self.m_Event.mousePosition = panelPosition;
+                        self.m_Event.delta = panelDelta;
+                        return UIElementsRuntimeUtility.CreateEvent(self.m_Event);
+                    }, this);
                 }
             }
         }
@@ -191,7 +204,7 @@ namespace UnityEngine.UIElements
             }
         }
 
-        internal void SendPositionBasedEvent<TArg>(Func<TArg, EventBase> evtFactory, TArg arg)
+        internal void SendPositionBasedEvent<TArg>(Vector3 mousePosition, Vector3 delta, Func<Vector3, Vector3, TArg, EventBase> evtFactory, TArg arg)
         {
             // Allow focus to be lost before processing the event
             if (focusedPanel != null)
@@ -206,13 +219,9 @@ namespace UnityEngine.UIElements
                 var panel = panels[i];
                 if (panel is RuntimePanel runtimePanel)
                 {
-                    if (ScreenToPanel(runtimePanel, m_Event.mousePosition,
-                        m_Event.delta, out var panelPosition, out var panelDelta))
+                    if (ScreenToPanel(runtimePanel, mousePosition, delta, out var panelPosition, out var panelDelta))
                     {
-                        m_Event.mousePosition = panelPosition;
-                        m_Event.delta = panelDelta;
-
-                        using (EventBase evt = evtFactory(arg))
+                        using (EventBase evt = evtFactory(panelPosition, panelDelta, arg))
                         {
                             runtimePanel.visualTree.SendEvent(evt);
 
@@ -243,7 +252,7 @@ namespace UnityEngine.UIElements
             }
         }
 
-        private EventBase MakeTouchEvent(Touch touch, EventModifiers modifiers)
+        private static EventBase MakeTouchEvent(Touch touch, EventModifiers modifiers)
         {
             // Flip Y Coordinates.
             touch.position = new Vector2(touch.position.x, Screen.height - touch.position.y);
@@ -276,24 +285,15 @@ namespace UnityEngine.UIElements
                 if (touch.type == TouchType.Indirect)
                     continue;
 
-                if (focusedPanel != null)
+                SendPositionBasedEvent(touch.position, touch.deltaPosition, (panelPosition, panelDelta, _touch) =>
                 {
-                    if (ScreenToPanel(focusedPanel, ref touch))
-                    {
-                        using (EventBase evt = MakeTouchEvent(touch, EventModifiers.None))
-                        {
-                            focusedPanel.visualTree.SendEvent(evt);
-                        }
-                    }
-                }
+                    _touch.position = panelPosition;
+                    _touch.deltaPosition = panelDelta;
+                    return MakeTouchEvent(_touch, EventModifiers.None);
+                }, touch);
             }
 
             return input.touchCount > 0;
-        }
-
-        private void OnApplicationFocus(bool hasFocus)
-        {
-            isAppFocused = hasFocus;
         }
 
         private Vector2 GetRawMoveVector()
@@ -372,18 +372,6 @@ namespace UnityEngine.UIElements
             return moveDirection != NavigationMoveEvent.Direction.None;
         }
 
-        static bool ScreenToPanel(BaseRuntimePanel panel, ref Touch touch)
-        {
-            var panelPosition = Vector2.zero;
-            var panelDelta = Vector2.zero;
-            if (!ScreenToPanel(panel, touch.position, touch.deltaPosition,
-                out panelPosition, out panelDelta))
-                return false;
-            touch.position = panelPosition;
-            touch.deltaPosition = panelDelta;
-            return true;
-        }
-
         static bool ScreenToPanel(BaseRuntimePanel panel, Vector2 screenPosition, Vector2 screenDelta,
             out Vector2 panelPosition, out Vector2 panelDelta)
         {
@@ -402,13 +390,6 @@ namespace UnityEngine.UIElements
             panelDelta = panelPosition - panelPrevPosition;
 
             return true;
-        }
-
-#if UNITY_2020_1
-        //TODO: Remove this once 2020_1 has PreLateUpdate built-in
-        void LateUpdate()
-        {
-            UIElementsRuntimeUtility.UpdateRuntimePanels();
         }
 
 #endif

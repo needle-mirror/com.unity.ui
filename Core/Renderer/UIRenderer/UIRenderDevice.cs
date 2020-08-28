@@ -82,22 +82,20 @@ namespace UnityEngine.UIElements.UIR
         private UInt32[] m_Fences;
         private MaterialPropertyBlock m_StandardMatProps, m_CommonMatProps;
         private uint m_FrameIndex;
-        private bool m_FrameIndexIncremented;
         private uint m_NextUpdateID = 1; // For the current frame only, 0 is not an accepted value here
         private DrawStatistics m_DrawStats;
 
         readonly Pool<MeshHandle> m_MeshHandles = new Pool<MeshHandle>();
         readonly DrawParams m_DrawParams = new DrawParams();
+        readonly TextureSlotManager m_TextureSlotManager = new TextureSlotManager();
 
         private static LinkedList<DeviceToFree> m_DeviceFreeQueue = new LinkedList<DeviceToFree>();   // Not thread safe for now
         private static int m_ActiveDeviceCount = 0; // Not thread safe for now
         private static bool m_SubscribedToNotifications; // Not thread safe for now
         private static bool m_SynchronousFree; // This is set on domain unload or app quit, so it is irreversible
 
-        static readonly int s_MainTexPropID = Shader.PropertyToID("_MainTex");
         static readonly int s_FontTexPropID = Shader.PropertyToID("_FontTex");
-        static readonly int s_CustomTexPropID = Shader.PropertyToID("_CustomTex");
-        static readonly int s_1PixelClipInvViewPropID = Shader.PropertyToID("_1PixelClipInvView");
+        static readonly int s_PixelClipInvViewPropID = Shader.PropertyToID("_PixelClipInvView");
         static readonly int s_GradientSettingsTexID = Shader.PropertyToID("_GradientSettingsTex");
         static readonly int s_ShaderInfoTexID = Shader.PropertyToID("_ShaderInfoTex");
         static readonly int s_ScreenClipRectPropID = Shader.PropertyToID("_ScreenClipRect");
@@ -113,6 +111,10 @@ namespace UnityEngine.UIElements.UIR
         static bool? s_VertexTexturingIsAvailable;
         const string k_VertexTexturingIsAvailableTag = "UIE_VertexTexturingIsAvailable";
         const string k_VertexTexturingIsAvailableTrue = "1";
+
+        static bool? s_ShaderModelIs35;
+        const string k_ShaderModelIs35Tag = "UIE_ShaderModelIs35";
+        const string k_ShaderModelIs35True = "1";
 
         internal uint maxVerticesPerPage  { get; } = 0xFFFF; // On DX11, 0xFFFF is an invalid index (associated to primitive restart). With size = 0xFFFF last index is 0xFFFE    cases:1259449
 
@@ -244,6 +246,24 @@ namespace UnityEngine.UIElements.UIR
             }
         }
 
+        internal static bool shaderModelIs35
+        {
+            get
+            {
+                if (!s_ShaderModelIs35.HasValue)
+                {
+                    var stockDefaultShader = Shader.Find(UIRUtility.k_DefaultShaderName);
+                    var stockDefaultMaterial = new Material(stockDefaultShader);
+                    stockDefaultMaterial.hideFlags |= HideFlags.DontSaveInEditor;
+                    string tagValue = stockDefaultMaterial.GetTag(k_ShaderModelIs35Tag, false);
+                    UIRUtility.Destroy(stockDefaultMaterial);
+                    s_ShaderModelIs35 = (tagValue == k_ShaderModelIs35True);
+                }
+
+                return s_ShaderModelIs35.Value;
+            }
+        }
+
         void InitVertexDeclaration()
         {
             var vertexDecl = new VertexAttributeDescriptor[]
@@ -264,7 +284,12 @@ namespace UnityEngine.UIElements.UIR
                 new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.UNorm8, 4),
 
                 // OpacityID page coordinate (XY), SVG SettingIndex (16-bit encoded in ZW), packed into a Color32
-                new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.UNorm8, 4)
+                new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.UNorm8, 4),
+
+                // TextureID, to represent integers from 0 to 2048
+                // Float32 is overkill for the time being but it avoids conversion issues on GLES2 and metal. We should
+                // use a Float16 instead but this isn't a trivial because C# doesn't have a native "half" datatype.
+                new VertexAttributeDescriptor(VertexAttribute.TexCoord4, VertexAttributeFormat.Float32, 1),
             };
             m_VertexDecl = Utility.GetVertexDeclaration(vertexDecl);
         }
@@ -279,7 +304,6 @@ namespace UnityEngine.UIElements.UIR
             m_Fences = new uint[(int)k_MaxQueuedFrameCount];
             m_StandardMatProps = new MaterialPropertyBlock();
             m_CommonMatProps = new MaterialPropertyBlock();
-            UIR.Utility.EngineUpdate += OnEngineUpdate;
         }
 
         bool fullyCreated { get { return m_Fences != null; } }
@@ -320,9 +344,6 @@ namespace UnityEngine.UIElements.UIR
 
             if (disposing)
             {
-                if (fullyCreated)
-                    UIR.Utility.EngineUpdate -= OnEngineUpdate;
-
                 DeviceToFree free = new DeviceToFree()
                 { handle = m_MockDevice ? 0 : Utility.InsertCPUFence(), page = m_FirstPage };
                 if (free.handle == 0)
@@ -642,28 +663,26 @@ namespace UnityEngine.UIElements.UIR
 
         static void Set1PixelSizeParameter(DrawParams drawParams, MaterialPropertyBlock props)
         {
-            Vector4 _1PixelClipInvView = new Vector4();
+            Vector4 _PixelClipInvView = new Vector4();
 
             // Size of 1 pixel in clip space
             RectInt viewport = Utility.GetActiveViewport();
-            _1PixelClipInvView.x = 2.0f / viewport.width;
-            _1PixelClipInvView.y = 2.0f / viewport.height;
+            _PixelClipInvView.x = 2.0f / viewport.width;
+            _PixelClipInvView.y = 2.0f / viewport.height;
 
             // Pixel density in group space
             Matrix4x4 matProj = Utility.GetUnityProjectionMatrix();
             Matrix4x4 matVPInv = (matProj * drawParams.view.Peek().transform).inverse;
-            Vector3 v = matVPInv.MultiplyVector(new Vector3(_1PixelClipInvView.x, _1PixelClipInvView.y));
-            _1PixelClipInvView.z = 1 / (Mathf.Abs(v.x) + Mathf.Epsilon);
-            _1PixelClipInvView.w = 1 / (Mathf.Abs(v.y) + Mathf.Epsilon);
+            Vector3 v = matVPInv.MultiplyVector(new Vector3(_PixelClipInvView.x, _PixelClipInvView.y));
+            _PixelClipInvView.z = 1 / (Mathf.Abs(v.x) + Mathf.Epsilon);
+            _PixelClipInvView.w = 1 / (Mathf.Abs(v.y) + Mathf.Epsilon);
 
-            props.SetVector(s_1PixelClipInvViewPropID, _1PixelClipInvView);
+            props.SetVector(s_PixelClipInvViewPropID, _PixelClipInvView);
         }
 
         public void OnFrameRenderingBegin()
         {
-            if (!m_FrameIndexIncremented)
-                AdvanceFrame();
-            m_FrameIndexIncremented = false;
+            AdvanceFrame();
             m_DrawStats = new DrawStatistics();
             m_DrawStats.currentFrameIndex = (int)m_FrameIndex;
 
@@ -689,7 +708,7 @@ namespace UnityEngine.UIElements.UIR
             return slice;
         }
 
-        public unsafe void EvaluateChain(RenderChainCommand head, Material initialMat, Material defaultMat, Texture atlas, Texture gradientSettings, Texture shaderInfo,
+        public unsafe void EvaluateChain(RenderChainCommand head, Material initialMat, Material defaultMat, Texture gradientSettings, Texture shaderInfo,
             float pixelsPerPoint, NativeSlice<Transform3x4> transforms, NativeSlice<Vector4> clipRects, MaterialPropertyBlock stateMatProps, bool allowMaterialChange,
             ref Exception immediateException)
         {
@@ -698,11 +717,10 @@ namespace UnityEngine.UIElements.UIR
             var drawParams = m_DrawParams;
             drawParams.Reset();
             stateMatProps.Clear();
+            m_TextureSlotManager.Reset();
 
             if (fullyCreated)
             {
-                if (atlas != null)
-                    m_StandardMatProps.SetTexture(s_MainTexPropID, atlas);
                 if (gradientSettings != null)
                     m_StandardMatProps.SetTexture(s_GradientSettingsTexID, gradientSettings);
                 if (shaderInfo != null)
@@ -742,12 +760,8 @@ namespace UnityEngine.UIElements.UIR
                     Material stateMat = head.state.material != null ? head.state.material : defaultMat;
                     materialChanges = (stateMat != curState.material);
                     curState.material = stateMat;
-                    if (head.state.custom != null)
-                    {
-                        stateParamsChanges |= head.state.custom != curState.custom;
-                        curState.custom = head.state.custom;
-                        stateMatProps.SetTexture(s_CustomTexPropID, head.state.custom);
-                    }
+                    if (head.state.texture.index >= 0)
+                        stateParamsChanges |= m_TextureSlotManager.AssignTexture(head.state.texture, stateMatProps);
 
                     if (head.state.font != null)
                     {
@@ -950,7 +964,6 @@ namespace UnityEngine.UIElements.UIR
             s_MarkerAdvanceFrame.Begin();
 
             m_FrameIndex++;
-            m_FrameIndexIncremented = true;
 
             m_DrawStats.currentFrameIndex = (int)m_FrameIndex;
 
@@ -1142,10 +1155,6 @@ namespace UnityEngine.UIElements.UIR
 
 
         #region Internals
-        private void OnEngineUpdate()
-        {
-            AdvanceFrame();
-        }
 
         private static void ProcessDeviceFreeQueue()
         {

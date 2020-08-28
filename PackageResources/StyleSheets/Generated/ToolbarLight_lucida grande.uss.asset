@@ -3455,5 +3455,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 927184f9f351e498db86187722c25f9e, type: 3}
   - {fileID: 2800000, guid: 89bc726a8aeab4e54adce1660dc72de4, type: 3}
   - {fileID: 2800000, guid: 927184f9f351e498db86187722c25f9e, type: 3}
+  imports: []
+  m_FlattenedImportedStyleSheets: []
   m_ContentHash: 0
   scalableImages: []

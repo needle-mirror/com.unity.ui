@@ -234,6 +234,54 @@ namespace UnityEngine.UIElements
             }
         }
 
+        [SerializeField]
+        bool m_ClearDepthStencil = true;
+
+        /// <summary>
+        /// Determines whether the depth/stencil buffer is cleared before the panel is rendered.
+        /// </summary>
+        public bool clearDepthStencil
+        {
+            get => m_ClearDepthStencil;
+            set => m_ClearDepthStencil = value;
+        }
+
+        /// <summary>
+        /// The depth used to clear the depth/stencil buffer.
+        /// </summary>
+        public float depthClearValue
+        {
+            get => UIRUtility.k_ClearZ;
+        }
+
+        [SerializeField]
+        bool m_ClearColor;
+
+        /// <summary>
+        /// Determines whether the color buffer is cleared before the panel is rendered.
+        /// </summary>
+        public bool clearColor
+        {
+            get => m_ClearColor;
+            set => m_ClearColor = value;
+        }
+
+        [SerializeField]
+        Color m_ColorClearValue = Color.clear;
+
+        /// <summary>
+        /// The color used to clear the color buffer.
+        /// </summary>
+        public Color colorClearValue
+        {
+            get => m_ColorClearValue;
+            set => m_ColorClearValue = value;
+        }
+
+#if UNITY_EDITOR
+        internal static Func<ILiveReloadAssetTracker<StyleSheet>> CreateLiveReloadStyleSheetAssetTracker;
+#endif
+
         /// <summary>
         /// NEVER USE THIS DIRECTLY! Use m_Panel instead to guarantee correct initialization.
         /// </summary>
@@ -254,6 +302,11 @@ namespace UnityEngine.UIElements
                     root.name = name;
 
                     ApplyThemeStyleSheet(root);
+#if UNITY_EDITOR
+                    // There's a single StyleSheet tracker for Live Reload per panel, so we can hook it up
+                    // here instead of in individual UIDocuments (where VisualTreeAsset trackers are set up).
+                    m_RuntimePanel.m_LiveReloadStyleSheetAssetTracker = CreateLiveReloadStyleSheetAssetTracker.Invoke();
+#endif
 
                     if (m_TargetTexture != null)
                     {
@@ -294,12 +347,26 @@ namespace UnityEngine.UIElements
         // UIDocument are added to the visual tree in order of their appearance in the Hierarchy View.
         private SortedDictionary<UIDocumentHierarchicalIndex, UIDocument> m_AttachedUIDocuments = null;
 
+        [HideInInspector]
+        [SerializeField]
+        DynamicAtlasSettings m_DynamicAtlasSettings = DynamicAtlasSettings.defaults;
+
+        /// <summary>
+        /// Settings of the dynamic atlas.
+        /// </summary>
+        public DynamicAtlasSettings dynamicAtlasSettings { get => m_DynamicAtlasSettings; set => m_DynamicAtlasSettings = value; }
+
         // References to shaders so they don't get stripped.
         [SerializeField]
+        [HideInInspector]
         private Shader m_AtlasBlitShader;
+
         [SerializeField]
+        [HideInInspector]
         private Shader m_RuntimeShader;
+
         [SerializeField]
+        [HideInInspector]
         private Shader m_RuntimeWorldShader;
 
         private Rect m_TargetRect;
@@ -407,6 +474,17 @@ namespace UnityEngine.UIElements
             }
             m_Panel.targetTexture = targetTexture;
             m_Panel.drawToCameras = false; //we don`t support WorldSpace rendering just yet
+            m_Panel.clearSettings = new PanelClearSettings {clearColor = m_ClearColor, clearDepthStencil = m_ClearDepthStencil, color = m_ColorClearValue};
+
+            var atlas = m_Panel.atlas as DynamicAtlas;
+            if (atlas != null)
+            {
+                atlas.minAtlasSize = dynamicAtlasSettings.minAtlasSize;
+                atlas.maxAtlasSize = dynamicAtlasSettings.maxAtlasSize;
+                atlas.maxSubTextureSize = dynamicAtlasSettings.maxSubTextureSize;
+                atlas.activeFilters = dynamicAtlasSettings.activeFilters;
+                atlas.customFilter = dynamicAtlasSettings.customFilter;
+            }
         }
 
         /// <summary>
@@ -494,13 +572,6 @@ namespace UnityEngine.UIElements
             }
 
             // Overlay.
-
-            // We may be drawing in a render texture (graphics tests do this),
-            // get the active RT size in this case.
-            var rt = RenderTexture.active;
-            if (rt != null)
-                return new Rect(0, 0, rt.width, rt.height);
-
             return new Rect(0, 0, Screen.width, Screen.height);
         }
 

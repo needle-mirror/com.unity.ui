@@ -32,4 +32,15 @@
             <uie:FloatField label="Fallback DPI" value="96" binding-path="m_FallbackDpi" tooltip="The DPI to assume if the screen DPI is not known." />
         </ui:VisualElement>
     </ui:Foldout>
+    <ui:Foldout text="Dynamic Atlas Settings">
+        <uie:PropertyField binding-path="m_DynamicAtlasSettings.m_MinAtlasSize" tooltip="The initial size of the atlas texture. Must be power of two." />
+        <uie:PropertyField binding-path="m_DynamicAtlasSettings.m_MaxAtlasSize" tooltip="The atlas texture will not grow beyond this limit. Must be a power of two." />
+        <uie:PropertyField binding-path="m_DynamicAtlasSettings.m_MaxSubTextureSize" tooltip="Sub-textures larger than this won't get into the atlas when the size filter is active." />
+        <uie:PropertyField binding-path="m_DynamicAtlasSettings.m_ActiveFilters" tooltip="Indicates which filters will be applied to exclude textures." />
+    </ui:Foldout>
+    <ui:Foldout text="Clear Settings">
+        <uie:PropertyField name="clearColor" binding-path="m_ClearColor" tooltip="Determines whether the color buffer is cleared before the panel is rendered." />
+        <uie:PropertyField name="colorClearValue" binding-path="m_ColorClearValue" tooltip="The color used to clear the color buffer." />
+        <uie:PropertyField name="clearDepthStencil" binding-path="m_ClearDepthStencil" tooltip="Determines whether the depth/stencil buffer is cleared before the panel is rendered." />
+    </ui:Foldout>
 </ui:UXML>

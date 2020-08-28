@@ -33,12 +33,20 @@ namespace UnityEditor.UIElements.Inspector
 
         private VisualElement m_ScreenMatchModeMatchWidthOrHeightGroup;
 
+        PropertyField m_ClearColorField;
+        PropertyField m_ColorClearValueField;
+
         private void ConfigureFields()
         {
             // Using MandatoryQ instead of just Q to make sure modifications of the UXML file don't make the
             // necessary elements disappear unintentionally.
             m_ThemeStyleSheetField = m_RootVisualElement.MandatoryQ<ObjectField>("themeStyleSheet");
             m_ThemeStyleSheetField.objectType = typeof(StyleSheet);
+
+            // We have decided to hide the setting of the style sheet until themes are available so we can
+            // prevent some misunderstandings happening with people removing the style sheet or replacing
+            // with a local one that does not have all the basic styles necessary defined.
+            m_ThemeStyleSheetField.style.display = DisplayStyle.None;
 
             m_TargetTextureField = m_RootVisualElement.MandatoryQ<ObjectField>("targetTexture");
             m_TargetTextureField.objectType = typeof(RenderTexture);
@@ -52,6 +60,9 @@ namespace UnityEditor.UIElements.Inspector
 
             m_ScreenMatchModeMatchWidthOrHeightGroup =
                 m_RootVisualElement.MandatoryQ("screenMatchModeMatchWidthOrHeight");
+
+            m_ClearColorField = m_RootVisualElement.MandatoryQ<PropertyField>("clearColor");
+            m_ColorClearValueField = m_RootVisualElement.MandatoryQ<PropertyField>("colorClearValue");
         }
 
         private void BindFields()
@@ -60,6 +71,8 @@ namespace UnityEditor.UIElements.Inspector
                 UpdateScaleModeValues((PanelScaleModes)evt.newValue));
             m_screenMatchModeField.RegisterCallback<ChangeEvent<Enum>>(evt =>
                 UpdateScreenMatchModeValues((PanelScreenMatchModes)evt.newValue));
+            m_ClearColorField.RegisterCallback<ChangeEvent<bool>>(evt =>
+                UpdateColorClearValue(evt.newValue));
         }
 
         private void UpdateScaleModeValues(PanelScaleModes scaleMode)
@@ -97,6 +110,11 @@ namespace UnityEditor.UIElements.Inspector
             }
         }
 
+        void UpdateColorClearValue(bool newClearColor)
+        {
+            m_ColorClearValueField.SetEnabled(newClearColor);
+        }
+
         public override VisualElement CreateInspectorGUI()
         {
             if (m_RootVisualElement == null)
@@ -126,6 +144,7 @@ namespace UnityEditor.UIElements.Inspector
             PanelSettings panelSettings = (PanelSettings)target;
             UpdateScaleModeValues(panelSettings.scaleMode);
             UpdateScreenMatchModeValues(panelSettings.screenMatchMode);
+            UpdateColorClearValue(panelSettings.clearColor);
 
             return m_RootVisualElement;
         }

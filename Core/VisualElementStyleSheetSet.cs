@@ -40,6 +40,10 @@ namespace UnityEngine.UIElements
 
             m_Element.styleSheetList.Add(styleSheet);
             m_Element.IncrementVersion(VersionChangeType.StyleSheet);
+
+#if UNITY_EDITOR
+            m_Element.elementPanel?.m_LiveReloadStyleSheetAssetTracker?.StartTrackingAsset(styleSheet);
+#endif
         }
 
         /// <summary>
@@ -49,6 +53,20 @@ namespace UnityEngine.UIElements
         {
             if (m_Element.styleSheetList == null)
                 return;
+
+#if UNITY_EDITOR
+            if (m_Element.elementPanel != null)
+            {
+                var tracker = m_Element.elementPanel.m_LiveReloadStyleSheetAssetTracker;
+                if (tracker != null)
+                {
+                    foreach (var styleSheet in m_Element.styleSheetList)
+                    {
+                        tracker.StopTrackingAsset(styleSheet);
+                    }
+                }
+            }
+#endif
 
             m_Element.styleSheetList = null;
             m_Element.IncrementVersion(VersionChangeType.StyleSheet);
@@ -69,6 +87,11 @@ namespace UnityEngine.UIElements
                     m_Element.styleSheetList = null;
                 }
                 m_Element.IncrementVersion(VersionChangeType.StyleSheet);
+
+#if UNITY_EDITOR
+                m_Element.elementPanel?.m_LiveReloadStyleSheetAssetTracker?.StopTrackingAsset(styleSheet);
+#endif
+
                 return true;
             }
             return false;
@@ -92,6 +115,18 @@ namespace UnityEngine.UIElements
             {
                 m_Element.IncrementVersion(VersionChangeType.StyleSheet);
                 m_Element.styleSheetList[index] = @new;
+
+#if UNITY_EDITOR
+                if (m_Element.elementPanel != null)
+                {
+                    var tracker = m_Element.elementPanel.m_LiveReloadStyleSheetAssetTracker;
+                    if (tracker != null)
+                    {
+                        tracker.StopTrackingAsset(old);
+                        tracker.StartTrackingAsset(@new);
+                    }
+                }
+#endif
             }
         }
 

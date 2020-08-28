@@ -64,7 +64,7 @@ Shader "Hidden/UIE-Editor"
         // SM3.5 version
         SubShader
         {
-            Tags { "UIE_VertexTexturingIsAvailable" = "1" }
+            Tags { "UIE_VertexTexturingIsAvailable" = "1" "UIE_ShaderModelIs35" = "1" }
             Pass
             {
                 CGPROGRAM

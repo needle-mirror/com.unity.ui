@@ -112,7 +112,7 @@ namespace UnityEngine.UIElements
         {
             foreach (BaseRuntimePanel panel in GetSortedPlayerPanels())
             {
-                if (!panel.drawToCameras && (panel.targetTexture == null || panel.isDirty))
+                if (!panel.drawToCameras)
                 {
                     using (s_RepaintProfilerMarker.Auto())
                         panel.Repaint(Event.current);
@@ -138,17 +138,13 @@ namespace UnityEngine.UIElements
         public static void RegisterPlayerloopCallback()
         {
             UIElementsRuntimeUtilityNative.RegisterPlayerloopCallback();
-#if UNITY_2020_2_OR_NEWER
             UIElementsRuntimeUtilityNative.UpdateRuntimePanelsCallback = UpdateRuntimePanels;
-#endif
         }
 
         public static void UnregisterPlayerloopCallback()
         {
             UIElementsRuntimeUtilityNative.UnregisterPlayerloopCallback();
-#if UNITY_2020_2_OR_NEWER
             UIElementsRuntimeUtilityNative.UpdateRuntimePanelsCallback = null;
-#endif
         }
 
         internal static void SetPanelOrderingDirty()

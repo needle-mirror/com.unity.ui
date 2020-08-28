@@ -34,7 +34,7 @@ namespace UnityEngine.UIElements
 
         internal bool ShouldClip()
         {
-            return computedStyle.overflow.value != OverflowInternal.Visible && !disableClipping;
+            return computedStyle.overflow != OverflowInternal.Visible && !disableClipping;
         }
 
         // parent in visual tree
@@ -938,5 +938,78 @@ namespace UnityEngine.UIElements
             // THIS is not under retargetRoot
             return this;
         }
+
+#if UNITY_EDITOR
+        internal VisualTreeAsset m_VisualTreeAssetSource = null;
+
+        private ILiveReloadAssetTracker<VisualTreeAsset> m_VisualTreeAssetTracker = null;
+
+        internal ILiveReloadAssetTracker<VisualTreeAsset> visualTreeAssetTracker
+        {
+            set => m_VisualTreeAssetTracker = value;
+            get
+            {
+                if (m_VisualTreeAssetTracker == null && parent != null)
+                {
+                    return parent.visualTreeAssetTracker;
+                }
+
+                return m_VisualTreeAssetTracker;
+            }
+        }
+        private void HandlePanelAttachmentEvents(EventBase evt)
+        {
+            if (evt.eventTypeId == AttachToPanelEvent.TypeId())
+            {
+                var attachingPanel = elementPanel ?? ((AttachToPanelEvent)evt).destinationPanel as BaseVisualElementPanel;
+
+                if (m_VisualTreeAssetSource != null)
+                {
+                    // We can find the tracker either at this level, or some level above - if there is a tracker.
+                    var tracker = visualTreeAssetTracker;
+                    if (tracker != null)
+                    {
+                        attachingPanel.StartVisualTreeAssetTracking(tracker, this);
+                    }
+                }
+
+                if (styleSheetList?.Count > 0)
+                {
+                    var styleSheetTracker = attachingPanel.m_LiveReloadStyleSheetAssetTracker;
+                    if (styleSheetTracker != null)
+                    {
+                        foreach (var styleSheet in styleSheetList)
+                        {
+                            styleSheetTracker.StartTrackingAsset(styleSheet);
+                        }
+                    }
+                }
+            }
+            else if (evt.eventTypeId == DetachFromPanelEvent.TypeId())
+            {
+                var detachingPanel = elementPanel ?? ((DetachFromPanelEvent)evt).originPanel as BaseVisualElementPanel;
+
+                if (m_VisualTreeAssetSource != null)
+                {
+                    // As we're detaching from panel, our parent may not be there anymore and if it held the tracker
+                    // information, we won't find it anymore - so the updater will handle it all, based on the VisualElement.
+                    detachingPanel.StopVisualTreeAssetTracking(this);
+                }
+
+                if (styleSheetList?.Count > 0)
+                {
+                    var styleSheetTracker = detachingPanel.m_LiveReloadStyleSheetAssetTracker;
+                    if (styleSheetTracker != null)
+                    {
+                        foreach (var styleSheet in styleSheetList)
+                        {
+                            styleSheetTracker.StopTrackingAsset(styleSheet);
+                        }
+                    }
+                }
+            }
+        }
+
+#endif
     }
 }

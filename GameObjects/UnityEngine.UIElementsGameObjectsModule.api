@@ -3,6 +3,18 @@
 // make sure the XML doc file is present and located next to the scraped dll
 namespace UnityEngine.UIElements
 {
+    public class DynamicAtlasSettings
+    {
+        public UnityEngine.UIElements.DynamicAtlasFilters activeFilters { get; set; }
+        public UnityEngine.UIElements.DynamicAtlasCustomFilter customFilter { get; set; }
+        public static UnityEngine.UIElements.DynamicAtlasFilters defaultFilters { get; }
+        public static UnityEngine.UIElements.DynamicAtlasSettings defaults { get; }
+        public int maxAtlasSize { get; set; }
+        public int maxSubTextureSize { get; set; }
+        public int minAtlasSize { get; set; }
+        public DynamicAtlasSettings() {}
+    }
+
     [UnityEngine.AddComponentMenu(@"UI Toolkit/Event System (UI Toolkit)")] public class EventSystem : UnityEngine.MonoBehaviour
     {
         public UnityEngine.UIElements.InputWrapper inputOverride { get; set; }
@@ -110,6 +122,11 @@ namespace UnityEngine.UIElements
 
     [UnityEngine.CreateAssetMenu(fileName = @"PanelSettings", menuName = @"UI Toolkit/Panel Settings Asset")] public class PanelSettings : UnityEngine.ScriptableObject
     {
+        public bool clearColor { get; set; }
+        public bool clearDepthStencil { get; set; }
+        public UnityEngine.Color colorClearValue { get; set; }
+        public float depthClearValue { get; }
+        public UnityEngine.UIElements.DynamicAtlasSettings dynamicAtlasSettings { get; set; }
         public float fallbackDpi { get; set; }
         public float match { get; set; }
         public float referenceDpi { get; set; }
@@ -124,11 +141,13 @@ namespace UnityEngine.UIElements
         public void SetScreenToPanelSpaceFunction(System.Func<UnityEngine.Vector2, UnityEngine.Vector2> screentoPanelSpaceFunction);
     }
 
-    public static class RuntimePanelUtils
+    [System.Runtime.CompilerServices.Extension] public static class RuntimePanelUtils
     {
         public static UnityEngine.Vector2 CameraTransformWorldToPanel(UnityEngine.UIElements.IPanel panel, UnityEngine.Vector3 worldPosition, UnityEngine.Camera camera);
         public static UnityEngine.Rect CameraTransformWorldToPanelRect(UnityEngine.UIElements.IPanel panel, UnityEngine.Vector3 worldPosition, UnityEngine.Vector2 worldSize, UnityEngine.Camera camera);
+        [System.Runtime.CompilerServices.Extension] public static void ResetDynamicAtlas(UnityEngine.UIElements.IPanel panel);
         public static UnityEngine.Vector2 ScreenToPanel(UnityEngine.UIElements.IPanel panel, UnityEngine.Vector2 screenPosition);
+        [System.Runtime.CompilerServices.Extension] public static void SetTextureDirty(UnityEngine.UIElements.IPanel panel, UnityEngine.Texture2D texture);
     }
 
     [UnityEngine.AddComponentMenu(@"UI Toolkit/UI Document")] [UnityEngine.DisallowMultipleComponent] [UnityEngine.ExecuteAlways] public sealed class UIDocument : UnityEngine.MonoBehaviour

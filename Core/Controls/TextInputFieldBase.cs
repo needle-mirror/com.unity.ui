@@ -75,7 +75,18 @@ namespace UnityEngine.UIElements
         internal const int kMaxLengthNone = -1;
         internal const char kMaskCharDefault = '*';
 
-        internal TextHandle textHandle { get; private set; } = TextHandle.New();
+        /// <summary>
+        /// DO NOT USE textHandle. This field is only there for backward compatibility reason and will soon be stripped.
+        /// </summary>
+        internal TextHandle textHandle
+        {
+            get
+            {
+                return new TextHandle() {textHandle = iTextHandle};
+            }
+        }
+
+        internal ITextHandle iTextHandle { get; private set; }
 
         /// <summary>
         /// USS class name of elements of this type.
@@ -192,6 +203,21 @@ namespace UnityEngine.UIElements
             set { m_TextInputBase.maskChar = value; }
         }
 
+        /// <summary>
+        /// Computes the size needed to display a text string based on element style values such as font, font-size, word-wrap, and so on.
+        /// </summary>
+        /// <param name="textToMeasure">The text to measure.</param>
+        /// <param name="width">Suggested width. Can be zero.</param>
+        /// <param name="widthMode">Width restrictions.</param>
+        /// <param name="height">Suggested height.</param>
+        /// <param name="heightMode">Height restrictions.</param>
+        /// <returns>The horizontal and vertical size needed to display the text string.</returns>
+        public Vector2 MeasureTextSize(string textToMeasure, float width, MeasureMode widthMode, float height,
+            MeasureMode heightMode)
+        {
+            return TextUtilities.MeasureVisualElementTextSize(this, textToMeasure, width, widthMode, height, heightMode, iTextHandle);
+        }
+
         /* internal for VisualTree tests */
         internal TextEditorEventHandler editorEventHandler => m_TextInputBase.editorEventHandler;
 
@@ -240,9 +266,9 @@ namespace UnityEngine.UIElements
 
         private void OnAttachToPanel(AttachToPanelEvent e)
         {
-            var h = textHandle;
-            h.useLegacy = e.destinationPanel.contextType == ContextType.Editor;
-            textHandle = h;
+            iTextHandle = e.destinationPanel.contextType == ContextType.Editor
+                ? TextHandleFactory.GetEditorHandle()
+                : TextHandleFactory.GetRuntimeHandle();
         }
 
         protected override void ExecuteDefaultActionAtTarget(EventBase evt)
@@ -408,7 +434,7 @@ namespace UnityEngine.UIElements
             /* internal for VisualTree tests */
             internal TextEditorEngine editorEngine { get; private set; }
 
-            private TextHandle m_TextHandle = TextHandle.New();
+            private ITextHandle m_TextHandle;
 
             private string m_Text;
 
@@ -511,7 +537,9 @@ namespace UnityEngine.UIElements
 
             private void OnAttachToPanel(AttachToPanelEvent e)
             {
-                m_TextHandle.useLegacy = e.destinationPanel.contextType == ContextType.Editor;
+                m_TextHandle = e.destinationPanel.contextType == ContextType.Editor
+                    ? TextHandleFactory.GetEditorHandle()
+                    : TextHandleFactory.GetRuntimeHandle();
             }
 
             internal virtual void SyncTextEngine()
@@ -578,7 +606,7 @@ namespace UnityEngine.UIElements
                 Rect localPosition = editorEngine.localPosition;
                 var scrollOffset = editorEngine.scrollOffset;
 
-                float textScaling = TextHandle.ComputeTextScaling(worldTransform, pixelsPerPoint);
+                float textScaling = TextUtilities.ComputeTextScaling(worldTransform, pixelsPerPoint);
 
                 var textParams = MeshGenerationContextUtils.TextParams.MakeStyleBased(this, text);
                 textParams.text = " ";
@@ -683,7 +711,7 @@ namespace UnityEngine.UIElements
                 // Draw the cursor
                 if (!isReadOnly && !isDragging)
                 {
-                    if (cursorIndex == selectionEndIndex && computedStyle.unityFont.value != null)
+                    if (cursorIndex == selectionEndIndex && computedStyle.unityFont != null)
                     {
                         cursorParams = CursorPositionStylePainterParameters.GetDefault(this, text);
                         cursorParams.text = editorEngine.text;
@@ -772,7 +800,7 @@ namespace UnityEngine.UIElements
                     textToUse = " ";
                 }
 
-                return TextElement.MeasureVisualElementTextSize(this, textToUse, desiredWidth, widthMode, desiredHeight, heightMode, m_TextHandle);
+                return TextUtilities.MeasureVisualElementTextSize(this, textToUse, desiredWidth, widthMode, desiredHeight, heightMode, m_TextHandle);
             }
 
             protected override void ExecuteDefaultActionAtTarget(EventBase evt)
@@ -877,22 +905,22 @@ namespace UnityEngine.UIElements
             private static void SyncGUIStyle(TextInputBase textInput, GUIStyle style)
             {
                 var computedStyle = textInput.computedStyle;
-                style.alignment = computedStyle.unityTextAlign.value;
-                style.wordWrap = computedStyle.whiteSpace.value == WhiteSpace.Normal;
-                bool overflowVisible = computedStyle.overflow.value == OverflowInternal.Visible;
+                style.alignment = computedStyle.unityTextAlign;
+                style.wordWrap = computedStyle.whiteSpace == WhiteSpace.Normal;
+                bool overflowVisible = computedStyle.overflow == OverflowInternal.Visible;
                 style.clipping = overflowVisible ? TextClipping.Overflow : TextClipping.Clip;
-                if (computedStyle.unityFont.value != null)
+                if (computedStyle.unityFont != null)
                 {
-                    style.font = computedStyle.unityFont.value;
+                    style.font = computedStyle.unityFont;
                 }
 
-                style.fontSize = (int)computedStyle.fontSize.value.value;
-                style.fontStyle = computedStyle.unityFontStyleAndWeight.value;
+                style.fontSize = (int)computedStyle.fontSize.value;
+                style.fontStyle = computedStyle.unityFontStyleAndWeight;
 
-                int left = computedStyle.unitySliceLeft.value;
-                int top = computedStyle.unitySliceTop.value;
-                int right = computedStyle.unitySliceRight.value;
-                int bottom = computedStyle.unitySliceBottom.value;
+                int left = computedStyle.unitySliceLeft;
+                int top = computedStyle.unitySliceTop;
+                int right = computedStyle.unitySliceRight;
+                int bottom = computedStyle.unitySliceBottom;
                 AssignRect(style.border, left, top, right, bottom);
 
                 if (IsLayoutUsingPercent(textInput))
@@ -901,16 +929,16 @@ namespace UnityEngine.UIElements
                 }
                 else
                 {
-                    left = (int)computedStyle.marginLeft.value.value;
-                    top = (int)computedStyle.marginTop.value.value;
-                    right = (int)computedStyle.marginRight.value.value;
-                    bottom = (int)computedStyle.marginBottom.value.value;
+                    left = (int)computedStyle.marginLeft.value;
+                    top = (int)computedStyle.marginTop.value;
+                    right = (int)computedStyle.marginRight.value;
+                    bottom = (int)computedStyle.marginBottom.value;
                     AssignRect(style.margin, left, top, right, bottom);
 
-                    left = (int)computedStyle.paddingLeft.value.value;
-                    top = (int)computedStyle.paddingTop.value.value;
-                    right = (int)computedStyle.paddingRight.value.value;
-                    bottom = (int)computedStyle.paddingBottom.value.value;
+                    left = (int)computedStyle.paddingLeft.value;
+                    top = (int)computedStyle.paddingTop.value;
+                    right = (int)computedStyle.paddingRight.value;
+                    bottom = (int)computedStyle.paddingBottom.value;
                     AssignRect(style.padding, left, top, right, bottom);
                 }
             }
@@ -920,17 +948,17 @@ namespace UnityEngine.UIElements
                 var computedStyle = ve.computedStyle;
 
                 // Margin
-                if (computedStyle.marginLeft.value.unit == LengthUnit.Percent ||
-                    computedStyle.marginTop.value.unit == LengthUnit.Percent ||
-                    computedStyle.marginRight.value.unit == LengthUnit.Percent ||
-                    computedStyle.marginBottom.value.unit == LengthUnit.Percent)
+                if (computedStyle.marginLeft.unit == LengthUnit.Percent ||
+                    computedStyle.marginTop.unit == LengthUnit.Percent ||
+                    computedStyle.marginRight.unit == LengthUnit.Percent ||
+                    computedStyle.marginBottom.unit == LengthUnit.Percent)
                     return true;
 
                 // Padding
-                if (computedStyle.paddingLeft.value.unit == LengthUnit.Percent ||
-                    computedStyle.paddingTop.value.unit == LengthUnit.Percent ||
-                    computedStyle.paddingRight.value.unit == LengthUnit.Percent ||
-                    computedStyle.paddingBottom.value.unit == LengthUnit.Percent)
+                if (computedStyle.paddingLeft.unit == LengthUnit.Percent ||
+                    computedStyle.paddingTop.unit == LengthUnit.Percent ||
+                    computedStyle.paddingRight.unit == LengthUnit.Percent ||
+                    computedStyle.paddingBottom.unit == LengthUnit.Percent)
                     return true;
 
                 return false;

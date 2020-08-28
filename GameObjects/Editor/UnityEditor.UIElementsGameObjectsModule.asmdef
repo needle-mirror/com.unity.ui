@@ -3,7 +3,8 @@
     "references": [
         "UnityEngine.UIElementsModule",
         "UnityEditor.UIElementsModule",
-        "UnityEngine.UIElementsGameObjectsModule"
+        "UnityEngine.UIElementsGameObjectsModule",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

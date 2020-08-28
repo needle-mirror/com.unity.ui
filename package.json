@@ -1,9 +1,9 @@
 {
   "name": "com.unity.ui",
   "displayName": "UI Toolkit",
-  "version": "1.0.0-preview.6",
+  "version": "1.0.0-preview.7",
   "unity": "2020.1",
-  "unityRelease": "0b13",
+  "unityRelease": "3f1",
   "keywords": [
     "UI",
     "UIElements",
@@ -19,20 +19,20 @@
     "com.unity.modules.uielementsnative": "1.0.0"
   },
   "relatedPackages": {
-    "com.unity.ui.tests": "1.0.0-preview.6"
+    "com.unity.ui.tests": "1.0.0-preview.7"
   },
   "upmCi": {
-    "footprint": "809330784ef6289b7a6e5a6bb27512d98192c8d5"
+    "footprint": "0e8d30b6fd09ae58e2afb83998143e646cb99d7a"
   },
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.ui.git",
     "type": "git",
-    "revision": "04ddad0b91e1039880b0bb2c9593bc89b0cac4cd"
+    "revision": "e805c6ac478b5be853a54d72b5154dbf343e0a49"
   },
   "samples": [
     {
-      "displayName": "UIElements Samples",
-      "description": "Collection of samples used in the UIElements documentation.",
+      "displayName": "UI Toolkit Examples",
+      "description": "Examples that demonstrate workflows and API usage for both Editor and Runtime UI",
       "path": "Samples~"
     }
   ]

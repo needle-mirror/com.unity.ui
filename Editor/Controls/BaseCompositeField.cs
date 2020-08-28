@@ -5,6 +5,9 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.UIElements
 {
+    /// <summary>
+    /// This is the base class for the composite fields.
+    /// </summary>
     public abstract class BaseCompositeField<TValueType, TField, TFieldValue> : BaseField<TValueType>
         where TField : TextValueField<TFieldValue>, new()
     {
@@ -41,15 +44,42 @@ namespace UnityEditor.UIElements
         internal abstract FieldDescription[] DescribeFields();
         bool m_ShouldUpdateDisplay;
 
+        /// <summary>
+        /// USS class name of elements of this type.
+        /// </summary>
         public new static readonly string ussClassName = "unity-composite-field";
+        /// <summary>
+        /// USS class name of labels in elements of this type.
+        /// </summary>
         public new static readonly string labelUssClassName = ussClassName + "__label";
+        /// <summary>
+        /// USS class name of input elements in elements of this type.
+        /// </summary>
         public new static readonly string inputUssClassName = ussClassName + "__input";
 
+        /// <summary>
+        /// USS class name of spacers in elements of this type.
+        /// </summary>
         public static readonly string spacerUssClassName = ussClassName + "__field-spacer";
+        /// <summary>
+        /// USS class name of elements of this type when the fields are displayed on multiple lines.
+        /// </summary>
         public static readonly string multilineVariantUssClassName = ussClassName + "--multi-line";
+        /// <summary>
+        /// USS class name of field groups in elements of this type.
+        /// </summary>
         public static readonly string fieldGroupUssClassName = ussClassName + "__field-group";
+        /// <summary>
+        /// USS class name of fields in elements of this type.
+        /// </summary>
         public static readonly string fieldUssClassName = ussClassName + "__field";
+        /// <summary>
+        /// USS class name of the first field in elements of this type.
+        /// </summary>
         public static readonly string firstFieldVariantUssClassName = fieldUssClassName + "--first";
+        /// <summary>
+        /// USS class name of elements of this type when the fields are displayed on two lines.
+        /// </summary>
         public static readonly string twoLinesVariantUssClassName = ussClassName + "--two-lines";
 
         protected BaseCompositeField(string label, int fieldsByLine)

@@ -28,11 +28,15 @@ namespace UnityEngine.UIElements
 
     public struct Background : System.IEquatable<UnityEngine.UIElements.Background>
     {
+        public UnityEngine.RenderTexture renderTexture { get; set; }
+        public UnityEngine.Sprite sprite { get; set; }
         public UnityEngine.Texture2D texture { get; set; }
         public UnityEngine.UIElements.VectorImage vectorImage { get; set; }
         [System.Obsolete(@"Use Background.FromTexture2D instead")] public Background(UnityEngine.Texture2D t) {}
         public virtual bool Equals(object obj);
         public virtual bool Equals(UnityEngine.UIElements.Background other);
+        public static UnityEngine.UIElements.Background FromRenderTexture(UnityEngine.RenderTexture rt);
+        public static UnityEngine.UIElements.Background FromSprite(UnityEngine.Sprite s);
         public static UnityEngine.UIElements.Background FromTexture2D(UnityEngine.Texture2D t);
         public static UnityEngine.UIElements.Background FromVectorImage(UnityEngine.UIElements.VectorImage vi);
         public virtual int GetHashCode();
@@ -384,6 +388,19 @@ namespace UnityEngine.UIElements
         public DropdownMenuSeparator(string subMenuPath) {}
     }
 
+    public delegate bool DynamicAtlasCustomFilter(UnityEngine.Texture2D texture, ref UnityEngine.UIElements.DynamicAtlasFilters filtersToApply);
+
+    [System.Flags] public enum DynamicAtlasFilters
+    {
+        public const UnityEngine.UIElements.DynamicAtlasFilters ColorSpace = 8;
+        public const UnityEngine.UIElements.DynamicAtlasFilters FilterMode = 16;
+        public const UnityEngine.UIElements.DynamicAtlasFilters Format = 4;
+        public const UnityEngine.UIElements.DynamicAtlasFilters None = 0;
+        public const UnityEngine.UIElements.DynamicAtlasFilters Readability = 1;
+        public const UnityEngine.UIElements.DynamicAtlasFilters Size = 2;
+        public int value__;
+    }
+
     public abstract class EventBase : System.IDisposable
     {
         public bool bubbles { get; protected set; }
@@ -609,6 +626,7 @@ namespace UnityEngine.UIElements
         public abstract bool TryGetValue(UnityEngine.UIElements.CustomStyleProperty<float> property, out float value);
         public abstract bool TryGetValue(UnityEngine.UIElements.CustomStyleProperty<string> property, out string value);
         public abstract bool TryGetValue(UnityEngine.UIElements.CustomStyleProperty<UnityEngine.Color> property, out UnityEngine.Color value);
+        public abstract bool TryGetValue(UnityEngine.UIElements.CustomStyleProperty<UnityEngine.Sprite> property, out UnityEngine.Sprite value);
         public abstract bool TryGetValue(UnityEngine.UIElements.CustomStyleProperty<UnityEngine.Texture2D> property, out UnityEngine.Texture2D value);
         public abstract bool TryGetValue(UnityEngine.UIElements.CustomStyleProperty<UnityEngine.UIElements.VectorImage> property, out UnityEngine.UIElements.VectorImage value);
     }
@@ -660,6 +678,7 @@ namespace UnityEngine.UIElements
         public UnityEngine.Texture image { get; set; }
         public UnityEngine.ScaleMode scaleMode { get; set; }
         public UnityEngine.Rect sourceRect { get; set; }
+        public UnityEngine.Sprite sprite { get; set; }
         public UnityEngine.Color tintColor { get; set; }
         public UnityEngine.Rect uv { get; set; }
         public UnityEngine.UIElements.VectorImage vectorImage { get; set; }
@@ -814,6 +833,7 @@ namespace UnityEngine.UIElements
         public abstract UnityEngine.UIElements.Align alignItems { get; }
         public abstract UnityEngine.UIElements.Align alignSelf { get; }
         public abstract UnityEngine.Color backgroundColor { get; }
+        public abstract UnityEngine.UIElements.Background backgroundImage { get; }
         public abstract UnityEngine.Color borderBottomColor { get; }
         public abstract float borderBottomLeftRadius { get; }
         public abstract float borderBottomRightRadius { get; }
@@ -1680,6 +1700,7 @@ namespace UnityEngine.UIElements
     {
         public virtual UnityEngine.UIElements.StyleKeyword keyword { get; set; }
         public virtual UnityEngine.UIElements.Background value { get; set; }
+        public StyleBackground(UnityEngine.Sprite v) {}
         public StyleBackground(UnityEngine.Texture2D v) {}
         public StyleBackground(UnityEngine.UIElements.Background v) {}
         public StyleBackground(UnityEngine.UIElements.StyleKeyword keyword) {}
@@ -1915,6 +1936,7 @@ namespace UnityEngine.UIElements
         protected TextInputBaseField(int maxLength, char maskChar, UnityEngine.UIElements.TextInputBaseField<TValueType> textInputBase) {}
         protected TextInputBaseField(string label, int maxLength, char maskChar, UnityEngine.UIElements.TextInputBaseField<TValueType> textInputBase) {}
         protected virtual void ExecuteDefaultActionAtTarget(UnityEngine.UIElements.EventBase evt);
+        public UnityEngine.Vector2 MeasureTextSize(string textToMeasure, float width, UnityEngine.UIElements.VisualElement.MeasureMode widthMode, float height, UnityEngine.UIElements.VisualElement.MeasureMode heightMode);
         public void SelectAll();
         public class UxmlTraits<TValueType> : UnityEngine.UIElements.BaseFieldTraits<string, UnityEngine.UIElements.UxmlStringAttributeDescription>
         {
@@ -1956,6 +1978,11 @@ namespace UnityEngine.UIElements
         public const UnityEngine.UIElements.TextOverflowPosition Middle = 2;
         public const UnityEngine.UIElements.TextOverflowPosition Start = 1;
         public int value__;
+    }
+
+    public class ThemeStyleSheet : UnityEngine.UIElements.StyleSheet
+    {
+        public ThemeStyleSheet() {}
     }
 
     public struct TimerState : System.IEquatable<UnityEngine.UIElements.TimerState>

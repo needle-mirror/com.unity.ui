@@ -1,25 +1,22 @@
+#if !UNITY_2020_2_OR_NEWER
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
-using UnityEngine;
 using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
-namespace Unity.UIElements.Editor
+namespace UnityEditor.UIElements
 {
     internal class UIDocumentAssetPostProcessor : AssetPostprocessor
     {
+        private const string k_UxmlExtension = ".uxml";
+
         private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets,
             string[] movedFromAssetPaths)
         {
-            // Don't run in play mode as it may break user code.
-            if (EditorApplication.isPlaying)
-            {
-                return;
-            }
+            var uxmlImportedAssets = new HashSet<string>(importedAssets.Where(x => MatchesFileExtension(x, k_UxmlExtension)));
+            var uxmlDeletedAssets =  new HashSet<string>(deletedAssets.Where(x => MatchesFileExtension(x, k_UxmlExtension)));
 
             // Early exit: no imported or deleted assets.
-            var uxmlImportedAssets = new HashSet<string>(importedAssets.Where(x => x.ToLower().EndsWith(".uxml")));
-            var uxmlDeletedAssets =  new HashSet<string>(deletedAssets.Where(x => x.ToLower().EndsWith(".uxml")));
             if (uxmlImportedAssets.Count == 0 && uxmlDeletedAssets.Count == 0)
             {
                 return;
@@ -72,7 +69,7 @@ namespace Unity.UIElements.Editor
 
                     if (uiDocument.rootVisualElement != null)
                     {
-                        uiDocument.RecreateUI();
+                        uiDocument.HandleLiveReload();
                     }
                 }
                 else if (uxmlDeletedAssets.Count > 0 &&
@@ -80,9 +77,15 @@ namespace Unity.UIElements.Editor
                          uiDocument.rootVisualElement != null)
                 {
                     // We can assume the uxml reference has been deleted in this case.
-                    uiDocument.RecreateUI();
+                    uiDocument.HandleLiveReload();
                 }
             }
         }
+
+        private static bool MatchesFileExtension(string assetPath, string fileExtension)
+        {
+            return assetPath.EndsWithIgnoreCaseFast(fileExtension);
+        }
     }
 }
+#endif

@@ -1,10 +1,17 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Profiling;
 
 namespace UnityEngine.UIElements
 {
+#if UNITY_EDITOR
+    // Editor update phases, the order of the enum define the updater order
+    internal enum VisualTreeEditorUpdatePhase
+    {
+        VisualTreeAssetChanged,
+        Count
+    }
+#endif
+
     // Update phases, the order of the enum define the updater order
     internal enum VisualTreeUpdatePhase
     {
@@ -45,16 +52,54 @@ namespace UnityEngine.UIElements
         private BaseVisualElementPanel m_Panel;
         private UpdaterArray m_UpdaterArray;
 
+#if UNITY_EDITOR
+
+        class EditorUpdaterArray
+        {
+            private IVisualTreeUpdater[] m_VisualTreeUpdaters;
+
+            public EditorUpdaterArray()
+            {
+                m_VisualTreeUpdaters = new IVisualTreeUpdater[(int)VisualTreeEditorUpdatePhase.Count];
+            }
+
+            public IVisualTreeUpdater this[VisualTreeEditorUpdatePhase phase]
+            {
+                set { m_VisualTreeUpdaters[(int)phase] = value; }
+                get { return m_VisualTreeUpdaters[(int)phase]; }
+            }
+
+            public IVisualTreeUpdater this[int index]
+            {
+                set { m_VisualTreeUpdaters[index] = value; }
+                get { return m_VisualTreeUpdaters[index]; }
+            }
+        }
+
+        private EditorUpdaterArray m_EditorUpdaterArray;
+#endif
+
         public VisualTreeUpdater(BaseVisualElementPanel panel)
         {
             m_Panel = panel;
             m_UpdaterArray = new UpdaterArray();
+#if UNITY_EDITOR
+            m_EditorUpdaterArray = new EditorUpdaterArray();
+#endif
 
             SetDefaultUpdaters();
         }
 
         public void Dispose()
         {
+#if UNITY_EDITOR
+            for (int i = 0; i < (int)VisualTreeEditorUpdatePhase.Count; i++)
+            {
+                var updater = m_EditorUpdaterArray[i];
+                updater.Dispose();
+            }
+#endif
+
             for (int i = 0; i < (int)VisualTreeUpdatePhase.Count; i++)
             {
                 var updater = m_UpdaterArray[i];
@@ -64,15 +109,41 @@ namespace UnityEngine.UIElements
 
         public void UpdateVisualTree()
         {
+#if UNITY_EDITOR
+            for (int i = 0; i < (int)VisualTreeEditorUpdatePhase.Count; i++)
+            {
+                var updater = m_EditorUpdaterArray[i];
+
+                using (updater.profilerMarker.Auto())
+                {
+                    updater.Update();
+                }
+            }
+#endif
+
             for (int i = 0; i < (int)VisualTreeUpdatePhase.Count; i++)
             {
                 var updater = m_UpdaterArray[i];
+
                 using (updater.profilerMarker.Auto())
                 {
                     updater.Update();
                 }
             }
         }
+
+#if UNITY_EDITOR
+        public void UpdateEditorVisualTreePhase(VisualTreeEditorUpdatePhase phase)
+        {
+            var updater = m_EditorUpdaterArray[phase];
+
+            using (updater.profilerMarker.Auto())
+            {
+                updater.Update();
+            }
+        }
+
+#endif
 
         public void UpdateVisualTreePhase(VisualTreeUpdatePhase phase)
         {
@@ -86,6 +157,14 @@ namespace UnityEngine.UIElements
 
         public void OnVersionChanged(VisualElement ve, VersionChangeType versionChangeType)
         {
+#if UNITY_EDITOR
+            for (int i = 0; i < (int)VisualTreeEditorUpdatePhase.Count; i++)
+            {
+                var updater = m_EditorUpdaterArray[i];
+                updater.OnVersionChanged(ve, versionChangeType);
+            }
+#endif
+
             for (int i = 0; i < (int)VisualTreeUpdatePhase.Count; i++)
             {
                 var updater = m_UpdaterArray[i];
@@ -121,8 +200,26 @@ namespace UnityEngine.UIElements
             return m_UpdaterArray[phase];
         }
 
+#if UNITY_EDITOR
+        private void SetEditorUpdater<T>(VisualTreeEditorUpdatePhase phase) where T : IVisualTreeUpdater, new()
+        {
+            m_EditorUpdaterArray[phase]?.Dispose();
+            var updater = new T() {panel = m_Panel};
+            m_EditorUpdaterArray[phase] = updater;
+        }
+
+        public IVisualTreeUpdater GetEditorUpdater(VisualTreeEditorUpdatePhase phase)
+        {
+            return m_EditorUpdaterArray[phase];
+        }
+
+#endif
+
         private void SetDefaultUpdaters()
         {
+#if UNITY_EDITOR
+            SetEditorUpdater<VisualTreeAssetChangeTrackerUpdater>(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged);
+#endif
             SetUpdater<VisualTreeViewDataUpdater>(VisualTreeUpdatePhase.ViewData);
             SetUpdater<VisualTreeBindingsUpdater>(VisualTreeUpdatePhase.Bindings);
             SetUpdater<VisualElementAnimationSystem>(VisualTreeUpdatePhase.Animation);

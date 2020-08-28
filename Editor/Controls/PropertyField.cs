@@ -5,17 +5,29 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.UIElements
 {
+    /// <summary>
+    /// A SerializedProperty wrapper VisualElement that, on Bind(), will generate the correct field elements with the correct bindingPaths.
+    /// </summary>
     public class PropertyField : VisualElement, IBindable
     {
         internal static readonly string foldoutTitleBoundLabelProperty = "unity-foldout-bound-title";
 
+        /// <summary>
+        /// Instantiates a <see cref="PropertyField"/> using the data read from a UXML file.
+        /// </summary>
         public new class UxmlFactory : UxmlFactory<PropertyField, UxmlTraits> {}
 
+        /// <summary>
+        /// Defines <see cref="UxmlTraits"/> for the <see cref="PropertyField"/>.
+        /// </summary>
         public new class UxmlTraits : VisualElement.UxmlTraits
         {
             UxmlStringAttributeDescription m_PropertyPath;
             UxmlStringAttributeDescription m_Label;
 
+            /// <summary>
+            /// Constructor.
+            /// </summary>
             public UxmlTraits()
             {
                 m_PropertyPath = new UxmlStringAttributeDescription { name = "binding-path" };
@@ -41,19 +53,52 @@ namespace UnityEditor.UIElements
         public IBinding binding { get; set; }
         public string bindingPath { get; set; }
 
+        /// <summary>
+        /// Optionally overwrite the label of the generate property field. If no label is provided the string will be taken from the SerializedProperty.
+        /// </summary>
         public string label { get; set; }
 
         private SerializedProperty m_SerializedProperty;
         private PropertyField m_ParentPropertyField;
 
+        /// <summary>
+        /// USS class name of elements of this type.
+        /// </summary>
         public static readonly string ussClassName = "unity-property-field";
+        /// <summary>
+        /// USS class name of labels in elements of this type.
+        /// </summary>
         public static readonly string labelUssClassName = ussClassName + "__label";
+        /// <summary>
+        /// USS class name of input elements in elements of this type.
+        /// </summary>
         public static readonly string inputUssClassName = ussClassName + "__input";
 
+        /// <summary>
+        /// PropertyField constructor.
+        /// </summary>
+        /// <remarks>
+        /// You will still have to call Bind() on the PropertyField afterwards.
+        /// </remarks>
         public PropertyField() : this(null, string.Empty) {}
 
+        /// <summary>
+        /// PropertyField constructor.
+        /// </summary>
+        /// <param name="property">Providing a SerializedProperty in the construct just sets the bindingPath. You will still have to call Bind() on the PropertyField afterwards.</param>
+        /// <remarks>
+        /// You will still have to call Bind() on the PropertyField afterwards.
+        /// </remarks>
         public PropertyField(SerializedProperty property) : this(property, string.Empty) {}
 
+        /// <summary>
+        /// PropertyField constructor.
+        /// </summary>
+        /// <param name="property">Providing a SerializedProperty in the construct just sets the bindingPath. You will still have to call Bind() on the PropertyField afterwards.</param>
+        /// <param name="label">Optionally overwrite the property label.</param>
+        /// <remarks>
+        /// You will still have to call Bind() on the PropertyField afterwards.
+        /// </remarks>
         public PropertyField(SerializedProperty property, string label)
         {
             AddToClassList(ussClassName);
@@ -280,6 +325,8 @@ namespace UnityEditor.UIElements
             switch (propertyType)
             {
                 case SerializedPropertyType.Integer:
+                    if (property.type == "long")
+                        return ConfigureField<LongField, long>(new LongField(), property);
                     return ConfigureField<IntegerField, int>(new IntegerField(), property);
 
                 case SerializedPropertyType.Boolean:
@@ -456,6 +503,9 @@ namespace UnityEditor.UIElements
             }
         }
 
+        /// <summary>
+        /// Registers this callback to receive SerializedPropertyChangeEvent when a value is changed.
+        /// </summary>
         public void RegisterValueChangeCallback(EventCallback<SerializedPropertyChangeEvent> callback)
         {
             if (callback != null)

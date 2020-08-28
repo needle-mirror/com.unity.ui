@@ -1,6 +1,4 @@
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+using System;
 using System.Collections.Generic;
 using UnityEngine.Assertions;
 
@@ -18,6 +16,12 @@ namespace UnityEngine.UIElements
         internal const string k_ContentContainerChildStyleClassName = "unity-ui-document--content-container__child";
 
         internal const string k_VisualElementNameSuffix = "-container";
+
+#if UNITY_EDITOR
+        internal static Func<bool> IsEditorPlaying;
+        internal static Func<bool> IsEditorPlayingOrWillChangePlaymode;
+        internal static Action UpdateGameView;
+#endif
 
         [SerializeField]
         private PanelSettings m_PanelSettings;
@@ -136,17 +140,24 @@ namespace UnityEngine.UIElements
 
         private bool m_ContentContainerSet = false;
 
-        // Empty private constructor to avoid public constructor on API listing.
+#if UNITY_EDITOR
+        internal static Func<UIDocument, ILiveReloadAssetTracker<VisualTreeAsset>> CreateLiveReloadVisualTreeAssetTracker;
+        private ILiveReloadAssetTracker<VisualTreeAsset> m_LiveReloadVisualTreeAssetTracker;
+
+#endif
+
+        // Private constructor so it's not present on the public API file.
         private UIDocument() {}
 
         private void Awake()
         {
 #if UNITY_EDITOR
-            if (EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying)
+            if (IsEditorPlayingOrWillChangePlaymode.Invoke() && !IsEditorPlaying.Invoke())
             {
                 // We're in a weird transition state that causes an error with the logic below so let's skip it.
                 return;
             }
+
 #endif
             // By default, the UI Content will try to attach itself to a parent somewhere in the hierarchy.
             // This is done to mimic the behaviour we get from UGUI's Canvas/Game Object relationship.
@@ -156,7 +167,7 @@ namespace UnityEngine.UIElements
         private void OnEnable()
         {
 #if UNITY_EDITOR
-            if (EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying)
+            if (IsEditorPlayingOrWillChangePlaymode.Invoke() && !IsEditorPlaying.Invoke())
             {
                 // We're in a weird transition state that causes an error with the logic below so let's skip it.
                 return;
@@ -177,28 +188,6 @@ namespace UnityEngine.UIElements
             {
                 AddRootVisualElementToTree();
             }
-        }
-
-        /// <summary>
-        /// Initializes the full UI after the UXML file loads.
-        /// </summary>
-        /// <remarks>
-        /// This method is called every time the UI is recreated. For example, on initialization.
-        /// In the Editor, this method is called when you modify UI assets and Unity must recreate
-        /// the UI.
-        /// </remarks>
-        private void OnCreateUI()
-        {
-            // Default empty implementation, users extend the class to add UI.
-        }
-
-        /// <summary>
-        /// An override that provides additional cleanup that might be required to avoid problems such as memory leaks.
-        /// This method is called when the UI is about to be recreated.
-        /// </summary>
-        private void OnAboutToRecreateUI()
-        {
-            // Default empty implementation.
         }
 
         /// <summary>
@@ -341,6 +330,15 @@ namespace UnityEngine.UIElements
             }
             m_RootVisualElement.pickingMode = PickingMode.Ignore;
 
+#if UNITY_EDITOR
+            // Setting the live reload tracker has to be done prior to attaching to panel in order to work properly
+            if (m_LiveReloadVisualTreeAssetTracker == null)
+            {
+                m_LiveReloadVisualTreeAssetTracker = CreateLiveReloadVisualTreeAssetTracker.Invoke(this);
+            }
+            m_RootVisualElement.visualTreeAssetTracker = m_LiveReloadVisualTreeAssetTracker;
+#endif
+
             if (isActiveAndEnabled)
             {
                 AddRootVisualElementToTree();
@@ -427,7 +425,15 @@ namespace UnityEngine.UIElements
 
         private void OnDisable()
         {
-            m_RootVisualElement?.RemoveFromHierarchy();
+            if (m_RootVisualElement != null)
+            {
+                m_RootVisualElement.RemoveFromHierarchy();
+#if UNITY_EDITOR
+                // Unhook tracking, we're going down (but only after we detach from the panel).
+                m_RootVisualElement.visualTreeAssetTracker = null;
+#endif
+                m_RootVisualElement = null;
+            }
         }
 
         private void OnDestroy()
@@ -445,8 +451,8 @@ namespace UnityEngine.UIElements
         private void OnTransformChildrenChanged()
         {
 #if UNITY_EDITOR
-            // In Editor, when not playing, we let a watcher listen for EditorApplication.hierarchyChanged events.
-            if (EditorApplication.isPlaying == false)
+            // In Editor, when not playing, we let a watcher listen for hierarchy changed events.
+            if (!IsEditorPlaying.Invoke())
             {
                 return;
             }
@@ -465,8 +471,8 @@ namespace UnityEngine.UIElements
         private void OnTransformParentChanged()
         {
 #if UNITY_EDITOR
-            // In Editor, when not playing, we let a watcher listen for EditorApplication.hierarchyChanged events.
-            if (EditorApplication.isPlaying == false)
+            // In Editor, when not playing, we let a watcher listen for hierarchy changed events.
+            if (!IsEditorPlaying.Invoke())
             {
                 return;
             }
@@ -573,6 +579,53 @@ namespace UnityEngine.UIElements
         }
 
 #if UNITY_EDITOR
+        internal void HandleLiveReload()
+        {
+            var disabledCompanions = DisableCompanions();
+
+            RecreateUI();
+
+            if (disabledCompanions != null && disabledCompanions.Count > 0)
+            {
+                EnableCompanions(disabledCompanions);
+            }
+            else if (IsEditorPlaying.Invoke())
+            {
+                Debug.LogWarning("UI was recreated and no companion MonoBehaviour found, some UI functionality may have been lost.");
+            }
+        }
+
+        private HashSet<MonoBehaviour> DisableCompanions()
+        {
+            HashSet<MonoBehaviour> disabledCompanions = null;
+
+            var companions = GetComponents<MonoBehaviour>();
+
+            if (companions != null && companions.Length > 1) // If only one is found, it's this UIDocument.
+            {
+                disabledCompanions = new HashSet<MonoBehaviour>();
+
+                foreach (var companion in companions)
+                {
+                    if (companion != this && companion.isActiveAndEnabled)
+                    {
+                        companion.enabled = false;
+                        disabledCompanions.Add(companion);
+                    }
+                }
+            }
+
+            return disabledCompanions;
+        }
+
+        private void EnableCompanions(HashSet<MonoBehaviour> disabledCompanions)
+        {
+            foreach (var companion in disabledCompanions)
+            {
+                companion.enabled = true;
+            }
+        }
+
         private VisualTreeAsset m_OldUxml = null;
         private PanelSettings m_OldPanelSettings = null;
 
@@ -585,13 +638,13 @@ namespace UnityEngine.UIElements
 
             bool shouldRepaint = false;
 
-            if (m_OldUxml != sourceAsset)
+            if (m_OldUxml != null && m_OldUxml != sourceAsset)
             {
                 visualTreeAsset = sourceAsset;
                 shouldRepaint = true;
             }
 
-            if (m_OldPanelSettings != m_PanelSettings)
+            if (m_OldPanelSettings != null && m_OldPanelSettings != m_PanelSettings)
             {
                 // We'll use the setter as it guarantees the right behavior.
                 // It's necessary for the setter that the old value is still in place.
@@ -604,7 +657,7 @@ namespace UnityEngine.UIElements
 
             if (shouldRepaint)
             {
-                EditorApplication.QueuePlayerLoopUpdate();
+                UpdateGameView.Invoke();
             }
 
             m_OldUxml = sourceAsset;

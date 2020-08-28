@@ -6,15 +6,30 @@ using Object = UnityEngine.Object;
 
 namespace UnityEditor.UIElements
 {
+    /// <summary>
+    /// Makes a field to receive any object type.
+    /// </summary>
     public class ObjectField : BaseField<Object>
     {
+        /// <summary>
+        /// Instantiates an <see cref="ObjectField"/> using the data read from a UXML file.
+        /// </summary>
         public new class UxmlFactory : UxmlFactory<ObjectField, UxmlTraits> {}
 
+        /// <summary>
+        /// Defines <see cref="UxmlTraits"/> for the <see cref="ObjectField"/>.
+        /// </summary>
         public new class UxmlTraits : BaseField<Object>.UxmlTraits
         {
             UxmlBoolAttributeDescription m_AllowSceneObjects = new UxmlBoolAttributeDescription { name = "allow-scene-objects", defaultValue = true };
             UxmlTypeAttributeDescription<Object> m_ObjectType = new UxmlTypeAttributeDescription<Object> { name = "type" };
 
+            /// <summary>
+            /// Initialize <see cref="ObjectField"/> properties using values from the attribute bag.
+            /// </summary>
+            /// <param name="ve">The object to initialize.</param>
+            /// <param name="bag">The attribute bag.</param>
+            /// <param name="cc">The creation context; unused.</param>
             public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
             {
                 base.Init(ve, bag, cc);
@@ -39,6 +54,9 @@ namespace UnityEditor.UIElements
 
         private Type m_objectType;
 
+        /// <summary>
+        /// The type of the objects that can be assigned.
+        /// </summary>
         public Type objectType
         {
             get { return m_objectType; }
@@ -52,6 +70,9 @@ namespace UnityEditor.UIElements
             }
         }
 
+        /// <summary>
+        /// Allows scene objects to be assigned to the field.
+        /// </summary>
         public bool allowSceneObjects { get; set; }
 
         private class ObjectFieldDisplay : VisualElement
@@ -234,16 +255,37 @@ namespace UnityEditor.UIElements
 
         private readonly ObjectFieldDisplay m_ObjectFieldDisplay;
 
+        /// <summary>
+        /// USS class name of elements of this type.
+        /// </summary>
         public new static readonly string ussClassName = "unity-object-field";
+        /// <summary>
+        /// USS class name of labels in elements of this type.
+        /// </summary>
         public new static readonly string labelUssClassName = ussClassName + "__label";
+        /// <summary>
+        /// USS class name of input elements in elements of this type.
+        /// </summary>
         public new static readonly string inputUssClassName = ussClassName + "__input";
 
+        /// <summary>
+        /// USS class name of object elements in elements of this type.
+        /// </summary>
         public static readonly string objectUssClassName = ussClassName + "__object";
+        /// <summary>
+        /// USS class name of selector elements in elements of this type.
+        /// </summary>
         public static readonly string selectorUssClassName = ussClassName + "__selector";
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public ObjectField()
             : this(null) {}
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public ObjectField(string label)
             : base(label, null)
         {

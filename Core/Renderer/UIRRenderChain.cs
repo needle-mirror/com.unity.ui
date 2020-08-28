@@ -131,7 +131,7 @@ namespace UnityEngine.UIElements.UIR
             public RenderChainCommand firstCommand;
 
             public UIRenderDevice device;
-            public Texture atlas, vectorAtlas, shaderInfoAtlas;
+            public Texture vectorAtlas, shaderInfoAtlas;
             public float dpiScale;
             public NativeSlice<Transform3x4> transformConstants;
             public NativeSlice<Vector4> clipRectConstants;
@@ -140,11 +140,11 @@ namespace UnityEngine.UIElements.UIR
         RenderChainCommand m_FirstCommand;
         DepthOrderedDirtyTracking m_DirtyTracker;
         Pool<RenderChainCommand> m_CommandPool = new Pool<RenderChainCommand>();
+        BasicNodePool<TextureEntry> m_TexturePool = new BasicNodePool<TextureEntry>();
         List<RenderNodeData> m_RenderNodesData = new List<RenderNodeData>();
         Shader m_DefaultShader, m_DefaultWorldSpaceShader;
         Material m_DefaultMat, m_DefaultWorldSpaceMat;
         bool m_BlockDirtyRegistration;
-        bool m_DrawInCameras;
         int m_StaticIndex = -1;
         int m_ActiveRenderNodes = 0;
         int m_CustomMaterialCommands = 0;
@@ -159,6 +159,7 @@ namespace UnityEngine.UIElements.UIR
         int m_DirtyTextRemaining;
         bool m_FontWasReset;
         Dictionary<VisualElement, Vector2> m_LastGroupTransformElementScale = new Dictionary<VisualElement, Vector2>();
+        TextureRegistry m_TextureRegistry = TextureRegistry.instance;
 
         internal RenderChainCommand firstCommand { get { return m_FirstCommand; } }
 
@@ -180,20 +181,17 @@ namespace UnityEngine.UIElements.UIR
             UIR.Utility.RenderNodeExecute += OnRenderNodeExecute;
         }
 
-        public RenderChain(IPanel panel)
+        public RenderChain(BaseVisualElementPanel panel)
         {
-            var atlasMan = new UIRAtlasManager();
-            var vectorImageMan = new VectorImageManager(atlasMan);
-
-            Constructor(panel, new UIRenderDevice(), atlasMan, vectorImageMan);
+            Constructor(panel, new UIRenderDevice(), panel.atlas, new VectorImageManager(panel.atlas));
         }
 
-        protected RenderChain(IPanel panel, UIRenderDevice device, UIRAtlasManager atlasManager, VectorImageManager vectorImageManager)
+        protected RenderChain(BaseVisualElementPanel panel, UIRenderDevice device, AtlasBase atlas, VectorImageManager vectorImageManager)
         {
-            Constructor(panel, device, atlasManager, vectorImageManager);
+            Constructor(panel, device, atlas, vectorImageManager);
         }
 
-        void Constructor(IPanel panelObj, UIRenderDevice deviceObj, UIRAtlasManager atlasMan, VectorImageManager vectorImageMan)
+        void Constructor(BaseVisualElementPanel panelObj, UIRenderDevice deviceObj, AtlasBase atlas, VectorImageManager vectorImageMan)
         {
             if (disposed)
                 DisposeHelper.NotifyDisposedUsed(this);
@@ -210,12 +208,19 @@ namespace UnityEngine.UIElements.UIR
 
             this.panel = panelObj;
             this.device = deviceObj;
-            this.atlasManager = atlasMan;
+            this.atlas = atlas;
             this.vectorImageManager = vectorImageMan;
             this.shaderInfoAllocator.Construct();
 
             painter = new Implementation.UIRStylePainter(this);
             Font.textureRebuilt += OnFontReset;
+
+            var rp = panel as BaseRuntimePanel;
+            if (rp != null && rp.drawToCameras)
+            {
+                drawInCameras = true;
+                m_StaticIndex = RenderChainStaticIndexAllocator.AllocateIndex(this);
+            }
         }
 
         void Destructor()
@@ -231,14 +236,13 @@ namespace UnityEngine.UIElements.UIR
             Font.textureRebuilt -= OnFontReset;
             painter?.Dispose();
             m_TextUpdatePainter?.Dispose();
-            atlasManager?.Dispose();
             vectorImageManager?.Dispose();
             shaderInfoAllocator.Dispose();
             device?.Dispose();
 
             painter = null;
             m_TextUpdatePainter = null;
-            atlasManager = null;
+            atlas = null;
             shaderInfoAllocator = new UIRVEShaderInfoAllocator();
             device = null;
 
@@ -289,37 +293,6 @@ namespace UnityEngine.UIElements.UIR
             m_Stats.elementsAdded += m_StatsElementsAdded;
             m_Stats.elementsRemoved += m_StatsElementsRemoved;
             m_StatsElementsAdded = m_StatsElementsRemoved = 0;
-
-            if (shaderInfoAllocator.isReleased)
-                RecreateDevice(); // The shader info texture was released, recreate the device to start fresh
-
-            if (m_DrawInCameras && m_StaticIndex < 0)
-                m_StaticIndex = RenderChainStaticIndexAllocator.AllocateIndex(this);
-            else if (!m_DrawInCameras && m_StaticIndex >= 0)
-            {
-                RenderChainStaticIndexAllocator.FreeIndex(m_StaticIndex);
-                m_StaticIndex = -1;
-            }
-
-            if (OnPreRender != null)
-                OnPreRender();
-
-            bool atlasWasReset = false;
-            if (atlasManager?.RequiresReset() == true)
-            {
-                atlasManager.Reset(); // May cause a dirty repaint
-                atlasWasReset = true;
-            }
-            if (vectorImageManager?.RequiresReset() == true)
-            {
-                vectorImageManager.Reset();
-                atlasWasReset = true;
-            }
-            // Although shaderInfoAllocator uses an atlas internally, it doesn't need to
-            // reset it due to any of the current reasons that the atlas is reset for, thus we don't do it.
-
-            if (atlasWasReset)
-                RepaintAtlassedElements();
 
 #if UIR_DEBUG_CHAIN_BUILDER
             {
@@ -457,7 +430,7 @@ namespace UnityEngine.UIElements.UIR
 #endif // UIR_DEBUG_CHAIN_BUILDER
 
             // Commit new requests for atlases if any
-            atlasManager?.Commit();
+            atlas?.InvokeUpdateDynamicTextures(panel); // TODO: For a shared atlas + drawInCameras, postpone after all updates have occurred.
             vectorImageManager?.Commit();
             shaderInfoAllocator.IssuePendingAtlasBlits();
 
@@ -471,12 +444,12 @@ namespace UnityEngine.UIElements.UIR
             s_MarkerRender.Begin();
 
             Material standardMaterial = GetStandardMaterial();
-            ((BaseVisualElementPanel)panel).InvokeUpdateMaterial(standardMaterial);
+            panel.InvokeUpdateMaterial(standardMaterial);
 
             Exception immediateException = null;
             if (m_FirstCommand != null)
             {
-                if (!m_DrawInCameras)
+                if (!drawInCameras)
                 {
                     var viewport = panel.visualTree.layout;
                     standardMaterial?.SetPass(0);
@@ -487,8 +460,8 @@ namespace UnityEngine.UIElements.UIR
 
                     //TODO: Reactivate this guard check once InspectorWindow is fixed to stop adding VEs during OnGUI
                     //m_BlockDirtyRegistration = true;
-                    device.EvaluateChain(m_FirstCommand, standardMaterial, standardMaterial, atlasManager?.atlas, vectorImageManager?.atlas, shaderInfoAllocator.atlas,
-                        (panel as BaseVisualElementPanel).scaledPixelsPerPoint, shaderInfoAllocator.transformConstants, shaderInfoAllocator.clipRectConstants,
+                    device.EvaluateChain(m_FirstCommand, standardMaterial, standardMaterial, vectorImageManager?.atlas, shaderInfoAllocator.atlas,
+                        panel.scaledPixelsPerPoint, shaderInfoAllocator.transformConstants, shaderInfoAllocator.clipRectConstants,
                         m_RenderNodesData[0].matPropBlock, true, ref immediateException);
                     //m_BlockDirtyRegistration = false;
                 }
@@ -651,33 +624,15 @@ namespace UnityEngine.UIElements.UIR
 
         #endregion
 
-        internal IPanel panel { get; private set; }
+        internal BaseVisualElementPanel panel { get; private set; }
         internal UIRenderDevice device { get; private set; }
-        internal UIRAtlasManager atlasManager { get; private set; }
+        internal AtlasBase atlas { get; private set; }
         internal VectorImageManager vectorImageManager { get; private set; }
         internal UIRVEShaderInfoAllocator shaderInfoAllocator; // Not a property because this is a struct we want to mutate
         internal Implementation.UIRStylePainter painter { get; private set; }
         internal bool drawStats { get; set; }
-        internal bool drawInCameras
-        {
-            get { return m_DrawInCameras; }
-            set
-            {
-                if (m_DrawInCameras != value)
-                {
-                    m_DrawInCameras = value;
-                    if (panel.visualTree != null)
-                        UIEOnClippingChanged(panel.visualTree, true);
-                }
-                if (m_DrawInCameras && m_StaticIndex < 0)
-                    m_StaticIndex = RenderChainStaticIndexAllocator.AllocateIndex(this);
-                else if (!m_DrawInCameras && m_StaticIndex >= 0)
-                {
-                    RenderChainStaticIndexAllocator.FreeIndex(m_StaticIndex);
-                    m_StaticIndex = -1;
-                }
-            }
-        }
+        internal bool drawInCameras { get; private set; }
+
         internal Shader defaultShader
         {
             get { return m_DefaultShader; }
@@ -802,57 +757,6 @@ namespace UnityEngine.UIElements.UIR
             }
         }
 
-        struct RenderDeviceRestoreInfo
-        {
-            public IPanel panel;
-            public VisualElement root;
-            public bool hasAtlasMan, hasVectorImageMan;
-        }
-        RenderDeviceRestoreInfo m_RenderDeviceRestoreInfo;
-        internal void BeforeRenderDeviceRelease()
-        {
-            Debug.Assert(device != null);
-            Debug.Assert(m_RenderDeviceRestoreInfo.panel == null);
-            Debug.Assert(m_RenderDeviceRestoreInfo.root == null);
-
-            m_RenderDeviceRestoreInfo.panel = panel;
-            m_RenderDeviceRestoreInfo.root = GetFirstElementInPanel(m_FirstCommand?.owner);
-            m_RenderDeviceRestoreInfo.hasAtlasMan = atlasManager != null;
-            m_RenderDeviceRestoreInfo.hasVectorImageMan = vectorImageManager != null;
-
-            if (m_RenderDeviceRestoreInfo.root != null)
-                UIEOnChildRemoving(m_RenderDeviceRestoreInfo.root);
-            Destructor();
-        }
-
-        internal void AfterRenderDeviceRelease()
-        {
-            if (disposed)
-                DisposeHelper.NotifyDisposedUsed(this);
-
-            Debug.Assert(device == null);
-
-            var panelObj = m_RenderDeviceRestoreInfo.panel;
-            var root = m_RenderDeviceRestoreInfo.root;
-            var deviceObj = new UIRenderDevice();
-            var atlasManObj = m_RenderDeviceRestoreInfo.hasAtlasMan ? new UIRAtlasManager() : null;
-            var vectorImageManObj = m_RenderDeviceRestoreInfo.hasVectorImageMan ? new VectorImageManager(atlasManObj) : null;
-            m_RenderDeviceRestoreInfo = new RenderDeviceRestoreInfo();
-
-            Constructor(panelObj, deviceObj, atlasManObj, vectorImageManObj);
-            if (root != null)
-            {
-                Debug.Assert(root.panel == panelObj);
-                UIEOnChildAdded(root.parent, root, root.hierarchy.parent == null ? 0 : root.hierarchy.parent.IndexOf(panel.visualTree));
-            }
-        }
-
-        internal void RecreateDevice()
-        {
-            BeforeRenderDeviceRelease();
-            AfterRenderDeviceRelease();
-        }
-
         unsafe static RenderNodeData AccessRenderNodeData(IntPtr obj)
         {
             int *indices = (int*)obj.ToPointer();
@@ -865,7 +769,7 @@ namespace UnityEngine.UIElements.UIR
             RenderNodeData rnd = AccessRenderNodeData(obj);
             Exception immediateException = null;
             rnd.device.EvaluateChain(rnd.firstCommand, rnd.initialMaterial, rnd.standardMaterial,
-                rnd.atlas, rnd.vectorAtlas, rnd.shaderInfoAtlas,
+                rnd.vectorAtlas, rnd.shaderInfoAtlas,
                 rnd.dpiScale, rnd.transformConstants, rnd.clipRectConstants,
                 rnd.matPropBlock, false, ref immediateException);
         }
@@ -886,7 +790,6 @@ namespace UnityEngine.UIElements.UIR
                 RenderNodeData rndSource = new RenderNodeData();
                 rndSource.device = renderChain.device;
                 rndSource.standardMaterial = standardMaterial;
-                rndSource.atlas = renderChain.atlasManager?.atlas;
                 rndSource.vectorAtlas = renderChain.vectorImageManager?.atlas;
                 rndSource.shaderInfoAtlas = renderChain.shaderInfoAllocator.atlas;
                 rndSource.dpiScale = rtp.scaledPixelsPerPoint;
@@ -964,14 +867,14 @@ namespace UnityEngine.UIElements.UIR
                 new IntPtr(userData), sizeof(int) * 2);
         }
 
-        private void RepaintAtlassedElements()
+        internal void RepaintTexturedElements()
         {
             // Invalidate all elements shaderInfoAllocs
             var ve = GetFirstElementInPanel(m_FirstCommand?.owner);
             while (ve != null)
             {
                 // Cause a regen on textured elements to get the new UVs from the atlas
-                if (ve.renderChainData.usesAtlas)
+                if (ve.renderChainData.textures != null)
                     UIEOnVisualsChanged(ve, false);
 
                 ve = ve.renderChainData.next;
@@ -980,6 +883,35 @@ namespace UnityEngine.UIElements.UIR
         }
 
         void OnFontReset(Font font) { m_FontWasReset = true; }
+
+        public void AppendTexture(VisualElement ve, Texture src, TextureId id, bool isAtlas)
+        {
+            BasicNode<TextureEntry> node = m_TexturePool.Get();
+            node.data.source = src;
+            node.data.actual = id;
+            node.data.replaced = isAtlas;
+            node.AppendTo(ref ve.renderChainData.textures);
+        }
+
+        public void ResetTextures(VisualElement ve)
+        {
+            AtlasBase atlas = this.atlas;
+            TextureRegistry registry = m_TextureRegistry;
+            BasicNodePool<TextureEntry> pool = m_TexturePool;
+
+            BasicNode<TextureEntry> current = ve.renderChainData.textures;
+            ve.renderChainData.textures = null;
+            while (current != null)
+            {
+                var next = current.next;
+                if (current.data.replaced)
+                    atlas.ReturnAtlas(ve, current.data.source as Texture2D, current.data.actual);
+                else
+                    registry.Release(current.data.actual);
+                pool.Return(current);
+                current = next;
+            }
+        }
 
         void DrawStats()
         {
@@ -1159,7 +1091,7 @@ namespace UnityEngine.UIElements.UIR
         internal RenderChainCommand firstCommand, lastCommand; // Sequential for the same owner
         internal RenderChainCommand firstClosingCommand, lastClosingCommand; // Optional, sequential for the same owner, the presence of closing commands requires starting commands too, otherwise certain optimizations will become invalid
         internal bool isInChain, isStencilClipped, isHierarchyHidden;
-        internal bool usesAtlas, disableNudging, usesLegacyText;
+        internal bool disableNudging, usesLegacyText;
         internal MeshHandle data, closingData;
         internal Matrix4x4 verticesSpace; // Transform describing the space which the vertices in 'data' are relative to
         internal int displacementUVStart, displacementUVEnd;
@@ -1170,6 +1102,8 @@ namespace UnityEngine.UIElements.UIR
         internal VisualElement prevText, nextText;
         internal List<RenderChainTextEntry> textEntries;
 
+        internal BasicNode<TextureEntry> textures;
+
         internal RenderChainCommand lastClosingOrLastCommand { get { return lastClosingCommand ?? lastCommand; } }
         static internal bool AllocatesID(BMPAlloc alloc) { return (alloc.ownedState != 0) && alloc.IsValid(); }
         static internal bool InheritsID(BMPAlloc alloc) { return (alloc.ownedState == 0) && alloc.IsValid(); }
@@ -1179,5 +1113,12 @@ namespace UnityEngine.UIElements.UIR
     {
         internal RenderChainCommand command;
         internal int firstVertex, vertexCount;
+    }
+
+    struct TextureEntry
+    {
+        public Texture source;
+        public TextureId actual;
+        public bool replaced;
     }
 }

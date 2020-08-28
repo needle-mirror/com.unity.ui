@@ -1012,6 +1012,13 @@ namespace UnityEngine.UIElements
             {
                 pseudoStates = pseudoStates | PseudoStates.Focus;
             }
+#if UNITY_EDITOR
+            else
+            {
+                HandlePanelAttachmentEvents(evt);
+            }
+
+#endif
         }
 
         public sealed override void Focus()
@@ -1804,7 +1811,7 @@ namespace UnityEngine.UIElements
             {
                 if (eventType == MouseOverEvent.TypeId() && elementPanel.GetTopElementUnderPointer(PointerId.mousePointerId) == this)
                 {
-                    elementPanel.cursorManager.SetCursor(computedStyle.cursor.value);
+                    elementPanel.cursorManager.SetCursor(computedStyle.cursor);
                 }
                 else if (eventType == MouseOutEvent.TypeId())
                 {

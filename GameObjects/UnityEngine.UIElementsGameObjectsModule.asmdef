@@ -2,6 +2,7 @@
     "name": "UnityEngine.UIElementsGameObjectsModule",
     "references": [
         "UnityEngine.UIElementsModule",
+        "Unity.InputSystem",
         "UnityEngine"
     ],
     "includePlatforms": [],

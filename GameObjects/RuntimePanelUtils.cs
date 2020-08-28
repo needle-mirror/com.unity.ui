@@ -50,5 +50,34 @@ namespace UnityEngine.UIElements
             Vector2 bottomRightOnPanel = CameraTransformWorldToPanel(panel, bottomRightInWorldFacingCam, camera);
             return new Rect(topLeftOnPanel, bottomRightOnPanel - topLeftOnPanel);
         }
+
+        /// <summary>
+        /// Resets the dynamic atlas of the panel. Textured elements will be repainted.
+        /// </summary>
+        public static void ResetDynamicAtlas(this IPanel panel)
+        {
+            var p = panel as BaseVisualElementPanel;
+            if (p == null)
+                return;
+
+            var atlas = p.atlas as DynamicAtlas;
+            atlas?.Reset();
+        }
+
+        /// <summary>
+        /// Notifies the dynamic atlas of the panel that the content of the provided texture has changed. If the dynamic
+        /// atlas contains the texture, it will update it.
+        /// </summary>
+        /// <param name="panel">The current panel</param>
+        /// <param name="texture">The texture whose content has changed.</param>
+        public static void SetTextureDirty(this IPanel panel, Texture2D texture)
+        {
+            var p = panel as BaseVisualElementPanel;
+            if (p == null)
+                return;
+
+            var atlas = p.atlas as DynamicAtlas;
+            atlas?.SetDirty(texture);
+        }
     }
 }

@@ -81,12 +81,20 @@ namespace UnityEngine.UIElements
         ClipWithScissors = 1 << 2 // If clipping is requested on this element, prefer scissoring
     }
 
+    // For backwards compatibility with debugger in 2020.1
     enum PanelClearFlags
     {
         None = 0,
         Color = 1 << 0,
         Depth = 1 << 1,
         All = Color | Depth
+    }
+
+    struct PanelClearSettings
+    {
+        public bool clearDepthStencil;
+        public bool clearColor;
+        public Color color;
     }
 
     internal class RepaintData
@@ -264,6 +272,7 @@ namespace UnityEngine.UIElements
         public abstract void ApplyStyles();
 
 #if UNITY_EDITOR
+        public abstract void UpdateAssetTrackers();
         public abstract void DirtyStyleSheets();
 #endif
         private float m_Scale = 1;
@@ -332,7 +341,35 @@ namespace UnityEngine.UIElements
             }
         }
 
-        internal PanelClearFlags clearFlags { get; set; } = PanelClearFlags.All;
+        // For backwards compatibility with debugger in 2020.1
+        public PanelClearFlags clearFlags
+        {
+            get
+            {
+                PanelClearFlags flags = PanelClearFlags.None;
+
+                if (clearSettings.clearColor)
+                {
+                    flags |= PanelClearFlags.Color;
+                }
+
+                if (clearSettings.clearDepthStencil)
+                {
+                    flags |= PanelClearFlags.Depth;
+                }
+
+                return flags;
+            }
+            set
+            {
+                var settings = clearSettings;
+                settings.clearColor = (value & PanelClearFlags.Color) == PanelClearFlags.Color;
+                settings.clearDepthStencil = (value & PanelClearFlags.Depth) == PanelClearFlags.Depth;
+                clearSettings = settings;
+            }
+        }
+
+        internal PanelClearSettings clearSettings { get; set; } = new PanelClearSettings { clearDepthStencil = true, clearColor = true, color = Color.clear };
 
         internal bool duringLayoutPhase { get; set; }
 
@@ -379,6 +416,44 @@ namespace UnityEngine.UIElements
         internal bool disposed { get; private set; }
 
         internal abstract IVisualTreeUpdater GetUpdater(VisualTreeUpdatePhase phase);
+
+#if UNITY_EDITOR
+        internal abstract IVisualTreeUpdater GetEditorUpdater(VisualTreeEditorUpdatePhase phase);
+
+        internal ILiveReloadAssetTracker<StyleSheet> m_LiveReloadStyleSheetAssetTracker
+        {
+            get =>
+                (GetEditorUpdater(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged) as
+                    VisualTreeAssetChangeTrackerUpdater)?.m_LiveReloadStyleSheetAssetTracker;
+            set
+            {
+                if (GetEditorUpdater(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged) is VisualTreeAssetChangeTrackerUpdater updater)
+                {
+                    updater.m_LiveReloadStyleSheetAssetTracker = value;
+                }
+            }
+        }
+
+        internal void StartVisualTreeAssetTracking(ILiveReloadAssetTracker<VisualTreeAsset> tracker,
+            VisualElement visualElementUsingAsset)
+        {
+            (GetEditorUpdater(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged) as
+                VisualTreeAssetChangeTrackerUpdater)?.StartVisualTreeAssetTracking(tracker, visualElementUsingAsset);
+        }
+
+        internal void StopVisualTreeAssetTracking(VisualElement visualElementUsingAsset)
+        {
+            (GetEditorUpdater(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged) as
+                VisualTreeAssetChangeTrackerUpdater)?.StopVisualTreeAssetTracking(visualElementUsingAsset);
+        }
+
+        internal HashSet<ILiveReloadAssetTracker<VisualTreeAsset>> GetVisualTreeAssetTrackersListCopy()
+        {
+            return (GetEditorUpdater(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged) as
+                VisualTreeAssetChangeTrackerUpdater)?.GetVisualTreeAssetTrackersListCopy();
+        }
+
+#endif
 
         internal ElementUnderPointer m_TopElementUnderPointers = new ElementUnderPointer();
 
@@ -429,6 +504,10 @@ namespace UnityEngine.UIElements
             if (standardWorldSpaceShaderChanged != null) standardWorldSpaceShaderChanged();
         }
 
+        internal event Action atlasChanged;
+        protected void InvokeAtlasChanged() { atlasChanged?.Invoke(); }
+        public abstract AtlasBase atlas { get; set; }
+
         internal event Action<Material> updateMaterial;
         internal void InvokeUpdateMaterial(Material mat) { updateMaterial?.Invoke(mat); } // TODO: Actually call this!
 
@@ -469,6 +548,10 @@ namespace UnityEngine.UIElements
         public virtual void Update()
         {
             scheduler.UpdateScheduledEvents();
+#if UNITY_EDITOR
+            // This call is already on UIElementsUtility.UpdateSchedulers() but it's also necessary here for Runtime UI
+            UpdateAssetTrackers();
+#endif
             ValidateLayout();
             UpdateAnimations();
             UpdateBindings();
@@ -632,6 +715,23 @@ namespace UnityEngine.UIElements
             }
         }
 
+        private AtlasBase m_Atlas;
+
+        public override AtlasBase atlas
+        {
+            get { return m_Atlas; }
+            set
+            {
+                if (m_Atlas != value)
+                {
+                    m_Atlas?.InvokeRemovedFromPanel(this);
+                    m_Atlas = value;
+                    InvokeAtlasChanged();
+                    m_Atlas?.InvokeAssignedToPanel(this);
+                }
+            }
+        }
+
         internal static Panel CreateEditorPanel(ScriptableObject ownerObject)
         {
 #if UNITY_EDITOR
@@ -663,6 +763,7 @@ namespace UnityEngine.UIElements
             CreateMarkers();
 
             InvokeHierarchyChanged(visualTree, HierarchyChangeType.Add);
+            atlas = new DynamicAtlas();
         }
 
         protected override void Dispose(bool disposing)
@@ -671,7 +772,10 @@ namespace UnityEngine.UIElements
                 return;
 
             if (disposing)
+            {
+                atlas = null;
                 m_VisualTreeUpdater.Dispose();
+            }
 
             base.Dispose(disposing);
         }
@@ -823,6 +927,14 @@ namespace UnityEngine.UIElements
             m_VisualTreeUpdater.UpdateVisualTreePhase(VisualTreeUpdatePhase.Styles);
         }
 
+#if UNITY_EDITOR
+        public override void UpdateAssetTrackers()
+        {
+            m_VisualTreeUpdater.UpdateEditorVisualTreePhase(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged);
+        }
+
+#endif
+
         void UpdateForRepaint()
         {
             //Here we don't want to update animation and bindings which are ticked by the scheduler
@@ -837,6 +949,11 @@ namespace UnityEngine.UIElements
         public override void DirtyStyleSheets()
         {
             m_VisualTreeUpdater.DirtyStyleSheets();
+        }
+
+        internal override IVisualTreeUpdater GetEditorUpdater(VisualTreeEditorUpdatePhase phase)
+        {
+            return m_VisualTreeUpdater.GetEditorUpdater(phase);
         }
 
 #endif
@@ -914,17 +1031,18 @@ namespace UnityEngine.UIElements
             }
         }
 
+        bool m_DrawToCameras;
+
         internal bool drawToCameras
         {
-            get
-            {
-                return (GetUpdater(VisualTreeUpdatePhase.Repaint) as UIRRepaintUpdater)?.renderChain?.drawInCameras == true;
-            }
+            get { return m_DrawToCameras; }
             set
             {
-                var renderChain = (GetUpdater(VisualTreeUpdatePhase.Repaint) as UIRRepaintUpdater)?.renderChain;
-                if (renderChain != null)
-                    renderChain.drawInCameras = value;
+                if (m_DrawToCameras != value)
+                {
+                    m_DrawToCameras = value;
+                    (GetUpdater(VisualTreeUpdatePhase.Repaint) as UIRRepaintUpdater)?.DestroyRenderChain();
+                }
             }
         }
 
@@ -943,15 +1061,13 @@ namespace UnityEngine.UIElements
                 int width = rt != null ? rt.width : Screen.width;
                 int height = rt != null ? rt.height : Screen.height;
                 GL.Viewport(new Rect(0, 0, width, height));
-
-                clearFlags = PanelClearFlags.Depth;
                 base.Repaint(e);
                 return;
             }
 
             var toBeRestoredTarget = RenderTexture.active;
             RenderTexture.active = targetTexture;
-            clearFlags = PanelClearFlags.All;
+            GL.Viewport(new Rect(0, 0, targetTexture.width, targetTexture.height));
             base.Repaint(e);
             RenderTexture.active = toBeRestoredTarget;
         }

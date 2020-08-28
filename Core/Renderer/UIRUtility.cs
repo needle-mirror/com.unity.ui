@@ -25,7 +25,7 @@ namespace UnityEngine.UIElements
 
         public static bool IsVectorImageBackground(VisualElement ve)
         {
-            return ve.computedStyle.backgroundImage.value.vectorImage != null;
+            return ve.computedStyle.backgroundImage.vectorImage != null;
         }
 
         public static void Destroy(Object obj)

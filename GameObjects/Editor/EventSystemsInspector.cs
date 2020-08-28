@@ -1,3 +1,4 @@
+#if !UNITY_INPUT_SYSTEM || !ENABLE_INPUT_SYSTEM
 using UnityEngine.UIElements;
 
 namespace UnityEditor.UIElements.Inspector
@@ -29,3 +30,4 @@ namespace UnityEditor.UIElements.Inspector
         }
     }
 }
+#endif
