@@ -160,7 +160,7 @@ namespace UnityEngine.UIElements
 
             if (!Mathf.Approximately(movement.x, 0f) || !Mathf.Approximately(movement.y, 0f))
             {
-                SendFocusBasedEvent(context, movement => NavigationMoveEvent.GetPooled(movement), movement);
+                SendFocusBasedEvent(context, m => NavigationMoveEvent.GetPooled(m), movement);
                 OnNavigationStarted(context, NavigationMoveEvent.TypeId());
                 m_LastNavigationMovement = movement;
             }
@@ -173,7 +173,7 @@ namespace UnityEngine.UIElements
             var direction = Mathf.RoundToInt(value);
             if (direction != 0)
             {
-                SendFocusBasedEvent(context, direction => NavigationTabEvent.GetPooled(direction), direction);
+                SendFocusBasedEvent(context, d => NavigationTabEvent.GetPooled(d), direction);
                 OnNavigationStarted(context, NavigationTabEvent.TypeId());
                 m_LastTabDirection = direction;
             }

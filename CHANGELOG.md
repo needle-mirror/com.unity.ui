@@ -4,6 +4,14 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-preview.8] - 2020-09-01
+---
+
+### Fixed
+
+- Fixed compilation error in EventSystem when using Input System package in Unity 2020.1
+
+
 ## [1.0.0-preview.7] - 2020-08-28
 ---
 
