@@ -269,78 +269,42 @@ namespace UnityEngine.UIElements
         private void OnGenericClickPerformed(InputAction.CallbackContext context, int button, float pressed)
         {
             m_PointerEvent.ReadDeviceState(context, button);
-            var pointerId = m_PointerEvent.pointerId;
 
-            bool SendPointerPressed(Vector2 mousePosition, Vector2 delta)
+            var position = m_LastPointedPositions.Get(m_PointerEvent.pointerId, m_LastPointedPosition);
+            if (pressed > 0)
             {
-                //TODO: remove MouseDownEvent and MouseUpEvent, find why they are used in TextField focus pipeline
-                return pointerId == PointerId.mousePointerId && SendPositionBasedEvent(context, mousePosition, delta,
-                    (panelPosition, panelDelta, data) =>
-                    {
-                        using (var e = PointerEventWrapper.GetPooled(data, panelPosition, panelDelta))
-                            return MouseDownEvent.GetPooled(e);
-                    }, m_PointerEvent) ||
-                    SendPositionBasedEvent(context, mousePosition, delta,
+                SendPositionBasedEvent(context, position, m_LastPointedDelta,
                     (panelPosition, panelDelta, data) =>
                     {
                         using (var e = PointerEventWrapper.GetPooled(data, panelPosition, panelDelta))
                             return PointerDownEvent.GetPooled((IPointerEvent)e);
                     }, m_PointerEvent);
             }
-
-            bool SendPointerReleased(Vector2 mousePosition, Vector2 delta)
+            else
             {
-                return pointerId == PointerId.mousePointerId && SendPositionBasedEvent(context, mousePosition, delta,
-                    (panelPosition, panelDelta, data) =>
-                    {
-                        using (var e = PointerEventWrapper.GetPooled(data, panelPosition, panelDelta))
-                            return MouseUpEvent.GetPooled(e);
-                    }, m_PointerEvent) ||
-                    SendPositionBasedEvent(context, mousePosition, delta,
+                SendPositionBasedEvent(context, position, m_LastPointedDelta,
                     (panelPosition, panelDelta, data) =>
                     {
                         using (var e = PointerEventWrapper.GetPooled(data, panelPosition, panelDelta))
                             return PointerUpEvent.GetPooled((IPointerEvent)e);
                     }, m_PointerEvent);
             }
-
-            var position = m_LastPointedPositions.Get(pointerId, m_LastPointedPosition);
-            if (pressed > 0)
-            {
-                SendPointerPressed(position, m_LastPointedDelta);
-            }
-            else
-            {
-                SendPointerReleased(position, m_LastPointedDelta);
-            }
         }
 
         private void OnGenericPointPerformed(InputAction.CallbackContext context, Vector2 position)
         {
             m_PointerEvent.ReadDeviceState(context);
-            var pointerId = m_PointerEvent.pointerId;
 
             m_LastPointedDelta = position - m_LastPointedPosition;
             m_LastPointedPosition = position;
-            m_LastPointedPositions[pointerId] = position;
+            m_LastPointedPositions[m_PointerEvent.pointerId] = position;
 
-            bool SendPointerMoved(Vector2 mousePosition, Vector2 delta)
-            {
-                return pointerId == PointerId.mousePointerId && SendPositionBasedEvent(context, mousePosition, delta,
-                    (panelPosition, panelDelta, data) =>
-                    {
-                        using (var e = PointerEventWrapper.GetPooled(data, panelPosition, panelDelta))
-                            return MouseMoveEvent.GetPooled(e);
-                    }, m_PointerEvent) ||
-                    SendPositionBasedEvent(context, mousePosition, delta,
-                    (panelPosition, panelDelta, data) =>
-                    {
-                        using (var e = PointerEventWrapper.GetPooled(data, panelPosition, panelDelta))
-                            return PointerMoveEvent.GetPooled((IPointerEvent)e);
-                    }, m_PointerEvent);
-            }
-
-            SendPointerMoved(position, m_LastPointedDelta);
+            SendPositionBasedEvent(context, position, m_LastPointedDelta,
+                (panelPosition, panelDelta, data) =>
+                {
+                    using (var e1 = PointerEventWrapper.GetPooled(data, panelPosition, panelDelta))
+                        return PointerMoveEvent.GetPooled((IPointerEvent)e1);
+                }, m_PointerEvent);
         }
 
         private class PointerEventWrapper : PointerEventBase<PointerEventWrapper>

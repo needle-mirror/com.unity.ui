@@ -25,9 +25,8 @@ namespace UnityEngine.UIElements
 
         public FocusChangeDirection GetFocusChangeDirection(Focusable currentFocusable, EventBase e)
         {
-            if (e.eventTypeId == PointerDownEvent.TypeId() || e.eventTypeId == MouseDownEvent.TypeId())
+            if (e.eventTypeId == MouseDownEvent.TypeId())
             {
-                // TODO: move unfocus if pointerdown on something not focusable here
                 if (e.target is Focusable focusable)
                     return VisualElementFocusChangeTarget.GetPooled(focusable);
             }
