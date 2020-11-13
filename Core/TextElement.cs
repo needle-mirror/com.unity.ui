@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine.UIElements.UIR;
 
 namespace UnityEngine.UIElements
 {
@@ -23,6 +24,7 @@ namespace UnityEngine.UIElements
         public new class UxmlTraits : BindableElement.UxmlTraits
         {
             UxmlStringAttributeDescription m_Text = new UxmlStringAttributeDescription { name = "text" };
+            UxmlBoolAttributeDescription m_EnableRichText = new UxmlBoolAttributeDescription { name = "enable-rich-text", defaultValue = true };
 
             UxmlBoolAttributeDescription m_DisplayTooltipWhenElided = new UxmlBoolAttributeDescription { name = "display-tooltip-when-elided" };
 
@@ -43,8 +45,10 @@ namespace UnityEngine.UIElements
             public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
             {
                 base.Init(ve, bag, cc);
+
                 var textElement = (TextElement)ve;
                 textElement.text = m_Text.GetValueFromBag(bag, cc);
+                textElement.enableRichText = m_EnableRichText.GetValueFromBag(bag, cc);
                 textElement.displayTooltipWhenElided = m_DisplayTooltipWhenElided.GetValueFromBag(bag, cc);
             }
         }
@@ -59,7 +63,6 @@ namespace UnityEngine.UIElements
             requireMeasureFunction = true;
             AddToClassList(ussClassName);
             generateVisualContent += OnGenerateVisualContent;
-            RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
             RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
         }
 
@@ -69,14 +72,27 @@ namespace UnityEngine.UIElements
         internal ITextHandle textHandle
         {
             get { return m_TextHandle; }
-            private set { m_TextHandle = value; }
+            set { m_TextHandle = value; }
         }
 
-        private void OnAttachToPanel(AttachToPanelEvent e)
+        public override void HandleEvent(EventBase evt)
         {
-            textHandle = e.destinationPanel.contextType == ContextType.Editor
-                ? TextHandleFactory.GetEditorHandle()
-                : TextHandleFactory.GetRuntimeHandle();
+            if (evt.eventTypeId == AttachToPanelEvent.TypeId() && evt is AttachToPanelEvent attachEvent)
+            {
+                textHandle = attachEvent.destinationPanel.contextType == ContextType.Editor
+                    ? TextHandleFactory.GetEditorHandle()
+                    : TextHandleFactory.GetRuntimeHandle();
+#if UNITY_EDITOR
+                (attachEvent.destinationPanel as BaseVisualElementPanel)?.OnTextElementAdded(this);
+#endif
+            }
+            else if (evt.eventTypeId == DetachFromPanelEvent.TypeId() && evt is DetachFromPanelEvent detachEvent)
+            {
+#if UNITY_EDITOR
+                (detachEvent.originPanel as BaseVisualElementPanel)?.OnTextElementRemoved(this);
+#endif
+            }
+            base.HandleEvent(evt);
         }
 
         private void OnGeometryChanged(GeometryChangedEvent e)
@@ -92,6 +108,22 @@ namespace UnityEngine.UIElements
             set
             {
                 ((INotifyValueChanged<string>) this).value = value;
+            }
+        }
+
+        private bool m_EnableRichText = true;
+
+        /// <summary>
+        /// When false, rich text tags will not be parsed.
+        /// </summary>
+        public bool enableRichText
+        {
+            get { return m_EnableRichText; }
+            set
+            {
+                if (m_EnableRichText == value) return;
+                m_EnableRichText = value;
+                MarkDirtyRepaint();
             }
         }
 
@@ -148,9 +180,14 @@ namespace UnityEngine.UIElements
 
         internal string ElideText(string drawText, string ellipsisText, float width, TextOverflowPosition textOverflowPosition)
         {
+            // The pixelOffset represent the maximum value that could be removed from the measured with by the layout when scaling is not 100%.
+            // the offset is caused by alining the borders+spacing+padding on the grid.
+            // We still want the text to render without being elided even when there is a small gap missing.  https://fogbugz.unity3d.com/f/cases/1268016/
+            float pixelOffset = 1 / scaledPixelsPerPoint;
+
             // Try full size first
             var size = MeasureTextSize(drawText, 0, MeasureMode.Undefined, 0, MeasureMode.Undefined);
-            if (size.x <= width || string.IsNullOrEmpty(ellipsisText))
+            if (size.x - pixelOffset <= width || string.IsNullOrEmpty(ellipsisText))
                 return drawText;
 
             var minText = drawText.Length > 1 ? ellipsisText : drawText;
@@ -264,8 +301,8 @@ namespace UnityEngine.UIElements
 
         private bool ShouldElide()
         {
-            return style.textOverflow == TextOverflow.Ellipsis && style.overflow == Overflow.Hidden &&
-                style.whiteSpace == WhiteSpace.NoWrap;
+            return computedStyle.textOverflow == TextOverflow.Ellipsis && computedStyle.overflow == OverflowInternal.Hidden &&
+                computedStyle.whiteSpace == WhiteSpace.NoWrap;
         }
 
         /// <summary>
@@ -296,6 +333,14 @@ namespace UnityEngine.UIElements
         protected internal override Vector2 DoMeasure(float desiredWidth, MeasureMode widthMode, float desiredHeight, MeasureMode heightMode)
         {
             return MeasureTextSize(text, desiredWidth, widthMode, desiredHeight, heightMode);
+        }
+
+        // Used in tests
+        internal int VerticesCount(string text)
+        {
+            var textParams = m_TextParams;
+            textParams.text = text;
+            return textHandle.VerticesCount(textParams, scaledPixelsPerPoint);
         }
 
         //INotifyValueChange

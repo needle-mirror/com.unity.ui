@@ -15,7 +15,6 @@ namespace Samples.Editor.Events
         }
 
         [SerializeField] private VisualTreeAsset uxmlAsset = default;
-        [SerializeField] private StyleSheet ussAsset = default;
 
         private VisualElement mainArea = default;
 
@@ -27,7 +26,6 @@ namespace Samples.Editor.Events
         public void OnEnable()
         {
             uxmlAsset.CloneTree(rootVisualElement);
-            rootVisualElement.styleSheets.Add(ussAsset);
 
             mainArea = rootVisualElement.Q<VisualElement>(className: "main-area");
             tooltip = rootVisualElement.Q<Label>(className: "main-area__tooltip");

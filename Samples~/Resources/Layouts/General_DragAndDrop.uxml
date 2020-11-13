@@ -1,4 +1,5 @@
 <UXML xmlns="UnityEngine.UIElements">
+    <Style src="../StyleSheets/General_DragAndDrop.uss" />
     <VisualElement class="background">
         <VisualElement class="header">
             <Label text="Drag And Drop Sample" class="header__label" />

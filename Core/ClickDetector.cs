@@ -146,9 +146,12 @@ namespace UnityEngine.UIElements
                     }
                 }
             }
-            else if (evt.eventTypeId == PointerCancelEvent.TypeId() ||
-                     evt.eventTypeId == PointerStationaryEvent.TypeId() ||
-                     evt.eventTypeId == DragUpdatedEvent.TypeId())
+            else if (evt.eventTypeId == PointerCancelEvent.TypeId()
+                     || evt.eventTypeId == PointerStationaryEvent.TypeId()
+#if UNITY_EDITOR
+                     || evt.eventTypeId == DragUpdatedEvent.TypeId()
+#endif
+            )
             {
                 CancelClickTracking(evt);
             }

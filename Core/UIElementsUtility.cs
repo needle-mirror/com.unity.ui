@@ -414,12 +414,14 @@ namespace UnityEngine.UIElements
                     return KeyDownEvent.GetPooled(systemEvent);
                 case EventType.KeyUp:
                     return KeyUpEvent.GetPooled(systemEvent);
+#if UNITY_EDITOR
                 case EventType.DragUpdated:
                     return DragUpdatedEvent.GetPooled(systemEvent);
                 case EventType.DragPerform:
                     return DragPerformEvent.GetPooled(systemEvent);
                 case EventType.DragExited:
                     return DragExitedEvent.GetPooled(systemEvent);
+#endif
                 case EventType.ValidateCommand:
                     return ValidateCommandEvent.GetPooled(systemEvent);
                 case EventType.ExecuteCommand:

@@ -66,7 +66,6 @@ Shader "Hidden/UIE-Runtime"
                 #pragma vertex vert
                 #pragma fragment frag
                 #pragma require samplelod
-                #define UIE_SDF_TEXT
                 #include "Packages/com.unity.ui/Shaders/UIE-Runtime.cginc"
                 ENDCG
             }
@@ -81,7 +80,6 @@ Shader "Hidden/UIE-Runtime"
                 #pragma target 2.0
                 #pragma vertex vert
                 #pragma fragment frag
-                #define UIE_SDF_TEXT
                 #include "Packages/com.unity.ui/Shaders/UIE-Runtime.cginc"
                 ENDCG
             }

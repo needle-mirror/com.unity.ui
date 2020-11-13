@@ -7,7 +7,7 @@ namespace UnityEngine.UIElements
     // Editor update phases, the order of the enum define the updater order
     internal enum VisualTreeEditorUpdatePhase
     {
-        VisualTreeAssetChanged,
+        AssetChange,
         Count
     }
 #endif
@@ -107,6 +107,7 @@ namespace UnityEngine.UIElements
             }
         }
 
+        //Note: used in tests
         public void UpdateVisualTree()
         {
 #if UNITY_EDITOR
@@ -218,7 +219,7 @@ namespace UnityEngine.UIElements
         private void SetDefaultUpdaters()
         {
 #if UNITY_EDITOR
-            SetEditorUpdater<VisualTreeAssetChangeTrackerUpdater>(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged);
+            SetEditorUpdater<VisualTreeAssetChangeTrackerUpdater>(VisualTreeEditorUpdatePhase.AssetChange);
 #endif
             SetUpdater<VisualTreeViewDataUpdater>(VisualTreeUpdatePhase.ViewData);
             SetUpdater<VisualTreeBindingsUpdater>(VisualTreeUpdatePhase.Bindings);

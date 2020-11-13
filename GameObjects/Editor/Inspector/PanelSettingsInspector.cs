@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.UIElements.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -22,10 +23,11 @@ namespace UnityEditor.UIElements.Inspector
         private VisualTreeAsset m_InspectorUxml;
 
         private ObjectField m_ThemeStyleSheetField;
+        private ObjectField m_UITKTextSettings;
         private ObjectField m_TargetTextureField;
 
         private EnumField m_ScaleModeField;
-        private EnumField m_screenMatchModeField;
+        private EnumField m_ScreenMatchModeField;
 
         private VisualElement m_ScaleModeConstantPixelSizeGroup;
         private VisualElement m_ScaleModeScaleWithScreenSizeGroup;
@@ -33,8 +35,10 @@ namespace UnityEditor.UIElements.Inspector
 
         private VisualElement m_ScreenMatchModeMatchWidthOrHeightGroup;
 
-        PropertyField m_ClearColorField;
-        PropertyField m_ColorClearValueField;
+        private PropertyField m_ClearColorField;
+        private PropertyField m_ColorClearValueField;
+
+        private FloatField m_SortOrderField;
 
         private void ConfigureFields()
         {
@@ -48,11 +52,14 @@ namespace UnityEditor.UIElements.Inspector
             // with a local one that does not have all the basic styles necessary defined.
             m_ThemeStyleSheetField.style.display = DisplayStyle.None;
 
+            m_UITKTextSettings = m_RootVisualElement.MandatoryQ<ObjectField>("textSettings");
+            m_UITKTextSettings.objectType = typeof(PanelTextSettings);
+
             m_TargetTextureField = m_RootVisualElement.MandatoryQ<ObjectField>("targetTexture");
             m_TargetTextureField.objectType = typeof(RenderTexture);
 
             m_ScaleModeField = m_RootVisualElement.MandatoryQ<EnumField>("scaleMode");
-            m_screenMatchModeField = m_RootVisualElement.MandatoryQ<EnumField>("screenMatchMode");
+            m_ScreenMatchModeField = m_RootVisualElement.MandatoryQ<EnumField>("screenMatchMode");
 
             m_ScaleModeConstantPixelSizeGroup = m_RootVisualElement.MandatoryQ("scaleModeConstantPixelSize");
             m_ScaleModeScaleWithScreenSizeGroup = m_RootVisualElement.MandatoryQ("scaleModeScaleWithScreenSize");
@@ -63,16 +70,20 @@ namespace UnityEditor.UIElements.Inspector
 
             m_ClearColorField = m_RootVisualElement.MandatoryQ<PropertyField>("clearColor");
             m_ColorClearValueField = m_RootVisualElement.MandatoryQ<PropertyField>("colorClearValue");
+
+            m_SortOrderField = m_RootVisualElement.MandatoryQ<FloatField>("sortingOrder");
+            m_SortOrderField.isDelayed = true;
         }
 
         private void BindFields()
         {
             m_ScaleModeField.RegisterCallback<ChangeEvent<Enum>>(evt =>
                 UpdateScaleModeValues((PanelScaleModes)evt.newValue));
-            m_screenMatchModeField.RegisterCallback<ChangeEvent<Enum>>(evt =>
+            m_ScreenMatchModeField.RegisterCallback<ChangeEvent<Enum>>(evt =>
                 UpdateScreenMatchModeValues((PanelScreenMatchModes)evt.newValue));
             m_ClearColorField.RegisterCallback<ChangeEvent<bool>>(evt =>
                 UpdateColorClearValue(evt.newValue));
+            m_SortOrderField.RegisterCallback<ChangeEvent<float>>(evt => SetSortOrder(evt));
         }
 
         private void UpdateScaleModeValues(PanelScaleModes scaleMode)
@@ -113,6 +124,16 @@ namespace UnityEditor.UIElements.Inspector
         void UpdateColorClearValue(bool newClearColor)
         {
             m_ColorClearValueField.SetEnabled(newClearColor);
+        }
+
+        private void SetSortOrder(ChangeEvent<float> evt)
+        {
+            PanelSettings panelSettings = (PanelSettings)target;
+
+            if (panelSettings.sortingOrder != evt.newValue)
+            {
+                m_SortOrderField.schedule.Execute(() => panelSettings.ApplySortingOrder());
+            }
         }
 
         public override VisualElement CreateInspectorGUI()

@@ -15,7 +15,6 @@ namespace Samples.Editor.Events
         }
 
         [SerializeField] private VisualTreeAsset uxmlAsset = default;
-        [SerializeField] private StyleSheet styleAsset = default;
 
         private Label label;
 
@@ -27,7 +26,6 @@ namespace Samples.Editor.Events
         public void OnEnable()
         {
             uxmlAsset.CloneTree(rootVisualElement);
-            rootVisualElement.styleSheets.Add(styleAsset);
 
             label = rootVisualElement.Q<Label>(className: "display__bpm");
 

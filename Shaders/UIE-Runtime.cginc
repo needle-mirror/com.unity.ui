@@ -48,6 +48,8 @@
 #include "UnityCG.cginc"
 
 sampler2D _FontTex;
+float4 _FontTex_TexelSize;
+float _FontTexSDFScale;
 
 sampler2D _GradientSettingsTex;
 float4 _GradientSettingsTex_TexelSize;
@@ -104,9 +106,10 @@ struct appdata_t
     float4 color    : COLOR;
     float2 uv       : TEXCOORD0;
     float4 xformClipPages : TEXCOORD1; // Top-left of xform and clip pages: XY,XY
-    float4 idsFlags : TEXCOORD2; //XYZ (xform,clip,opacity) (W flags)
-    float4 opacityPageSVGSettingIndex : TEXCOORD3; //XY (ZW SVG setting index)
-    float  textureId : TEXCOORD4; // X (textureId)
+    float4 ids      : TEXCOORD2; //XYZW (xform,clip,opacity,textcore)
+    float4 flags    : TEXCOORD3; //X (flags) Y (textcore-dilate) ZW (unused)
+    float4 opacityPageSettingIndex : TEXCOORD4; //XY: Opacity page index, ZW: SVG/TexCore setting index
+    float  textureId : TEXCOORD5; // X (textureId)
 
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -115,11 +118,12 @@ struct v2f
 {
     UIE_V2F_COLOR_T color : COLOR;
     float4 uvXY  : TEXCOORD0; // UV and ZW holds XY position in points
-    UIE_FLAT_OPTIM half3 typeTexSvg : TEXCOORD1; // X: Render Type Y: Tex Index Z: SVG Gradient Index
+    UIE_FLAT_OPTIM half3 typeTexSettings : TEXCOORD1; // X: Render Type Y: Tex Index Z: SVG Gradient Index
     fixed4 clipRectOpacityUVs : TEXCOORD2;
-    float2 clipPos : TEXCOORD3;
+    fixed2 textCoreUVs : TEXCOORD3;
+    float4 clipPos : TEXCOORD4; // W holds textcore dilate flag
 #if UIE_SHADER_INFO_IN_VS
-    UIE_FLAT_OPTIM fixed4 clipRect : TEXCOORD4; // Clip rect presampled
+    nointerpolation fixed4 clipRect : TEXCOORD5; // Clip rect presampled
 #endif // UIE_SHADER_INFO_IN_VS
     UNITY_VERTEX_OUTPUT_STEREO
 };
@@ -309,7 +313,7 @@ void uie_vert_load_payload(appdata_t v)
 {
 #if UIE_SHADER_INFO_IN_VS
 
-    float2 xformTexel = uie_decode_shader_info_texel_pos(v.xformClipPages.xy, v.idsFlags.x);
+    float2 xformTexel = uie_decode_shader_info_texel_pos(v.xformClipPages.xy, v.ids.x);
     xformTexel.y *= 3.0f; // Because each transform entry is 3 texels high
 
     float2 row0UV = (xformTexel + float2(0, 0) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
@@ -324,7 +328,7 @@ void uie_vert_load_payload(appdata_t v)
 
 #else // !UIE_SHADER_INFO_IN_VS
 
-    int xformConstantIndex = (int)(v.idsFlags.x * 255.0f * 3.0f);
+    int xformConstantIndex = (int)(v.ids.x * 255.0f * 3.0f);
     uie_toWorldMat = float4x4(
         _Transforms[xformConstantIndex + 0],
         _Transforms[xformConstantIndex + 1],
@@ -422,17 +426,67 @@ float TestForValue(float value, inout float flags)
 #endif
 }
 
-float sdf(float distanceSample)
+// 1 layer : Face only
+// sd           : Signed distance / sdfScale + 0.5
+// sdfSizeRCP   : 1 / texture width
+// sdfScale     : Signed Distance Field Scale
+// isoPerimeter : Dilate / Contract the shape
+float sd_to_coverage(float sd, float2 uv, float sdfSizeRCP, float sdfScale, float isoPerimeter)
 {
-    float sharpness = 0;
-    float outlineSoftness = 0;
-    float faceDilation = 0;
+    float ta = ddx(uv.x) * ddy(uv.y) - ddy(uv.x) * ddx(uv.y);   // Texel area (parallelogram)
+    float ssr = rsqrt(abs(ta)) * sdfSizeRCP;                    // Texture to Screen Space Ratio
+    sd = (sd - 0.5) * sdfScale + isoPerimeter;                  // Signed Distance to edge (in texture space)
+    return saturate(0.5 + 2.0 * sd * ssr);                      // Screen pixel coverage : center + (1 / sampling radius) * signed distance
+}
 
-    float smoothing = fwidth(distanceSample) * (1 - sharpness) + outlineSoftness;
-    float contour = 0.5 - faceDilation * 0.5;
-    float2 edgeRange = float2(contour - smoothing, contour + smoothing);
+// 3 Layers : Face, Outline, Underlay
+// sd           : Signed distance / sdfScale + 0.5
+// sdfSizeRCP   : 1 / texture width
+// sdfScale     : Signed Distance Field Scale
+// isoPerimeter : Dilate / Contract the shape
+// softness     : softness of each outer edges
+float3 sd_to_coverage(float3 sd, float2 uv, float sdfSizeRCP, float sdfScale, float3 isoPerimeter, float3 softness)
+{
+    float ta = ddx(uv.x) * ddy(uv.y) - ddy(uv.x) * ddx(uv.y);         // Texel area (parallelogram)
+    float ssr = rsqrt(abs(ta)) * sdfSizeRCP;                          // Texture to Screen Space Ratio
+    sd = (sd - 0.5) * sdfScale + isoPerimeter;                        // Signed Distance to edge (in texture space)
+    return saturate(0.5 + 2.0 * sd * ssr / (1.0 + softness * ssr));   // Screen pixel coverage : center + (1 / sampling radius) * signed distance
+}
 
-    return smoothstep (edgeRange.x, edgeRange.y, distanceSample);
+UIE_FRAG_T uie_textcore(float textAlpha, float2 uv, float2 textCoreUV, float4 faceColor, float extraDilate)
+{
+    textCoreUV.y *= 3.0f; // Because each TextCore settings entry is 3 texels high
+
+    float2 row0UV = (textCoreUV + float2(0, 0) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
+    float2 row1UV = (textCoreUV + float2(0, 1) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
+    float2 row2UV = (textCoreUV + float2(0, 2) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
+
+    float4 outlineColor  = tex2Dlod(_ShaderInfoTex, float4(row0UV, 0, 0));
+    float4 underlayColor = tex2Dlod(_ShaderInfoTex, float4(row1UV, 0, 0));
+    float4 settings      = tex2Dlod(_ShaderInfoTex, float4(row2UV, 0, 0));
+
+     settings *= _FontTexSDFScale;
+    float2 underlayOffset = settings.xy;
+    float underlaySoftness = settings.z;
+    float outlineDilate = settings.w * 0.25f;
+    float3 dilate = float3(-outlineDilate, outlineDilate, 0);
+    float3 softness = float3(0, 0, underlaySoftness);
+
+    // Distance to Alpha
+    float alpha1 = textAlpha;
+    float alpha2 = tex2D(_FontTex, uv + underlayOffset * _FontTex_TexelSize.x).a;
+    float3 alpha = sd_to_coverage(float3(alpha1, alpha1, alpha2), uv, _FontTex_TexelSize.x, _FontTexSDFScale, dilate + extraDilate, softness);
+
+    // Blending of the 3 ARGB layers
+    underlayColor.a *= alpha.z;
+    faceColor.rgb *= faceColor.a;
+    outlineColor.rgb *= outlineColor.a;
+    underlayColor.rgb *= underlayColor.a;
+
+    UIE_FRAG_T color = lerp(lerp(underlayColor, outlineColor, alpha.y), faceColor, alpha.x);
+    color.rgb /= (color.a > 0.0f ? color.a : 1.0f);
+
+    return color;
 }
 
 float4 uie_std_vert_shader_info(appdata_t v, out UIE_V2F_COLOR_T color)
@@ -444,12 +498,12 @@ float4 uie_std_vert_shader_info(appdata_t v, out UIE_V2F_COLOR_T color)
     color = UIE_V2F_COLOR_T(GammaToLinearSpace(v.color.rgb), v.color.a);
 #endif // UIE_COLORSPACE_GAMMA
 
-    const float2 opacityUV = (uie_decode_shader_info_texel_pos(v.opacityPageSVGSettingIndex.xy, v.idsFlags.z) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
+    const float2 opacityUV = (uie_decode_shader_info_texel_pos(v.opacityPageSettingIndex.xy, v.ids.z) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
 #if UIE_SHADER_INFO_IN_VS
-    const float2 clipRectUV = (uie_decode_shader_info_texel_pos(v.xformClipPages.zw, v.idsFlags.y) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
+    const float2 clipRectUV = (uie_decode_shader_info_texel_pos(v.xformClipPages.zw, v.ids.y) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
     color.a *= tex2Dlod(_ShaderInfoTex, float4(opacityUV, 0, 0)).a;
 #else // !UIE_SHADER_INFO_IN_VS
-    const float2 clipRectUV = float2(v.idsFlags.y * 255.0f, 0.0f);
+    const float2 clipRectUV = float2(v.ids.y * 255.0f, 0.0f);
 #endif // UIE_SHADER_INFO_IN_VS
 
     return float4(clipRectUV, opacityUV);
@@ -462,7 +516,7 @@ v2f uie_std_vert(appdata_t v, out float4 clipSpacePos)
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
 
     uie_vert_load_payload(v);
-    float flags = round(v.idsFlags.w*255.0f); // Must round for MacGL VM
+    float flags = round(v.flags.x*255.0f); // Must round for MacGL VM
     // Keep the descending order for GLES2
     const float isEdgeNoShrinkY  = TestForValue(7.0, flags);
     const float isEdgeNoShrinkX  = TestForValue(6.0, flags);
@@ -485,24 +539,24 @@ v2f uie_std_vert(appdata_t v, out float4 clipSpacePos)
     OUT.uvXY.zw = v.vertex.xy;
     clipSpacePos = UnityObjectToClipPos(v.vertex);
 
-#ifndef UIE_SDF_TEXT
-    if (isText == 1)
+    if (isText == 1 && _FontTexSDFScale == 0)
         clipSpacePos.xy = uie_snap_to_integer_pos(clipSpacePos.xy);
-#endif // UIE_SDF_TEXT
 
     OUT.clipPos.xy = clipSpacePos.xy / clipSpacePos.w;
+    OUT.clipPos.zw = float2(0, v.flags.y);
 
     // 1 => solid, 2 => text, 3 => textured, 4 => svg
     half renderType = isSolid * 1 + isText * 2 + (isDynamic + isTextured) * 3 + isSvgGradients * 4;
     half textureSlot = FindTextureSlot(v.textureId);
-    half svgFlags = v.opacityPageSVGSettingIndex.z*(255.0f*255.0f) + v.opacityPageSVGSettingIndex.w*255.0f;
-    OUT.typeTexSvg = half3(renderType, textureSlot, svgFlags);
+    float settingIndex = v.opacityPageSettingIndex.z*(255.0f*255.0f) + v.opacityPageSettingIndex.w*255.0f;
+    OUT.typeTexSettings = half3(renderType, textureSlot, settingIndex);
 
     OUT.uvXY.xy = v.uv;
     if (isDynamic == 1.0f)
         OUT.uvXY.xy *= _TextureInfo[textureSlot].yz;
 
     OUT.clipRectOpacityUVs = uie_std_vert_shader_info(v, OUT.color);
+    OUT.textCoreUVs = uie_decode_shader_info_texel_pos(v.opacityPageSettingIndex.zw, v.ids.w);
 
 #if UIE_SHADER_INFO_IN_VS
     OUT.clipRect = tex2Dlod(_ShaderInfoTex, float4(OUT.clipRectOpacityUVs.xy, 0, 0));
@@ -516,12 +570,11 @@ UIE_FRAG_T uie_std_frag(v2f IN)
     uie_fragment_clip(IN);
 
     // Extract the render type
-    bool isSolid        = IN.typeTexSvg.x == 1;
-    bool isText         = IN.typeTexSvg.x == 2;
-    bool isTextured     = IN.typeTexSvg.x == 3;
-    bool isSvgGradients = IN.typeTexSvg.x == 4;
-
-    float settingIndex = IN.typeTexSvg.z;
+    bool isSolid        = IN.typeTexSettings.x == 1;
+    bool isText         = IN.typeTexSettings.x == 2;
+    bool isTextured     = IN.typeTexSettings.x == 3;
+    bool isSvgGradients = IN.typeTexSettings.x == 4;
+    float settingIndex = IN.typeTexSettings.z;
 
     float2 uv = IN.uvXY.xy;
 
@@ -531,24 +584,27 @@ UIE_FRAG_T uie_std_frag(v2f IN)
 
     UIE_FRAG_T texColor = (UIE_FRAG_T)isSolid;
     if (isTextured)
-        texColor = SampleTextureSlot(IN.typeTexSvg.y, uv);
-    else if (isText)
-#ifdef UIE_SDF_TEXT
-        texColor = UIE_FRAG_T(1, 1, 1, sdf(tex2D(_FontTex, uv).a));
-#else
-        texColor = UIE_FRAG_T(1, 1, 1, tex2D(_FontTex, uv).a);
-#endif
+        texColor = SampleTextureSlot(IN.typeTexSettings.y, uv);
+
+    float textAlpha = tex2D(_FontTex, uv).a;
+    if (isText)
+    {
+        if (_FontTexSDFScale > 0.0f)
+            texColor = uie_textcore(textAlpha, uv, IN.textCoreUVs.xy, IN.color, IN.clipPos.w);
+        else
+            texColor = UIE_FRAG_T(1, 1, 1, tex2D(_FontTex, uv).a);
+    }
     else if (isSvgGradients)
     {
-        float2 texelSize = _TextureInfo[IN.typeTexSvg.y].yz;
+        float2 texelSize = _TextureInfo[IN.typeTexSettings.y].yz;
         GradientLocation grad = uie_sample_gradient_location(settingIndex, uv, _GradientSettingsTex, _GradientSettingsTex_TexelSize.xy);
         grad.location *= texelSize.xyxy;
         grad.uv *= grad.location.zw;
         grad.uv += grad.location.xy;
-        texColor = SampleTextureSlot(IN.typeTexSvg.y, grad.uv);
+        texColor = SampleTextureSlot(IN.typeTexSettings.y, grad.uv);
     }
 
-    UIE_FRAG_T color = texColor * IN.color;
+    UIE_FRAG_T color = (isText && _FontTexSDFScale > 0.0f) ? texColor : texColor * IN.color;
     return color;
 }
 

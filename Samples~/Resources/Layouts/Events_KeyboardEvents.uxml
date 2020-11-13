@@ -1,4 +1,5 @@
 <UXML xmlns="UnityEngine.UIElements">
+    <Style src="../StyleSheets/Events_KeyboardEvents.uss" />
     <VisualElement class="background">
         <VisualElement class="header">
             <Label text="Tap Metronome" class="title" />

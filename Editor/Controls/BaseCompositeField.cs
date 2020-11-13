@@ -109,6 +109,8 @@ namespace UnityEditor.UIElements
                 AddToClassList(multilineVariantUssClassName);
             }
 
+            int propertyIndex = 0;
+
             for (int i = 0; i < numberOfLines; i++)
             {
                 VisualElement newLineGroup = null;
@@ -119,6 +121,7 @@ namespace UnityEditor.UIElements
                 }
 
                 bool firstField = true;
+
                 for (int j = i * fieldsByLine; j < ((i * fieldsByLine) + fieldsByLine); j++)
                 {
                     var desc = fieldDescriptions[j];
@@ -135,6 +138,7 @@ namespace UnityEditor.UIElements
                     }
 
                     field.label = desc.name;
+
                     field.RegisterValueChangedCallback(e =>
                     {
                         TValueType cur = value;
@@ -154,7 +158,27 @@ namespace UnityEditor.UIElements
                         value = cur;
                         m_ShouldUpdateDisplay = true;
                     });
+
+                    field.RegisterCallback<AttachToPanelEvent>(e =>
+                    {
+                        if (!(userData is SerializedProperty property)) return;
+                        var propertyCopy = property.Copy();
+
+                        var k = 0;
+                        while (k <= propertyIndex)
+                        {
+                            propertyCopy.Next(k == 0);
+                            k++;
+                        }
+
+                        field.userData = propertyCopy.Copy();
+                        field.showMixedValue = propertyCopy.hasMultipleDifferentValues;
+
+                        propertyIndex++;
+                    });
+
                     m_Fields.Add(field);
+
                     if (isMultiLine)
                     {
                         newLineGroup.Add(field);
@@ -216,6 +240,10 @@ namespace UnityEditor.UIElements
             {
                 UpdateDisplay();
             }
+        }
+
+        protected override void UpdateMixedValueContent()
+        {
         }
     }
 }

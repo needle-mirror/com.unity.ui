@@ -1,6 +1,3 @@
-using UnityEditor.Experimental;
-using UnityEditor.StyleSheets;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UnityEditor.UIElements

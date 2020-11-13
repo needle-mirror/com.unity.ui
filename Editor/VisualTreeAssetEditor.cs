@@ -18,8 +18,6 @@ namespace UnityEditor.UIElements
         //Currently just uses a fixed size texture to minimize lag/jitter as we are not integrated in the update loop. (instead of the real preview size)
         private Vector2Int m_TextureSize = new Vector2Int(512, 512);
 
-        private
-
         protected void OnEnable()
         {
             m_FileTypeIcon = EditorGUIUtility.FindTexture(typeof(VisualTreeAsset));
@@ -80,39 +78,48 @@ namespace UnityEditor.UIElements
             m_Panel.visualTree.IncrementVersion(VersionChangeType.Repaint);
 
             var backup = RenderTexture.active;
-
-            if (tex == null || tex.width != width || tex.height != height)
-            {
-                tex?.Release();
-                tex?.DiscardContents();
-                tex = new RenderTexture((int)viewportRect.size.x, (int)viewportRect.size.y, 24);
-            }
-
-            RenderTexture.active = tex;
-            GL.LoadPixelMatrix();
-            GL.Clear(true, true, Color.black, UIRUtility.k_ClearZ);
-
-
+            GL.PushMatrix();
             var oldState = SavedGUIState.Create();
-            int clips = GUIClip.Internal_GetCount();
-            while (clips > 0)
+            PanelClearSettings oldClearSettings = m_Panel.clearSettings;
+
+            try
             {
-                GUIClip.Pop();
-                clips--;
+                if (tex == null || tex.width != width || tex.height != height)
+                {
+                    if (tex != null)
+                    {
+                        tex.Release();
+                        tex.DiscardContents();
+                        DestroyImmediate(tex);
+                    }
+
+                    tex = new RenderTexture((int)viewportRect.size.x, (int)viewportRect.size.y, 24);
+                }
+
+                RenderTexture.active = tex;
+                GL.LoadPixelMatrix();
+                GL.Clear(true, true, Color.black, UIRUtility.k_ClearZ);
+
+                int clips = GUIClip.Internal_GetCount();
+                while (clips > 0)
+                {
+                    GUIClip.Pop();
+                    clips--;
+                }
+
+                m_Panel.clearSettings = new PanelClearSettings();
+
+                //Use a dummy repaint event, otherwise imgui element wont be shown when using event.current and rendered in the editor update loop
+                m_evt.type = EventType.Repaint;
+                m_Panel.Repaint(m_evt);
             }
-
-            var oldClearSettings = m_Panel.clearSettings;
-            m_Panel.clearSettings = new PanelClearSettings();
-
-            //Use a dummy repaint event, otherwise imgui element wont be shown when using event.current and rendered in the editor update loop
-            m_evt.type = EventType.Repaint;
-            m_Panel.Repaint(m_evt);
-
-
-            oldState.ApplyAndForget();
-            m_Panel.clearSettings = oldClearSettings;
-
-            RenderTexture.active = backup;
+            finally
+            {
+                m_Panel.clearSettings = oldClearSettings;
+                oldState.ApplyAndForget();
+                GL.PopMatrix();
+                RenderTexture.active = backup;
+            }
 
             // As stated above, viewport is not saved/restored.
             // Doing  " GL.Viewport(new Rect(oldViewport.xMin, oldViewport.yMin, oldViewport.width, oldViewport.height));" is not ennough
@@ -155,7 +162,6 @@ namespace UnityEditor.UIElements
             {
                 m_Panel = UIElementsUtility.FindOrCreateEditorPanel(m_LastTree);
                 var visualTree = m_Panel.visualTree;
-                visualTree.pseudoStates |= PseudoStates.Root;
                 UIElementsEditorUtility.AddDefaultEditorStyleSheets(visualTree);
                 dirty = true;
             }

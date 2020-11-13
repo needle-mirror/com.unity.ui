@@ -4,6 +4,97 @@ using UnityEngine.Assertions;
 
 namespace UnityEngine.UIElements
 {
+    internal class UIDocumentList
+    {
+        internal List<UIDocument> m_AttachedUIDocuments = new List<UIDocument>();
+
+        internal void RemoveFromListAndFromVisualTree(UIDocument uiDocument)
+        {
+            m_AttachedUIDocuments.Remove(uiDocument);
+            uiDocument.rootVisualElement?.RemoveFromHierarchy();
+        }
+
+        internal void AddToListAndToVisualTree(UIDocument uiDocument, VisualElement visualTree, int firstInsertIndex = 0)
+        {
+            int index = 0;
+            foreach (var sibling in m_AttachedUIDocuments)
+            {
+                if (uiDocument.sortingOrder > sibling.sortingOrder)
+                {
+                    index++;
+                    continue;
+                }
+
+                if (uiDocument.sortingOrder < sibling.sortingOrder)
+                {
+                    break;
+                }
+
+                // They're the same value, compare their count (UIDocuments created first show up first).
+                if (uiDocument.m_UIDocumentCount > sibling.m_UIDocumentCount)
+                {
+                    index++;
+                    continue;
+                }
+
+                break;
+            }
+
+            if (index < m_AttachedUIDocuments.Count)
+            {
+                m_AttachedUIDocuments.Insert(index, uiDocument);
+
+                if (visualTree == null || uiDocument.rootVisualElement == null)
+                {
+                    return;
+                }
+
+                // Not every UIDocument is in the tree already (because their root is null, for example), so we need
+                // to figure out the insertion point.
+                if (index > 0)
+                {
+                    VisualElement previousInTree = null;
+                    int i = 1;
+                    while (previousInTree == null && index - i >= 0)
+                    {
+                        var previousUIDocument = m_AttachedUIDocuments[index - i++];
+                        previousInTree = previousUIDocument.rootVisualElement;
+                    }
+
+                    if (previousInTree != null)
+                    {
+                        index = visualTree.IndexOf(previousInTree) + 1;
+                    }
+                }
+
+                if (index > visualTree.childCount)
+                {
+                    index = visualTree.childCount;
+                }
+            }
+            else
+            {
+                // Add in the end.
+                m_AttachedUIDocuments.Add(uiDocument);
+            }
+
+            if (visualTree == null || uiDocument.rootVisualElement == null)
+            {
+                return;
+            }
+
+            int insertionIndex = firstInsertIndex + index;
+            if (insertionIndex < visualTree.childCount)
+            {
+                visualTree.Insert(insertionIndex, uiDocument.rootVisualElement);
+            }
+            else
+            {
+                visualTree.Add(uiDocument.rootVisualElement);
+            }
+        }
+    }
+
     /// <summary>
     /// Defines a Component that connects VisualElements to GameObjects. This makes it
     /// possible to render UI defined in UXML documents in the Game view.
@@ -12,10 +103,15 @@ namespace UnityEngine.UIElements
     public sealed class UIDocument : MonoBehaviour
     {
         internal const string k_RootStyleClassName = "unity-ui-document__root";
-        internal const string k_ChildStyleClassName = "unity-ui-document__child";
-        internal const string k_ContentContainerChildStyleClassName = "unity-ui-document--content-container__child";
 
         internal const string k_VisualElementNameSuffix = "-container";
+
+        private const int k_DefaultSortingOrder = 0;
+
+        // We count instances of UIDocument to be able to insert UIDocuments that have the same sort order in a
+        // deterministic way (i.e. instances created before will be placed before in the visual tree).
+        private static int s_CurrentUIDocumentCounter = 0;
+        internal readonly int m_UIDocumentCount;
 
 #if UNITY_EDITOR
         internal static Func<bool> IsEditorPlaying;
@@ -25,6 +121,10 @@ namespace UnityEngine.UIElements
 
         [SerializeField]
         private PanelSettings m_PanelSettings;
+
+        // For Reset, we need to always keep track of what our previous PanelSettings was so we can react to being
+        // removed from it (as our PanelSettings becomes null in that operation).
+        private PanelSettings m_PreviousPanelSettings = null;
 
         /// <summary>
         /// Specifies the PanelSettings instance to connect this UIDocument component to.
@@ -44,11 +144,9 @@ namespace UnityEngine.UIElements
             {
                 if (parentUI == null)
                 {
-                    if (m_RootVisualElement == null)
+                    if (m_PanelSettings == value)
                     {
-                        // If our root doesn't exist, we're not attached to the panel settings
-                        // so nothing else to do but keep the new value.
-                        m_PanelSettings = value;
+                        m_PreviousPanelSettings = m_PanelSettings;
                         return;
                     }
 
@@ -57,6 +155,7 @@ namespace UnityEngine.UIElements
                         m_PanelSettings.DetachUIDocument(this);
                     }
                     m_PanelSettings = value;
+
                     if (m_PanelSettings != null)
                     {
                         m_PanelSettings.AttachAndInsertUIDocumentToVisualTree(this);
@@ -72,12 +171,13 @@ namespace UnityEngine.UIElements
                 if (m_ChildrenContent != null)
                 {
                     // Guarantee changes to panel settings trickles down the hierarchy.
-                    foreach (var child in m_ChildrenContent)
+                    foreach (var child in m_ChildrenContent.m_AttachedUIDocuments)
                     {
-                        var childContent = child.Value;
-                        childContent.panelSettings = m_PanelSettings;
+                        child.panelSettings = m_PanelSettings;
                     }
                 }
+
+                m_PreviousPanelSettings = m_PanelSettings;
             }
         }
 
@@ -101,14 +201,11 @@ namespace UnityEngine.UIElements
 
 
         // If this UIDocument has UIDocument children (1st level only, 2nd level would be the child's
-        // children), they're added to this map using the indexes of the game object hierarchy
-        // as keys, which are used for sorting.
-        private SortedDictionary<UIDocumentHierarchicalIndex, UIDocument> m_ChildrenContent = null;
+        // children), they're added to this list instead of to the PanelSetting's list.
+        private UIDocumentList m_ChildrenContent = null;
+        private List<UIDocument> m_ChildrenContentCopy = null;
 
-        // Index used by either a parent or the panel renderer to order content.
-        internal UIDocumentHierarchicalIndex m_HierarchicalIndex;
-
-        [SerializeField, Tooltip("The UI Document asset that contains the UI to be shown")]
+        [SerializeField]
         private VisualTreeAsset sourceAsset;
 
         /// <summary>
@@ -138,7 +235,37 @@ namespace UnityEngine.UIElements
         }
         private int m_FirstChildInsertIndex;
 
-        private bool m_ContentContainerSet = false;
+        internal int firstChildInserIndex
+        {
+            get => m_FirstChildInsertIndex;
+        }
+
+        [SerializeField]
+        private float m_SortingOrder = k_DefaultSortingOrder;
+
+        /// <summary>
+        /// The order in which this UIDocument will show up on the hierarchy in relation to other UIDocuments either
+        /// attached to the same PanelSettings, or with the same UIDocument parent.
+        /// </summary>
+        public float sortingOrder
+        {
+            get => m_SortingOrder;
+            set
+            {
+                if (m_SortingOrder == value)
+                {
+                    return;
+                }
+
+                m_SortingOrder = value;
+                AddRootVisualElementToTree();
+            }
+        }
+
+        internal void ApplySortingOrder()
+        {
+            AddRootVisualElementToTree();
+        }
 
 #if UNITY_EDITOR
         internal static Func<UIDocument, ILiveReloadAssetTracker<VisualTreeAsset>> CreateLiveReloadVisualTreeAssetTracker;
@@ -147,7 +274,10 @@ namespace UnityEngine.UIElements
 #endif
 
         // Private constructor so it's not present on the public API file.
-        private UIDocument() {}
+        private UIDocument()
+        {
+            m_UIDocumentCount = s_CurrentUIDocumentCounter++;
+        }
 
         private void Awake()
         {
@@ -199,9 +329,11 @@ namespace UnityEngine.UIElements
             {
                 parentUI.RemoveChild(this);
             }
-            parentUI = null;
-            m_HierarchicalIndex.pathToParent = null;
+            parentUI = FindUIDocumentParent();
+        }
 
+        private UIDocument FindUIDocumentParent()
+        {
             // Go up looking for a parent UIDocument, which we'd add ourselves too.
             // If that fails, we'll just add ourselves to the runtime panel through the PanelSettings
             // (assuming one is set, otherwise nothing gets drawn so it's pointless to not be
@@ -210,89 +342,60 @@ namespace UnityEngine.UIElements
             Transform parentTransform = t.parent;
             if (parentTransform != null)
             {
-                parentUI = parentTransform.GetComponentInParent<UIDocument>();
-
-                if (parentUI != null)
+                // We need to make sure we can get a parent even if they're disabled/inactive to reflect the good values.
+                var potentialParents = parentTransform.GetComponentsInParent<UIDocument>(true);
+                if (potentialParents != null && potentialParents.Length > 0)
                 {
-                    UIDocumentHierarchyUtil.SetHierarchicalIndex(t, parentTransform, parentUI.transform, out m_HierarchicalIndex);
+                    return potentialParents[0];
                 }
             }
 
-            if (m_HierarchicalIndex.pathToParent == null)
-            {
-                // Value of parentTransform may be null but that's handled internally and a valid value to pass on.
-                UIDocumentHierarchyUtil.SetGlobalIndex(t, parentTransform, out m_HierarchicalIndex);
-            }
+            return null;
         }
 
-        private void Reset()
+        internal void Reset()
         {
+            if (parentUI == null)
+            {
+                m_PreviousPanelSettings?.DetachUIDocument(this);
+                panelSettings = null;
+            }
+
             SetupFromHierarchy();
 
             if (parentUI != null)
             {
                 m_PanelSettings = parentUI.m_PanelSettings;
+                AddRootVisualElementToTree();
+            }
+            else if (m_PanelSettings != null)
+            {
+                AddRootVisualElementToTree();
             }
 #if UNITY_EDITOR
             OnValidate();
 #endif
         }
 
-        private void AddChild(UIDocument child)
+        private void AddChildAndInsertContentToVisualTree(UIDocument child)
         {
             if (m_ChildrenContent == null)
             {
-                m_ChildrenContent = new SortedDictionary<UIDocumentHierarchicalIndex, UIDocument>(UIDocumentHierarchyUtil.indexComparer);
+                m_ChildrenContent = new UIDocumentList();
             }
-
-            m_ChildrenContent[child.m_HierarchicalIndex] = child;
-        }
-
-        private void AddChildAndInsertContentToVisualTree(UIDocument child)
-        {
-            AddChild(child);
-
-            if (m_RootVisualElement == null)
+            else
             {
-                // Parent not yet initialized, when it initializes it'll
-                // take care of the children at the same time.
-                return;
+                // Before adding, we need to make sure it's nowhere else in the list (and in the hierarchy) as if we're
+                // re-adding, the position probably changed.
+                m_ChildrenContent.RemoveFromListAndFromVisualTree(child);
             }
 
-            int startIndex = UIDocumentHierarchyUtil.FindHierarchicalSortedIndex(m_ChildrenContent, child);
-
-            m_RootVisualElement.Insert(m_FirstChildInsertIndex + startIndex, child.m_RootVisualElement);
+            m_ChildrenContent.AddToListAndToVisualTree(child, m_RootVisualElement, m_FirstChildInsertIndex);
         }
 
         private void RemoveChild(UIDocument child)
         {
-            if (m_ChildrenContent == null || child.m_HierarchicalIndex.pathToParent == null)
-            {
-                return;
-            }
-
-            child.m_RootVisualElement?.RemoveFromHierarchy();
-
-            if (m_ChildrenContent.TryGetValue(child.m_HierarchicalIndex, out UIDocument childForIndex) &&
-                child == childForIndex)
-            {
-                m_ChildrenContent.Remove(child.m_HierarchicalIndex);
-            }
-        }
-
-        private void RemoveChildFromPreviousIndex(UIDocument child, UIDocumentHierarchicalIndex previousHierarchicalIndex)
-        {
-            if (m_ChildrenContent == null || previousHierarchicalIndex.pathToParent == null)
-            {
-                return;
-            }
-
-            if (m_ChildrenContent.TryGetValue(previousHierarchicalIndex, out UIDocument previousChild) &&
-                child == previousChild)
-            {
-                m_ChildrenContent.Remove(previousHierarchicalIndex);
-            }
-            m_ChildrenContent[child.m_HierarchicalIndex] = child;
+            m_ChildrenContent?.RemoveFromListAndFromVisualTree(child);
         }
 
         /// <summary>
@@ -344,8 +447,6 @@ namespace UnityEngine.UIElements
                 AddRootVisualElementToTree();
             }
 
-            m_ContentContainerSet = m_RootVisualElement.contentContainer != m_RootVisualElement;
-
             // Save the last VisualElement before we start adding children so we can guarantee
             // the order from the game object hierarchy.
             m_FirstChildInsertIndex = m_RootVisualElement.childCount;
@@ -354,7 +455,17 @@ namespace UnityEngine.UIElements
             // This makes sure the hierarchy of game objects reflects on the order of VisualElements.
             if (m_ChildrenContent != null)
             {
-                foreach (var child in m_ChildrenContent.Values)
+                // We need a copy to iterate because in the process of creating the children UI we modify the list.
+                if (m_ChildrenContentCopy == null)
+                {
+                    m_ChildrenContentCopy = new List<UIDocument>(m_ChildrenContent.m_AttachedUIDocuments);
+                }
+                else
+                {
+                    m_ChildrenContentCopy.AddRange(m_ChildrenContent.m_AttachedUIDocuments);
+                }
+
+                foreach (var child in m_ChildrenContentCopy)
                 {
                     if (child.isActiveAndEnabled)
                     {
@@ -364,50 +475,22 @@ namespace UnityEngine.UIElements
                         }
                         else
                         {
-                            // Child already ran RecreateUI(), we need to make sure the class list is correct
-                            child.AddToCorrectClassList();
+                            // Since the root is already created, make sure it's inserted into the right position.
+                            AddChildAndInsertContentToVisualTree(child);
                         }
-
-                        m_RootVisualElement.Add(child.m_RootVisualElement);
                     }
                 }
+
+                m_ChildrenContentCopy.Clear();
             }
 
-            AddToCorrectClassList();
+            SetupRootClassList();
         }
 
-        private void AddToCorrectClassList()
+        private void SetupRootClassList()
         {
-            if (m_RootVisualElement == null)
-            {
-                return;
-            }
-
-            if (parentUI == null)
-            {
-                // We're not a child of any other UIDocument so stretch to take the full screen.
-                m_RootVisualElement.EnableInClassList(k_RootStyleClassName, true);
-                m_RootVisualElement.EnableInClassList(k_ChildStyleClassName, false);
-                m_RootVisualElement.EnableInClassList(k_ContentContainerChildStyleClassName, false);
-            }
-            else if (parentUI.m_ContentContainerSet)
-            {
-                // We're a child of a UIDocument with content container set, we'll show up within it and not take the
-                // full screen. The difference of having a content container set or not is that we allow users to
-                // establish further styling, but we don't do anything different ourselves.
-                m_RootVisualElement.EnableInClassList(k_RootStyleClassName, false);
-                m_RootVisualElement.EnableInClassList(k_ChildStyleClassName, false);
-                m_RootVisualElement.EnableInClassList(k_ContentContainerChildStyleClassName, true);
-            }
-            else
-            {
-                // We're a child of a UIDocument without content container set, we'll show up within it and not take the
-                // full screen. The difference of having a content container set or not is that we allow users to
-                // establish further styling, but we don't do anything different ourselves.
-                m_RootVisualElement.EnableInClassList(k_RootStyleClassName, false);
-                m_RootVisualElement.EnableInClassList(k_ChildStyleClassName, true);
-                m_RootVisualElement.EnableInClassList(k_ContentContainerChildStyleClassName, false);
-            }
+            // If we're not a child of any other UIDocument stretch to take the full screen.
+            m_RootVisualElement?.EnableInClassList(k_RootStyleClassName, parentUI == null);
         }
 
         private void AddRootVisualElementToTree()
@@ -451,8 +534,9 @@ namespace UnityEngine.UIElements
         private void OnTransformChildrenChanged()
         {
 #if UNITY_EDITOR
-            // In Editor, when not playing, we let a watcher listen for hierarchy changed events.
-            if (!IsEditorPlaying.Invoke())
+            // In Editor, when not playing, we let a watcher listen for hierarchy changed events, except if
+            // we're disabled in which case the watcher can't find us.
+            if (!IsEditorPlaying.Invoke() && isActiveAndEnabled)
             {
                 return;
             }
@@ -460,19 +544,28 @@ namespace UnityEngine.UIElements
             if (m_ChildrenContent != null)
             {
                 // The list may change inside the call to ReactToHierarchyChanged so we need a copy.
-                var childrenCopy = new List<UIDocument>(m_ChildrenContent.Values);
-                foreach (var child in childrenCopy)
+                if (m_ChildrenContentCopy == null)
+                {
+                    m_ChildrenContentCopy = new List<UIDocument>(m_ChildrenContent.m_AttachedUIDocuments);
+                }
+                else
+                {
+                    m_ChildrenContentCopy.AddRange(m_ChildrenContent.m_AttachedUIDocuments);
+                }
+                foreach (var child in m_ChildrenContentCopy)
                 {
                     child.ReactToHierarchyChanged();
                 }
+                m_ChildrenContentCopy.Clear();
             }
         }
 
         private void OnTransformParentChanged()
         {
 #if UNITY_EDITOR
-            // In Editor, when not playing, we let a watcher listen for hierarchy changed events.
-            if (!IsEditorPlaying.Invoke())
+            // In Editor, when not playing, we let a watcher listen for hierarchy changed events, except if
+            // we're disabled in which case the watcher can't find us.
+            if (!IsEditorPlaying.Invoke() && isActiveAndEnabled)
             {
                 return;
             }
@@ -483,99 +576,18 @@ namespace UnityEngine.UIElements
 
         internal void ReactToHierarchyChanged()
         {
-            if (m_RootVisualElement == null)
-            {
-                return;
-            }
-
-            Transform t = transform;
-            Transform parentTransform = t.parent;
-            var previousHierarchicalIndex = m_HierarchicalIndex;
-            var previousParentContent = parentUI;
-            if (parentTransform != null)
-            {
-                var newParentContent = parentTransform.GetComponentInParent<UIDocument>();
-                if (newParentContent != null && newParentContent == parentUI)
-                {
-                    // If we still have the same parent, but our position may have changed within it, we just need
-                    // to re-calculate our child index.
-                    UIDocumentHierarchyUtil.SetHierarchicalIndex(t, parentTransform, newParentContent.transform,
-                        out m_HierarchicalIndex);
-
-                    if (previousHierarchicalIndex.CompareTo(m_HierarchicalIndex) != 0)
-                    {
-                        parentUI.RemoveChildFromPreviousIndex(this, previousHierarchicalIndex);
-
-                        if (isActiveAndEnabled)
-                        {
-                            m_RootVisualElement.RemoveFromHierarchy();
-                            AddRootVisualElementToTree();
-                        }
-                    }
-
-                    return;
-                }
-            }
-
-            // If we got here, either our parent changed or we're attached to the PanelSetting directly so it's easier
-            // to just setup completely again. The path to parent on the index will be updated in that process.
-
-            // First, check if we were attached to a PanelSettings directly before, as that may leave the previous
-            // PanelSettings empty (in which case it should be destroyed so we need to detach properly).
-            bool wasPreviouslyAttachedToPanelSettings = (parentUI == null && m_PanelSettings != null);
-
             SetupFromHierarchy();
 
-            if (previousParentContent != parentUI || previousHierarchicalIndex.CompareTo(m_HierarchicalIndex) != 0)
+            if (parentUI != null)
             {
-                if (wasPreviouslyAttachedToPanelSettings || (parentUI == null && m_PanelSettings != null))
-                {
-                    m_PanelSettings.RemoveAttachedUIDocumentFromPreviousIndex(this, previousHierarchicalIndex);
-                }
-
-                if (parentUI != null)
-                {
-                    // Using the property guarantees the change trickles down the hierarchy (if there is one).
-                    panelSettings = parentUI.m_PanelSettings;
-                }
-
-                if (isActiveAndEnabled)
-                {
-                    m_RootVisualElement?.RemoveFromHierarchy();
-                    AddRootVisualElementToTree();
-                }
-
-                AddToCorrectClassList();
-            }
-        }
-
-        internal void ReactToTopLevelHierarchyChanged()
-        {
-            // This is meant for UIDocument attached to the PanelSettings only, so if it's not the case don't even bother.
-            if (m_PanelSettings == null)
-            {
-                return;
+                // Using the property guarantees the change trickles down the hierarchy (if there is one).
+                panelSettings = parentUI.m_PanelSettings;
             }
 
-            var previousHierarchicalIndex = m_HierarchicalIndex;
-            SetupFromHierarchy();
+            m_RootVisualElement?.RemoveFromHierarchy();
+            AddRootVisualElementToTree();
 
-            if (previousHierarchicalIndex.CompareTo(m_HierarchicalIndex) != 0)
-            {
-                m_PanelSettings.RemoveAttachedUIDocumentFromPreviousIndex(this, previousHierarchicalIndex);
-
-                if (parentUI != null)
-                {
-                    // Using the property guarantees the change trickles down the hierarchy (if there is one).
-                    panelSettings = parentUI.m_PanelSettings;
-                }
-
-                if (isActiveAndEnabled)
-                {
-                    m_RootVisualElement?.RemoveFromHierarchy();
-                    m_PanelSettings.AttachAndInsertUIDocumentToVisualTree(this);
-                }
-            }
+            SetupRootClassList();
         }
 
 #if UNITY_EDITOR
@@ -627,7 +639,6 @@ namespace UnityEngine.UIElements
         }
 
         private VisualTreeAsset m_OldUxml = null;
-        private PanelSettings m_OldPanelSettings = null;
 
         private void OnValidate()
         {
@@ -644,12 +655,12 @@ namespace UnityEngine.UIElements
                 shouldRepaint = true;
             }
 
-            if (m_OldPanelSettings != null && m_OldPanelSettings != m_PanelSettings)
+            if (m_PreviousPanelSettings != null && m_PreviousPanelSettings != m_PanelSettings)
             {
                 // We'll use the setter as it guarantees the right behavior.
                 // It's necessary for the setter that the old value is still in place.
                 var tempPanelSettings = m_PanelSettings;
-                m_PanelSettings = m_OldPanelSettings;
+                m_PanelSettings = m_PreviousPanelSettings;
                 panelSettings = tempPanelSettings;
 
                 shouldRepaint = true;
@@ -661,7 +672,6 @@ namespace UnityEngine.UIElements
             }
 
             m_OldUxml = sourceAsset;
-            m_OldPanelSettings = m_PanelSettings;
         }
 
 #endif

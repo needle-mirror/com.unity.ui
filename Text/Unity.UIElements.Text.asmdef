@@ -1,0 +1,19 @@
+{
+    "name": "Unity.UIElements.Text",
+    "rootNamespace": "",
+    "references": [
+        "UnityEngine.UIElementsModule",
+        "UnityEngine.UIElementsGameObjectsModule",
+        "UnityEngine.TextCoreModule",
+        "Unity.TextCore"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

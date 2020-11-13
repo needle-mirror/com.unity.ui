@@ -1,6 +1,6 @@
 using System;
+using System.IO;
 using UnityEngine;
-using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEditor.Experimental.SceneManagement;
 using UnityEngine.UIElements;
@@ -9,10 +9,12 @@ namespace UnityEditor.UIElements.GameObjects
 {
     internal static class PlayModeMenuItems
     {
+        internal static readonly string k_UITKEssentialResourcesFolderPath = Path.Combine(k_AssetsFolder, k_UITKEssentialResourcesFolderName);
+        internal const string k_UITKEssentialResourcesFolderName = "UI Toolkit";
         private const string k_UILayerName = "UI";
         private const string k_AssetSearchByTypePanelSettings = "t:panelsettings";
         private const string k_AssetsFolder = "Assets";
-        private const string k_PanelSettingsAssetPath = k_AssetsFolder + "/PanelSettings.asset";
+        private static readonly string k_PanelSettingsAssetPath = k_UITKEssentialResourcesFolderPath + "/PanelSettings.asset";
         private static string[] k_AssetsFolderFilter = new[] { k_AssetsFolder };
 
         [MenuItem("GameObject/UI Toolkit/UI Document", false, 9)]
@@ -70,6 +72,9 @@ namespace UnityEditor.UIElements.GameObjects
                 {
                     // Create one.
                     PanelSettings panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
+
+                    if (!AssetDatabase.IsValidFolder(k_UITKEssentialResourcesFolderPath))
+                        AssetDatabase.CreateFolder(k_AssetsFolder, k_UITKEssentialResourcesFolderName);
 
                     AssetDatabase.CreateAsset(panelSettings, k_PanelSettingsAssetPath);
                     panelSettingsInProject = AssetDatabase.FindAssets(k_AssetSearchByTypePanelSettings, k_AssetsFolderFilter);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace UnityEngine.UIElements
 {
@@ -31,6 +32,7 @@ namespace UnityEngine.UIElements
 
         [SerializeField]
         private TValueType m_LowValue;
+
         /// <summary>
         /// This is the minimum value that the slider encodes.
         /// </summary>
@@ -51,6 +53,7 @@ namespace UnityEngine.UIElements
 
         [SerializeField]
         private TValueType m_HighValue;
+
         /// <summary>
         /// This is the maximum value that the slider encodes.
         /// </summary>
@@ -72,9 +75,13 @@ namespace UnityEngine.UIElements
         /// <summary>
         /// This is the range from the minimum value to the maximum value of the slider.
         /// </summary>
-        public TValueType range { get { return SliderRange(); } }
+        public TValueType range
+        {
+            get { return SliderRange(); }
+        }
 
         private float m_PageSize;
+
         /// <summary>
         /// This is a generic page size used to change the value when clicking in the slider.
         /// </summary>
@@ -85,12 +92,10 @@ namespace UnityEngine.UIElements
         }
 
         private bool m_ShowInputField = false;
+
         public virtual bool showInputField
         {
-            get
-            {
-                return m_ShowInputField;
-            }
+            get { return m_ShowInputField; }
             set
             {
                 if (m_ShowInputField != value)
@@ -158,6 +163,7 @@ namespace UnityEngine.UIElements
         }
 
         private SliderDirection m_Direction;
+
         /// <summary>
         /// This is the actual property to contain the direction of the slider.
         /// </summary>
@@ -180,9 +186,29 @@ namespace UnityEngine.UIElements
             }
         }
 
+        private bool m_Inverted = false;
+
+        /// <summary>
+        /// This is indicating whether or not this slider is inverted.
+        /// For an inverted horizontal slider, high value is located to the left, low value is located to the right
+        /// For an inverted vertical slider, high value is located to the bottom, low value is located to the top.
+        /// </summary>
+        public bool inverted
+        {
+            get { return m_Inverted; }
+            set
+            {
+                if (m_Inverted != value)
+                {
+                    m_Inverted = value;
+                    UpdateDragElementPosition();
+                }
+            }
+        }
 
         internal const float kDefaultPageSize = 0.0f;
         internal const bool kDefaultShowInputField = false;
+        internal const bool kDefaultInverted = false;
 
         /// <summary>
         /// USS class name of elements of this type.
@@ -261,7 +287,23 @@ namespace UnityEngine.UIElements
             clampedDragger = new ClampedDragger<TValueType>(this, SetSliderValueFromClick, SetSliderValueFromDrag);
             visualInput.AddManipulator(clampedDragger);
 
+            RegisterCallback<KeyDownEvent>(OnKeyDown);
+
             UpdateTextFieldVisibility();
+        }
+
+        protected static float GetClosestPowerOfTen(float positiveNumber)
+        {
+            if (positiveNumber <= 0)
+                return 1;
+            return Mathf.Pow(10, Mathf.RoundToInt(Mathf.Log10(positiveNumber)));
+        }
+
+        protected static float RoundToMultipleOf(float value, float roundingValue)
+        {
+            if (roundingValue == 0)
+                return value;
+            return Mathf.Round(value / roundingValue) * roundingValue;
         }
 
         private void ClampValue()
@@ -274,6 +316,33 @@ namespace UnityEngine.UIElements
         internal abstract float SliderNormalizeValue(TValueType currentValue, TValueType lowerValue, TValueType higherValue);
         internal abstract TValueType SliderRange();
         internal abstract TValueType ParseStringToValue(string stringValue);
+        internal abstract void ComputeValueFromKey(SliderKey sliderKey, bool isShift);
+
+        internal enum SliderKey
+        {
+            None,
+            Lowest,
+            LowerPage,
+            Lower,
+            Higher,
+            HigherPage,
+            Highest
+        };
+
+        // Calculates the value based on desired direction (inverted and vertical sliders)
+        TValueType SliderLerpDirectionalUnclamped(TValueType a, TValueType b, float positionInterpolant)
+        {
+            // For vertical slider, the default should be bottom is lowValue, top is highValue, so we need
+            // to invert the interpolant because it is based on element position (top-0, bottom-1)
+            var directionalInterpolant = direction == SliderDirection.Vertical ? 1 - positionInterpolant : positionInterpolant;
+
+            if (inverted)
+            {
+                return SliderLerpUnclamped(b, a, directionalInterpolant);
+            }
+
+            return SliderLerpUnclamped(a, b, directionalInterpolant);
+        }
 
         // Handles slider drags
         void SetSliderValueFromDrag()
@@ -296,7 +365,7 @@ namespace UnityEngine.UIElements
                 return;
 
             float normalizedDragElementPosition = Mathf.Max(0f, Mathf.Min(dragElementPos, totalRange)) / totalRange;
-            value = SliderLerpUnclamped(lowValue, highValue, normalizedDragElementPosition);
+            value = SliderLerpDirectionalUnclamped(lowValue, highValue, normalizedDragElementPosition);
         }
 
         // Handles slider clicks and page scrolls
@@ -311,9 +380,9 @@ namespace UnityEngine.UIElements
                 {
                     // Jump drag element to current mouse position when user clicks on slider and pageSize == 0
                     var x = (direction == SliderDirection.Horizontal)
-                        ? clampedDragger.startMousePosition.x - (dragElement.resolvedStyle.width / 2f) : dragElement.transform.position.x;
-                    var y = (direction == SliderDirection.Horizontal) ?
-                        dragElement.transform.position.y : clampedDragger.startMousePosition.y - (dragElement.resolvedStyle.height / 2f);
+                        ? clampedDragger.startMousePosition.x - (dragElement.resolvedStyle.width / 2f)
+                        : dragElement.transform.position.x;
+                    var y = (direction == SliderDirection.Horizontal) ? dragElement.transform.position.y : clampedDragger.startMousePosition.y - (dragElement.resolvedStyle.height / 2f);
 
                     var pos = new Vector3(x, y, 0);
 
@@ -339,25 +408,54 @@ namespace UnityEngine.UIElements
                 ComputeValueAndDirectionFromClick(dragContainer.resolvedStyle.height, dragElement.resolvedStyle.height, dragElement.transform.position.y, clampedDragger.lastMousePosition.y);
         }
 
+        void OnKeyDown(KeyDownEvent evt)
+        {
+            SliderKey sliderKey = SliderKey.None;
+            bool isHorizontal = direction == SliderDirection.Horizontal;
+
+            if (isHorizontal && evt.keyCode == KeyCode.Home || !isHorizontal && evt.keyCode == KeyCode.End)
+                sliderKey = inverted ? SliderKey.Highest : SliderKey.Lowest;
+            else if (isHorizontal && evt.keyCode == KeyCode.End || !isHorizontal && evt.keyCode == KeyCode.Home)
+                sliderKey = inverted ? SliderKey.Lowest : SliderKey.Highest;
+            else if (isHorizontal && evt.keyCode == KeyCode.PageUp || !isHorizontal && evt.keyCode == KeyCode.PageDown)
+                sliderKey = inverted ? SliderKey.HigherPage : SliderKey.LowerPage;
+            else if (isHorizontal && evt.keyCode == KeyCode.PageDown || !isHorizontal && evt.keyCode == KeyCode.PageUp)
+                sliderKey = inverted ? SliderKey.LowerPage : SliderKey.HigherPage;
+            else if (isHorizontal && evt.keyCode == KeyCode.LeftArrow || !isHorizontal && evt.keyCode == KeyCode.DownArrow)
+                sliderKey = inverted ? SliderKey.Higher : SliderKey.Lower;
+            else if (isHorizontal && evt.keyCode == KeyCode.RightArrow || !isHorizontal && evt.keyCode == KeyCode.UpArrow)
+                sliderKey = inverted ? SliderKey.Lower : SliderKey.Higher;
+
+            if (sliderKey == SliderKey.None)
+                return;
+
+            ComputeValueFromKey(sliderKey, evt.shiftKey);
+            evt.StopPropagation();
+        }
+
         internal virtual void ComputeValueAndDirectionFromClick(float sliderLength, float dragElementLength, float dragElementPos, float dragElementLastPos)
         {
             var totalRange = sliderLength - dragElementLength;
             if (Mathf.Abs(totalRange) < Mathf.Epsilon)
                 return;
 
-            if ((dragElementLastPos < dragElementPos) &&
-                (clampedDragger.dragDirection != ClampedDragger<TValueType>.DragDirection.LowToHigh))
+            var isPositionDecreasing = dragElementLastPos < dragElementPos;
+            var isPositionIncreasing = dragElementLastPos > (dragElementPos + dragElementLength);
+            var isDraggingHighToLow = inverted ? isPositionIncreasing : isPositionDecreasing;
+            var isDraggingLowToHigh = inverted ? isPositionDecreasing : isPositionIncreasing;
+            var adjustedPageSize = inverted ? -pageSize : pageSize;
+
+            if (isDraggingHighToLow && (clampedDragger.dragDirection != ClampedDragger<TValueType>.DragDirection.LowToHigh))
             {
                 clampedDragger.dragDirection = ClampedDragger<TValueType>.DragDirection.HighToLow;
-                float normalizedDragElementPosition = Mathf.Max(0f, Mathf.Min(dragElementPos - pageSize, totalRange)) / totalRange;
-                value = SliderLerpUnclamped(lowValue, highValue, normalizedDragElementPosition);
+                float normalizedDragElementPosition = Mathf.Max(0f, Mathf.Min(dragElementPos - adjustedPageSize, totalRange)) / totalRange;
+                value = SliderLerpDirectionalUnclamped(lowValue, highValue, normalizedDragElementPosition);
             }
-            else if ((dragElementLastPos > (dragElementPos + dragElementLength)) &&
-                     (clampedDragger.dragDirection != ClampedDragger<TValueType>.DragDirection.HighToLow))
+            else if (isDraggingLowToHigh && (clampedDragger.dragDirection != ClampedDragger<TValueType>.DragDirection.HighToLow))
             {
                 clampedDragger.dragDirection = ClampedDragger<TValueType>.DragDirection.LowToHigh;
-                float normalizedDragElementPosition = Mathf.Max(0f, Mathf.Min(dragElementPos + pageSize, totalRange)) / totalRange;
-                value = SliderLerpUnclamped(lowValue, highValue, normalizedDragElementPosition);
+                float normalizedDragElementPosition = Mathf.Max(0f, Mathf.Min(dragElementPos + adjustedPageSize, totalRange)) / totalRange;
+                value = SliderLerpDirectionalUnclamped(lowValue, highValue, normalizedDragElementPosition);
             }
         }
 
@@ -390,6 +488,7 @@ namespace UnityEngine.UIElements
                     inlineStyles.height = Mathf.Round(Mathf.Max(dragContainer.layout.height * factor, elemMinHeight));
                 }
             }
+
             dragBorderElement.visible = dragElement.visible;
         }
 
@@ -423,6 +522,7 @@ namespace UnityEngine.UIElements
                 return;
 
             float normalizedPosition = SliderNormalizeValue(value, lowValue, highValue);
+            float directionalNormalizedPosition = inverted ? 1f - normalizedPosition : normalizedPosition;
             float halfPixel = scaledPixelsPerPoint * 0.5f;
 
             if (direction == SliderDirection.Horizontal)
@@ -432,7 +532,7 @@ namespace UnityEngine.UIElements
                 // This is the main calculation for the location of the thumbs / dragging element
                 float offsetForThumbFullWidth = -dragElement.resolvedStyle.marginLeft - dragElement.resolvedStyle.marginRight;
                 float totalWidth = dragContainer.layout.width - dragElementWidth + offsetForThumbFullWidth;
-                float newLeft = normalizedPosition * totalWidth;
+                float newLeft = directionalNormalizedPosition * totalWidth;
 
                 if (float.IsNaN(newLeft)) //This can happen when layout is not computed yet
                     return;
@@ -441,7 +541,7 @@ namespace UnityEngine.UIElements
 
                 if (!SameValues(currentLeft, newLeft, halfPixel))
                 {
-                    var newPos = new Vector3(newLeft, 0 , 0);
+                    var newPos = new Vector3(newLeft, 0, 0);
                     dragElement.transform.position = newPos;
                     dragBorderElement.transform.position = newPos;
                 }
@@ -451,7 +551,9 @@ namespace UnityEngine.UIElements
                 float dragElementHeight = dragElement.resolvedStyle.height;
 
                 float totalHeight = dragContainer.resolvedStyle.height - dragElementHeight;
-                float newTop = normalizedPosition * totalHeight;
+
+                // Vertical scrollbar default starts from the bottom, so we invert the normalized position.
+                float newTop = (1 - directionalNormalizedPosition) * totalHeight;
 
                 if (float.IsNaN(newTop)) //This can happen when layout is not computed yet
                     return;
@@ -459,7 +561,7 @@ namespace UnityEngine.UIElements
                 float currentTop = dragElement.transform.position.y;
                 if (!SameValues(currentTop, newTop, halfPixel))
                 {
-                    var newPos = new Vector3(0, newTop , 0);
+                    var newPos = new Vector3(0, newTop, 0);
                     dragElement.transform.position = newPos;
                     dragBorderElement.transform.position = newPos;
                 }
@@ -487,7 +589,7 @@ namespace UnityEngine.UIElements
             {
                 if (inputTextField == null)
                 {
-                    inputTextField = new TextField() {name = "unity-text-field"};
+                    inputTextField = new TextField() { name = "unity-text-field" };
                     inputTextField.AddToClassList(textFieldClassName);
                     inputTextField.RegisterValueChangedCallback(OnTextFieldValueChange);
                     inputTextField.RegisterCallback<FocusOutEvent>(OnTextFieldFocusOut);
@@ -511,7 +613,7 @@ namespace UnityEngine.UIElements
             if (inputTextField == null)
                 return;
 
-            inputTextField.SetValueWithoutNotify(String.Format("{0:0.##}", value));
+            inputTextField.SetValueWithoutNotify(String.Format(CultureInfo.InvariantCulture, "{0:g7}", value));
         }
 
         private void OnTextFieldFocusOut(FocusOutEvent evt)
@@ -529,6 +631,18 @@ namespace UnityEngine.UIElements
 
                 if (elementPanel != null)
                     OnViewDataReady();
+            }
+        }
+
+        protected override void UpdateMixedValueContent()
+        {
+            if (showMixedValue)
+            {
+                dragElement?.RemoveFromHierarchy();
+            }
+            else
+            {
+                visualInput.Add(dragElement);
             }
         }
     }

@@ -234,10 +234,11 @@ namespace UnityEngine.UIElements
         {
             m_PointerEvent.ReadDeviceState(context);
             var mousePosition = m_LastPointedPositions.Get(m_PointerEvent.pointerId, m_LastPointedPosition);
-            var delta = context.ReadValue<Vector2>();
-            delta *= Time.deltaTime;
-            SendFocusBasedEvent(context, t => WheelEvent.GetPooled(t.delta, t.mousePosition),
-                (delta, mousePosition));
+            var scrollDelta = context.ReadValue<Vector2>();
+            scrollDelta.y = -scrollDelta.y;
+            scrollDelta *= Time.deltaTime;
+            SendPositionBasedEvent(context, mousePosition, m_LastPointedDelta,
+                (p, d, sd) => WheelEvent.GetPooled(sd, p), scrollDelta);
         }
 
         private void OnClickPerformed(InputAction.CallbackContext context)
@@ -406,8 +407,17 @@ namespace UnityEngine.UIElements
                 {
                     pressure = pen.pressure.EvaluateMagnitude();
                     clickCount = pen.tip.isPressed ? 1 : 0;
+                    azimuthAngle = (pen.tilt.ReadValue().x + 1) * Mathf.PI / 2;
+                    altitudeAngle = (pen.tilt.ReadValue().y + 1) * Mathf.PI / 2;
+                    twist = pen.twist.ReadValue() * Mathf.PI * 2;
                     pointerType = PointerType.pen;
-                    pointerId = PointerId.penPointerIdBase; //TODO: find pen index if there are many
+                    pointerId = GetPenPointerId(pen);
+
+                    // Note that the pressedButtons PointerEvent property for the pen doesn't reflect the states of the
+                    // Pen.eraser, Pen.firstBarrelButton, Pen.secondBarrelButton, Pen.thirdBarrelButton and
+                    // Pen.fourthBarrelButton device properties, but rather they reflect whatever PointerDownEvents
+                    // with various Left/Right/Middle click flavours were invoked by the EventSystem. If users want
+                    // the state of the Pen device, they can use Pen.current.eraser.isPressed, etc.
                 }
                 else if (context.control.parent is TouchControl touchControl)
                 {
@@ -447,6 +457,19 @@ namespace UnityEngine.UIElements
                         return PointerId.touchPointerIdBase + i;
                 return PointerId.touchPointerIdBase; // Default to 0-th touch if nothing else is found
             }
+
+            private static int GetPenPointerId(Pen pen)
+            {
+                var n = 0;
+                foreach (var device in InputSystem.InputSystem.devices)
+                    if (device is Pen otherPen)
+                    {
+                        if (pen == otherPen)
+                            return n;
+                        n++;
+                    }
+                return PointerId.penPointerIdBase; // Default to 0-th pen if nothing else is found
+            }
         }
 
         private void SendEvent(IPanel panel, EventBase ev, InputContext context)
@@ -474,6 +497,9 @@ namespace UnityEngine.UIElements
                 OnDisableEvent += () => action.canceled -= canceledCallback;
             }
         }
+
+        internal bool SendFocusBasedEvent<TArg>(Func<TArg, EventBase> evtFactory, TArg arg) =>
+            SendFocusBasedEvent(default, evtFactory, arg);
 
         internal bool SendFocusBasedEvent<TArg>(InputContext context, Func<TArg, EventBase> evtFactory, TArg arg)
         {
@@ -516,6 +542,9 @@ namespace UnityEngine.UIElements
 
             return false;
         }
+
+        internal bool SendPositionBasedEvent<TArg>(Vector2 position, Vector2 delta, Func<Vector2, Vector2, TArg, EventBase> evtFactory, TArg arg) =>
+            SendPositionBasedEvent(default, position, delta, evtFactory, arg);
 
         internal bool SendPositionBasedEvent<TArg>(InputAction.CallbackContext context, Vector2 position, Vector2 delta, Func<Vector2, Vector2, TArg, EventBase> evtFactory, TArg arg)
         {

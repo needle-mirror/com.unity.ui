@@ -27,6 +27,8 @@ namespace UnityEditor.UIElements.Inspector
 
         private HelpBox m_DrivenByParentWarning;
 
+        private FloatField m_SortOrderField;
+
         private void ConfigureFields()
         {
             // Using MandatoryQ instead of just Q to make sure modifications of the UXML file don't make the
@@ -42,12 +44,16 @@ namespace UnityEditor.UIElements.Inspector
 
             m_SourceAssetField = m_RootVisualElement.MandatoryQ<ObjectField>("sourceAssetField");
             m_SourceAssetField.objectType = typeof(VisualTreeAsset);
+
+            m_SortOrderField = m_RootVisualElement.MandatoryQ<FloatField>("sortOrderField");
+            m_SortOrderField.isDelayed = true;
         }
 
         private void BindFields()
         {
             m_ParentField.RegisterCallback<ChangeEvent<Object>>(evt => UpdateValues());
             m_PanelSettingsField.RegisterCallback<ChangeEvent<Object>>(evt => UpdateValues());
+            m_SortOrderField.RegisterCallback<ChangeEvent<float>>(evt => SetSortOrder(evt));
         }
 
         private void UpdateValues()
@@ -59,6 +65,17 @@ namespace UnityEditor.UIElements.Inspector
             m_ParentField.EnableInClassList(k_StyleClassWithParentHidden, isNotDrivenByParent);
 
             m_PanelSettingsField.SetEnabled(isNotDrivenByParent);
+        }
+
+        private void SetSortOrder(ChangeEvent<float> evt)
+        {
+            // The field is bound, but we need to do extra operations when the value changes.
+            UIDocument uiDocument = (UIDocument)target;
+
+            if (uiDocument.sortingOrder != evt.newValue)
+            {
+                m_SortOrderField.schedule.Execute(() => uiDocument.ApplySortingOrder());
+            }
         }
 
         public override VisualElement CreateInspectorGUI()

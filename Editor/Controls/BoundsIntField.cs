@@ -114,5 +114,11 @@ namespace UnityEditor.UIElements
             m_PositionField.SetValueWithoutNotify(rawValue.position);
             m_SizeField.SetValueWithoutNotify(rawValue.size);
         }
+
+        protected override void UpdateMixedValueContent()
+        {
+            m_PositionField.showMixedValue = showMixedValue;
+            m_SizeField.showMixedValue = showMixedValue;
+        }
     }
 }

@@ -7,7 +7,6 @@ namespace Samples.Editor.General
     public class DragAndDropWindow : EditorWindow
     {
         [SerializeField] private VisualTreeAsset uxmlAsset = default;
-        [SerializeField] private StyleSheet styleSheet = default;
 
         private VisualElement dropArea;
         private Label dropLabel;
@@ -32,7 +31,6 @@ namespace Samples.Editor.General
         private void OnEnable()
         {
             if (uxmlAsset != null) uxmlAsset.CloneTree(rootVisualElement);
-            if (styleSheet != null) rootVisualElement.styleSheets.Add(styleSheet);
             RegisterCallbacks();
         }
 

@@ -527,6 +527,22 @@ namespace UnityEditor.UIElements
             }
         }
 
+        protected override void UpdateMixedValueContent()
+        {
+            if (showMixedValue)
+            {
+                visualInput.Add(mixedValueLabel);
+                m_ContentParent?.RemoveFromHierarchy();
+                visualInput.generateVisualContent -= OnGenerateVisualContent;
+            }
+            else
+            {
+                visualInput.Add(m_ContentParent);
+                visualInput.generateVisualContent += OnGenerateVisualContent;
+                mixedValueLabel.RemoveFromHierarchy();
+            }
+        }
+
         class CurveFieldContent : ImmediateModeElement
         {
             Material m_Mat;

@@ -1,4 +1,4 @@
-.unity-ui-document__root {
+:root {
     background-color: teal;
     --color1: rgb(25, 255, 75);
     --color2: rgb(75, 25, 255);

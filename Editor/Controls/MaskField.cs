@@ -164,6 +164,9 @@ namespace UnityEditor.UIElements
 
         internal string GetDisplayedValue(int itemIndex)
         {
+            if (showMixedValue)
+                return mixedValueString;
+
             var newValueToShowUser = "";
 
             switch (itemIndex)

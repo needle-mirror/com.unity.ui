@@ -8,19 +8,12 @@ namespace Samples.Runtime.General
     {
         [SerializeField] private PanelSettings panelSettings = default;
         [SerializeField] private VisualTreeAsset sourceAsset = default;
-        [SerializeField] private StyleSheet styleAsset = default;
 
         private void Awake()
         {
             var uiDocument = GetComponent<UIDocument>();
             uiDocument.panelSettings = panelSettings;
             uiDocument.visualTreeAsset = sourceAsset;
-        }
-
-        private void OnEnable()
-        {
-            var uiDocument = GetComponent<UIDocument>();
-            uiDocument.rootVisualElement.styleSheets.Add(styleAsset);
         }
     }
 }

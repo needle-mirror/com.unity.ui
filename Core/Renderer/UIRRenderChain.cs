@@ -139,7 +139,7 @@ namespace UnityEngine.UIElements.UIR
 
         RenderChainCommand m_FirstCommand;
         DepthOrderedDirtyTracking m_DirtyTracker;
-        Pool<RenderChainCommand> m_CommandPool = new Pool<RenderChainCommand>();
+        LinkedPool<RenderChainCommand> m_CommandPool = new LinkedPool<RenderChainCommand>(() => new RenderChainCommand(), cmd => {});
         BasicNodePool<TextureEntry> m_TexturePool = new BasicNodePool<TextureEntry>();
         List<RenderNodeData> m_RenderNodesData = new List<RenderNodeData>();
         Shader m_DefaultShader, m_DefaultWorldSpaceShader;
@@ -1095,7 +1095,7 @@ namespace UnityEngine.UIElements.UIR
         internal MeshHandle data, closingData;
         internal Matrix4x4 verticesSpace; // Transform describing the space which the vertices in 'data' are relative to
         internal int displacementUVStart, displacementUVEnd;
-        internal BMPAlloc transformID, clipRectID, opacityID;
+        internal BMPAlloc transformID, clipRectID, opacityID, textCoreSettingsID;
         internal float compositeOpacity;
 
         // Text update acceleration
@@ -1105,8 +1105,8 @@ namespace UnityEngine.UIElements.UIR
         internal BasicNode<TextureEntry> textures;
 
         internal RenderChainCommand lastClosingOrLastCommand { get { return lastClosingCommand ?? lastCommand; } }
-        static internal bool AllocatesID(BMPAlloc alloc) { return (alloc.ownedState != 0) && alloc.IsValid(); }
-        static internal bool InheritsID(BMPAlloc alloc) { return (alloc.ownedState == 0) && alloc.IsValid(); }
+        static internal bool AllocatesID(BMPAlloc alloc) { return (alloc.ownedState == OwnedState.Owned) && alloc.IsValid(); }
+        static internal bool InheritsID(BMPAlloc alloc) { return (alloc.ownedState == OwnedState.Inherited) && alloc.IsValid(); }
     }
 
     internal struct RenderChainTextEntry

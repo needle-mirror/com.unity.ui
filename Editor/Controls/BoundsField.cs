@@ -113,5 +113,11 @@ namespace UnityEditor.UIElements
             m_CenterField.SetValueWithoutNotify(rawValue.center);
             m_ExtentsField.SetValueWithoutNotify(rawValue.extents);
         }
+
+        protected override void UpdateMixedValueContent()
+        {
+            m_CenterField.showMixedValue = showMixedValue;
+            m_ExtentsField.showMixedValue = showMixedValue;
+        }
     }
 }

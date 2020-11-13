@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace UnityEngine.UIElements
 {
@@ -30,21 +31,25 @@ namespace UnityEngine.UIElements
             return (TextureId)obj == this;
         }
 
+        [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
         public bool Equals(TextureId other)
         {
             return m_Index == other.m_Index;
         }
 
+        [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
         public override int GetHashCode()
         {
             return m_Index.GetHashCode();
         }
 
+        [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
         public static bool operator==(TextureId left, TextureId right)
         {
             return left.m_Index == right.m_Index;
         }
 
+        [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
         public static bool operator!=(TextureId left, TextureId right)
         {
             return !(left == right);

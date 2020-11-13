@@ -32,6 +32,9 @@ namespace UnityEngine.UIElements
         static CustomStyleProperty<Color> s_SelectionColorProperty = new CustomStyleProperty<Color>("--unity-selection-color");
         static CustomStyleProperty<Color> s_CursorColorProperty = new CustomStyleProperty<Color>("--unity-cursor-color");
 
+        // This is to save the value of the tabindex of the visual input to achieve the IMGUI behaviour of tabbing on focused-non-edit-mode TextFields.
+        int m_VisualInputTabIndex;
+
         /// <summary>
         /// Defines <see cref="UxmlTraits"/> for <see cref="TextInputFieldBase"/>.
         /// </summary>
@@ -100,6 +103,15 @@ namespace UnityEngine.UIElements
         /// USS class name of input elements in elements of this type.
         /// </summary>
         public new static readonly string inputUssClassName = ussClassName + "__input";
+        /// <summary>
+        /// USS class name of single line input elements in elements of this type.
+        /// </summary>
+        public static readonly string singleLineInputUssClassName = inputUssClassName + "--single-line";
+
+        /// <summary>
+        /// USS class name of multiline input elements in elements of this type.
+        /// </summary>
+        public static readonly string multilineInputUssClassName = inputUssClassName + "--multiline";
 
         /// <summary>
         /// USS class name of input elements in elements of this type.
@@ -226,6 +238,16 @@ namespace UnityEngine.UIElements
 
         internal bool hasFocus => m_TextInputBase.hasFocus;
 
+        protected virtual string ValueToString(TValueType value)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected virtual TValueType StringToValue(string str)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Selects all the text.
         /// </summary>
@@ -251,24 +273,32 @@ namespace UnityEngine.UIElements
             : base(label, textInputBase)
         {
             tabIndex = 0;
-            delegatesFocus = false;
+            delegatesFocus = true;
+            labelElement.tabIndex = -1; // To delegate directly to text-input field
 
             AddToClassList(ussClassName);
             labelElement.AddToClassList(labelUssClassName);
             visualInput.AddToClassList(inputUssClassName);
+            visualInput.AddToClassList(singleLineInputUssClassName);
 
             m_TextInputBase = textInputBase;
             m_TextInputBase.maxLength = maxLength;
             m_TextInputBase.maskChar = maskChar;
 
             RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
+            RegisterCallback<CustomStyleResolvedEvent>(OnFieldCustomStyleResolved);
         }
 
         private void OnAttachToPanel(AttachToPanelEvent e)
         {
             iTextHandle = e.destinationPanel.contextType == ContextType.Editor
-                ? TextHandleFactory.GetEditorHandle()
+                ? TextNativeHandle.New()
                 : TextHandleFactory.GetRuntimeHandle();
+        }
+
+        private void OnFieldCustomStyleResolved(CustomStyleResolvedEvent e)
+        {
+            m_TextInputBase.OnInputCustomStyleResolved(e);
         }
 
         protected override void ExecuteDefaultActionAtTarget(EventBase evt)
@@ -292,6 +322,84 @@ namespace UnityEngine.UIElements
                     visualInput?.Focus();
                 }
             }
+            // The following code is to help achieve the following behaviour:
+            // On IMGUI, on any text input field in focused-non-edit-mode, doing a TAB will allow the user to get to the next control...
+            // To mimic that behaviour in UIE, when in focused-non-edit-mode, we have to make sure the input is not "tabbable".
+            //     So, each time, either the main TextField or the Label is receiving the focus, we remove the tabIndex on
+            //     the input, and we put it back when the BlurEvent is received.
+            else if (evt.eventTypeId == FocusInEvent.TypeId())
+            {
+                if (evt.leafTarget == this || evt.leafTarget == labelElement)
+                {
+                    m_VisualInputTabIndex = visualInput.tabIndex;
+                    visualInput.tabIndex = -1;
+                }
+            }
+            // The following code was added to help achieve the following behaviour:
+            // On IMGUI, doing a Return, Shift+Return or Escape will get out of the Edit mode, but stay on the control. To allow a
+            //     focused-non-edit-mode, we remove the delegateFocus when we start editing to allow focusing on the parent,
+            //     and we restore it when we exit the control, to prevent coming in a semi-focused state from outside the control.
+            else if (evt.eventTypeId == FocusEvent.TypeId())
+            {
+                delegatesFocus = false;
+            }
+            else if (evt.eventTypeId == BlurEvent.TypeId())
+            {
+                delegatesFocus = true;
+
+                if (evt.leafTarget == this || evt.leafTarget == labelElement)
+                {
+                    visualInput.tabIndex = m_VisualInputTabIndex;
+                }
+            }
+            // The following code is to help achieve the following behaviour:
+            // On IMGUI, on any text input field in focused-non-edit-mode, doing a TAB will allow the user to get to the next control...
+            // To mimic that behaviour in UIE, when in focused-non-edit-mode, we have to make sure the input is not "tabbable".
+            //     So, each time, either the main TextField or the Label is receiving the focus, we remove the tabIndex on
+            //     the input, and we put it back when the BlurEvent is received.
+            else if (evt.eventTypeId == FocusInEvent.TypeId())
+            {
+                if (showMixedValue)
+                    m_TextInputBase.ResetValueAndText();
+
+                if (evt.leafTarget == this || evt.leafTarget == labelElement)
+                {
+                    m_VisualInputTabIndex = visualInput.tabIndex;
+                    visualInput.tabIndex = -1;
+                }
+            }
+            // The following code was added to help achieve the following behaviour:
+            // On IMGUI, doing a Return, Shift+Return or Escape will get out of the Edit mode, but stay on the control. To allow a
+            //     focused-non-edit-mode, we remove the delegateFocus when we start editing to allow focusing on the parent,
+            //     and we restore it when we exit the control, to prevent coming in a semi-focused state from outside the control.
+            else if (evt.eventTypeId == FocusEvent.TypeId())
+            {
+                delegatesFocus = false;
+            }
+            else if (evt.eventTypeId == BlurEvent.TypeId())
+            {
+                delegatesFocus = true;
+
+                if (evt.leafTarget == this || evt.leafTarget == labelElement)
+                {
+                    visualInput.tabIndex = m_VisualInputTabIndex;
+                }
+            }
+        }
+
+        protected override void UpdateMixedValueContent()
+        {
+            if (showMixedValue)
+            {
+                text = mixedValueString;
+                AddToClassList(mixedValueLabelUssClassName);
+                visualInput?.AddToClassList(mixedValueLabelUssClassName);
+            }
+            else
+            {
+                visualInput?.RemoveFromClassList(mixedValueLabelUssClassName);
+                RemoveFromClassList(mixedValueLabelUssClassName);
+            }
         }
 
         /// <summary>
@@ -300,6 +408,14 @@ namespace UnityEngine.UIElements
         protected abstract class TextInputBase : VisualElement, ITextInputField
         {
             string m_OriginalText;
+
+            /// <summary>
+            /// Resets the text contained in the field.
+            /// </summary>
+            public void ResetValueAndText()
+            {
+                m_OriginalText = text = default(string);
+            }
 
             void SaveValueAndText()
             {
@@ -458,12 +574,14 @@ namespace UnityEngine.UIElements
                 focusable = true;
 
                 AddToClassList(inputUssClassName);
+                AddToClassList(singleLineInputUssClassName);
                 m_Text = string.Empty;
                 name = TextField.textInputUssName;
 
                 requireMeasureFunction = true;
 
                 editorEngine = new TextEditorEngine(OnDetectFocusChange, OnCursorIndexChange);
+                editorEngine.style.richText = false;
 
                 if (touchScreenTextField)
                 {
@@ -481,9 +599,9 @@ namespace UnityEngine.UIElements
                 // Make the editor style unique across all textfields
                 editorEngine.style = new GUIStyle(editorEngine.style);
 
-                RegisterCallback<CustomStyleResolvedEvent>(OnCustomStyleResolved);
+                RegisterCallback<CustomStyleResolvedEvent>(OnInputCustomStyleResolved);
                 RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
-                this.generateVisualContent += OnGenerateVisualContent;
+                generateVisualContent += OnGenerateVisualContent;
             }
 
             DropdownMenuAction.Status CutCopyActionStatus(DropdownMenuAction a)
@@ -520,7 +638,7 @@ namespace UnityEngine.UIElements
                 ProcessMenuCommand(EventCommandNames.Paste);
             }
 
-            private void OnCustomStyleResolved(CustomStyleResolvedEvent e)
+            internal void OnInputCustomStyleResolved(CustomStyleResolvedEvent e)
             {
                 Color selectionValue = Color.clear;
                 Color cursorValue = Color.clear;
@@ -603,17 +721,12 @@ namespace UnityEngine.UIElements
 
                 int cursorIndex = editorEngine.cursorIndex;
                 int selectIndex = editorEngine.selectIndex;
-                Rect localPosition = editorEngine.localPosition;
                 var scrollOffset = editorEngine.scrollOffset;
 
                 float textScaling = TextUtilities.ComputeTextScaling(worldTransform, pixelsPerPoint);
 
-                var textParams = MeshGenerationContextUtils.TextParams.MakeStyleBased(this, text);
-                textParams.text = " ";
-                textParams.wordWrapWidth = 0.0f;
-                textParams.wordWrap = false;
-
-                float lineHeight = m_TextHandle.ComputeTextHeight(textParams, textScaling);
+                var textParams = MeshGenerationContextUtils.TextParams.MakeStyleBased(this, " ");
+                float lineHeight = m_TextHandle.GetLineHeight(0, textParams, textScaling, pixelsPerPoint);
 
                 float wordWrapWidth = 0.0f;
 
@@ -626,8 +739,6 @@ namespace UnityEngine.UIElements
                 Vector2 pos = editorEngine.graphicalCursorPos - scrollOffset;
                 pos.y += lineHeight;
                 GUIUtility.compositionCursorPos = this.LocalToWorld(pos);
-
-                Color drawCursorColor = cursorColor;
 
                 int selectionEndIndex = string.IsNullOrEmpty(GUIUtility.compositionString)
                     ? selectIndex
@@ -653,6 +764,8 @@ namespace UnityEngine.UIElements
 
                     minPos -= scrollOffset;
                     maxPos -= scrollOffset;
+
+                    lineHeight = m_TextHandle.GetLineHeight(cursorIndex, textParams, textScaling, pixelsPerPoint);
 
                     if (Mathf.Approximately(minPos.y, maxPos.y))
                     {
@@ -701,7 +814,6 @@ namespace UnityEngine.UIElements
                 // Draw the text with the scroll offset
                 if (!string.IsNullOrEmpty(editorEngine.text) && contentRect.width > 0.0f && contentRect.height > 0.0f)
                 {
-                    textParams = MeshGenerationContextUtils.TextParams.MakeStyleBased(this, text);
                     textParams.rect = new Rect(contentRect.x - scrollOffset.x, contentRect.y - scrollOffset.y, contentRect.width + scrollOffset.x, contentRect.height + scrollOffset.y);
                     textParams.text = editorEngine.text;
 
@@ -711,7 +823,7 @@ namespace UnityEngine.UIElements
                 // Draw the cursor
                 if (!isReadOnly && !isDragging)
                 {
-                    if (cursorIndex == selectionEndIndex && computedStyle.unityFont != null)
+                    if (cursorIndex == selectionEndIndex && (computedStyle.unityFont != null || !computedStyle.unityFontDefinition.IsEmpty()))
                     {
                         cursorParams = CursorPositionStylePainterParameters.GetDefault(this, text);
                         cursorParams.text = editorEngine.text;
@@ -723,7 +835,7 @@ namespace UnityEngine.UIElements
                         mgc.Rectangle(new MeshGenerationContextUtils.RectangleParams
                         {
                             rect = new Rect(cursorPosition.x, cursorPosition.y, 1f, lineHeight),
-                            color = drawCursorColor,
+                            color = cursorColor,
                             playmodeTintColor = playmodeTintColor
                         });
                     }
@@ -741,7 +853,7 @@ namespace UnityEngine.UIElements
                         mgc.Rectangle(new MeshGenerationContextUtils.RectangleParams
                         {
                             rect = new Rect(altCursorPosition.x, altCursorPosition.y, 1f, lineHeight),
-                            color = drawCursorColor,
+                            color = cursorColor,
                             playmodeTintColor = playmodeTintColor
                         });
                     }
@@ -783,7 +895,9 @@ namespace UnityEngine.UIElements
                 }
 
                 if (!editorEngine.m_HasFocus && hasFocus)
+                {
                     editorEngine.OnLostFocus();
+                }
             }
 
             private void OnCursorIndexChange()
@@ -807,10 +921,7 @@ namespace UnityEngine.UIElements
             {
                 base.ExecuteDefaultActionAtTarget(evt);
 
-                if (elementPanel != null && elementPanel.contextualMenuManager != null)
-                {
-                    elementPanel.contextualMenuManager.DisplayMenuIfEventMatches(evt, this);
-                }
+                elementPanel?.contextualMenuManager?.DisplayMenuIfEventMatches(evt, this);
 
                 if (evt?.eventTypeId == ContextualMenuPopulateEvent.TypeId())
                 {
@@ -909,10 +1020,9 @@ namespace UnityEngine.UIElements
                 style.wordWrap = computedStyle.whiteSpace == WhiteSpace.Normal;
                 bool overflowVisible = computedStyle.overflow == OverflowInternal.Visible;
                 style.clipping = overflowVisible ? TextClipping.Overflow : TextClipping.Clip;
+
                 if (computedStyle.unityFont != null)
-                {
                     style.font = computedStyle.unityFont;
-                }
 
                 style.fontSize = (int)computedStyle.fontSize.value;
                 style.fontStyle = computedStyle.unityFontStyleAndWeight;

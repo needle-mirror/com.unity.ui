@@ -22,10 +22,6 @@ namespace UnityEngine.UIElements
         protected EventSystem() {}
     }
 
-    public interface INavigationEvent
-    {
-    }
-
     public class InputWrapper : UnityEngine.MonoBehaviour
     {
         public virtual UnityEngine.Vector2 compositionCursorPos { get; set; }
@@ -43,65 +39,6 @@ namespace UnityEngine.UIElements
         public virtual bool GetMouseButtonDown(int button);
         public virtual bool GetMouseButtonUp(int button);
         public virtual UnityEngine.Touch GetTouch(int index);
-    }
-
-    public class NavigationCancelEvent : UnityEngine.UIElements.NavigationEventBase<UnityEngine.UIElements.NavigationCancelEvent>
-    {
-        public NavigationCancelEvent() {}
-    }
-
-    public abstract class NavigationEventBase<T> : UnityEngine.UIElements.EventBase<T>, UnityEngine.UIElements.INavigationEvent where T : UnityEngine.UIElements.NavigationEventBase<T>, new()
-    {
-        protected NavigationEventBase() {}
-        protected virtual void Init();
-    }
-
-    public class NavigationMoveEvent : UnityEngine.UIElements.NavigationEventBase<UnityEngine.UIElements.NavigationMoveEvent>
-    {
-        public UnityEngine.UIElements.NavigationMoveEvent.Direction direction { get; }
-        public UnityEngine.Vector2 move { get; }
-        public NavigationMoveEvent() {}
-        public static UnityEngine.UIElements.NavigationMoveEvent GetPooled(UnityEngine.Vector2 moveVector);
-        protected virtual void Init();
-        public enum Direction
-        {
-            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Down = 4;
-            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Left = 1;
-            public const UnityEngine.UIElements.NavigationMoveEvent.Direction None = 0;
-            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Right = 3;
-            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Up = 2;
-            public int value__;
-        }
-    }
-
-    public class NavigationSubmitEvent : UnityEngine.UIElements.NavigationEventBase<UnityEngine.UIElements.NavigationSubmitEvent>
-    {
-        public NavigationSubmitEvent() {}
-    }
-
-    [System.Obsolete(@"PanelRenderer will be removed in a future release. Use UIDocument with PanelSettings instead.")] [UnityEngine.AddComponentMenu(@"UI Toolkit/Panel Renderer")] [UnityEngine.ExecuteInEditMode] public class PanelRenderer : UnityEngine.MonoBehaviour
-    {
-        public UnityEngine.UIElements.VisualTreeAsset uxml;
-        public float fallbackDpi { get; set; }
-        public float match { get; set; }
-        public UnityEngine.UIElements.IPanel panel { get; }
-        public System.Func<System.Collections.Generic.IEnumerable<UnityEngine.Object>> postUxmlReload { get; set; }
-        public float referenceDpi { get; set; }
-        public UnityEngine.Vector2Int referenceResolution { get; set; }
-        public float scale { get; set; }
-        public UnityEngine.UIElements.PanelScaleModes scaleMode { get; set; }
-        public UnityEngine.UIElements.PanelScreenMatchModes screenMatchMode { get; set; }
-        public UnityEngine.RenderTexture targetTexture { get; set; }
-        public UnityEngine.UIElements.StyleSheet themeStyleSheet { get; set; }
-        public UnityEngine.UIElements.VisualElement visualTree { get; }
-        public PanelRenderer() {}
-        protected void OnDestroy();
-        protected void OnDisable();
-        protected void OnEnable();
-        protected void OnValidate();
-        public void RecreateUIFromUxml();
-        protected void Reset();
-        protected virtual void Validate();
     }
 
     public enum PanelScaleModes
@@ -137,7 +74,7 @@ namespace UnityEngine.UIElements
         public float sortingOrder { get; set; }
         public UnityEngine.RenderTexture targetTexture { get; set; }
         public UnityEngine.UIElements.StyleSheet themeStyleSheet { get; set; }
-        public void OrderByHierarchy();
+        [System.Obsolete(@"UIDocument ordering is done by explicit sort order and the Game Object hierarchy is no longer used for automatic ordering like it was before.")] public void OrderByHierarchy();
         public void SetScreenToPanelSpaceFunction(System.Func<UnityEngine.Vector2, UnityEngine.Vector2> screentoPanelSpaceFunction);
     }
 
@@ -155,6 +92,7 @@ namespace UnityEngine.UIElements
         public UnityEngine.UIElements.PanelSettings panelSettings { get; set; }
         public UnityEngine.UIElements.UIDocument parentUI { get; }
         public UnityEngine.UIElements.VisualElement rootVisualElement { get; }
+        public float sortingOrder { get; set; }
         public UnityEngine.UIElements.VisualTreeAsset visualTreeAsset { get; set; }
     }
 }

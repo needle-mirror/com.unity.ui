@@ -40,3 +40,4 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("Unity.UIElements.PlayModeTests")]
 [assembly: InternalsVisibleTo("Unity.UIElements.EditorTests")]
 [assembly: InternalsVisibleTo("Unity.UIElements.InputSystem")]
+[assembly: InternalsVisibleTo("Unity.UIElements.Text")]

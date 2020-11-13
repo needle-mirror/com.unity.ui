@@ -103,8 +103,18 @@ namespace UnityEditor.UIElements
                 IncrementVersion(VersionChangeType.Repaint);
             }
 
+            var editorGUIShowMixedValue = EditorGUI.showMixedValue;
+            EditorGUI.showMixedValue = showMixedValue;
+
             Color newColor = EditorGUILayout.ColorField(GUIContent.none, value, showEyeDropper, showAlpha, hdr);
-            value = newColor;
+            if (value != newColor)
+                value = newColor;
+
+            EditorGUI.showMixedValue = editorGUIShowMixedValue;
+        }
+
+        protected override void UpdateMixedValueContent()
+        {
         }
     }
 }

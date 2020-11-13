@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <uie:ObjectField label="Theme Style Sheet" allow-scene-objects="false" name="themeStyleSheet" binding-path="themeUss" tooltip="The main style sheet file to give styles to Unity provided elements (buttons, etc.).">
-    </uie:ObjectField>
+    <uie:ObjectField label="Theme Style Sheet" allow-scene-objects="false" name="themeStyleSheet" binding-path="themeUss" tooltip="The main style sheet file to give styles to Unity provided elements (buttons, etc.)."></uie:ObjectField>
+    <uie:ObjectField label="Text Settings" allow-scene-objects="false" name="textSettings" binding-path="textSettings" tooltip="The TextSettings used by all elements contained by this panel."></uie:ObjectField>
     <uie:ObjectField label="Target Texture" allow-scene-objects="false" name="targetTexture" binding-path="m_TargetTexture" tooltip="An optional texture onto which the panel should be rendered.">
     </uie:ObjectField>
     <uie:FloatField label="Sort Order" value="0" name="sortingOrder" binding-path="m_SortingOrder" tooltip="Defines the sorting order to the panel created by this PanelSettings, in relation to other panels.">

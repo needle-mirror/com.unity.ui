@@ -17,10 +17,11 @@ namespace UnityEngine.UIElements
             m_Target.RegisterCallback<PointerLeaveEvent>(OnPointerLeaveEvent);
             m_Target.RegisterCallback<PointerMoveEvent>(OnPointerMoveEvent);
 
+#if UNITY_EDITOR
             m_Target.RegisterCallback<DragUpdatedEvent>(OnDragUpdate);
             m_Target.RegisterCallback<DragPerformEvent>(OnDragPerformEvent);
             m_Target.RegisterCallback<DragExitedEvent>(OnDragExitedEvent);
-
+#endif
             m_Target.RegisterCallback<DetachFromPanelEvent>(UnregisterCallbacksFromTarget);
         }
 
@@ -29,11 +30,12 @@ namespace UnityEngine.UIElements
             m_Target.UnregisterCallback<PointerDownEvent>(OnPointerDownEvent);
             m_Target.UnregisterCallback<PointerUpEvent>(OnPointerUpEvent);
             m_Target.UnregisterCallback<PointerLeaveEvent>(OnPointerLeaveEvent);
-
+            m_Target.UnregisterCallback<PointerMoveEvent>(OnPointerMoveEvent);
+#if UNITY_EDITOR
             m_Target.UnregisterCallback<DragUpdatedEvent>(OnDragUpdate);
             m_Target.UnregisterCallback<DragPerformEvent>(OnDragPerformEvent);
             m_Target.UnregisterCallback<DragExitedEvent>(OnDragExitedEvent);
-            m_Target.UnregisterCallback<PointerMoveEvent>(OnPointerMoveEvent);
+#endif
 
             m_Target.UnregisterCallback<DetachFromPanelEvent>(UnregisterCallbacksFromTarget);
         }
@@ -76,6 +78,7 @@ namespace UnityEngine.UIElements
                 ClearDragAndDropUI();
         }
 
+#if UNITY_EDITOR
         private void OnDragExitedEvent(DragExitedEvent evt)
         {
             ClearDragAndDropUI();
@@ -96,6 +99,7 @@ namespace UnityEngine.UIElements
             DragAndDropUtility.dragAndDrop.SetVisualMode(visualMode);
         }
 
+#endif
         private void OnPointerMoveEvent(PointerMoveEvent evt)
         {
             if (!m_CanStartDrag)

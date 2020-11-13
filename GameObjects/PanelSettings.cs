@@ -109,7 +109,7 @@ namespace UnityEngine.UIElements
         }
 
         [SerializeField]
-        private PanelScaleModes m_ScaleMode = PanelScaleModes.ConstantPixelSize;
+        private PanelScaleModes m_ScaleMode = PanelScaleModes.ConstantPhysicalSize;
 
         /// <summary>
         /// Determines how elements in the panel scale when the screen size changes.
@@ -138,10 +138,11 @@ namespace UnityEngine.UIElements
 
         #region Scaling parameters
 
+        private const float DefaultDpi = 96;
         [SerializeField]
-        private float m_ReferenceDpi = 96;
+        private float m_ReferenceDpi = DefaultDpi;
         [SerializeField]
-        private float m_FallbackDpi = 96;
+        private float m_FallbackDpi = DefaultDpi;
 
         /// <summary>
         /// The DPI that the UI is designed for.
@@ -155,7 +156,7 @@ namespace UnityEngine.UIElements
         public float referenceDpi
         {
             get => m_ReferenceDpi;
-            set => m_ReferenceDpi = value;
+            set => m_ReferenceDpi = (value >= 1.0f) ? value : DefaultDpi;
         }
 
         /// <summary>
@@ -164,7 +165,7 @@ namespace UnityEngine.UIElements
         public float fallbackDpi
         {
             get => m_FallbackDpi;
-            set => m_FallbackDpi = value;
+            set => m_FallbackDpi = (value >= 1.0f) ? value : DefaultDpi;
         }
 
         [SerializeField]
@@ -227,10 +228,15 @@ namespace UnityEngine.UIElements
             set
             {
                 m_SortingOrder = value;
-                if (m_RuntimePanel != null)
-                {
-                    m_RuntimePanel.sortingPriority = m_SortingOrder;
-                }
+                ApplySortingOrder();
+            }
+        }
+
+        internal void ApplySortingOrder()
+        {
+            if (m_RuntimePanel != null)
+            {
+                m_RuntimePanel.sortingPriority = m_SortingOrder;
             }
         }
 
@@ -272,6 +278,10 @@ namespace UnityEngine.UIElements
         /// <summary>
         /// The color used to clear the color buffer.
         /// </summary>
+        /// <remarks>
+        /// The color is specified as a "straight" color but will internally be converted to "premultiplied" before
+        /// being applied.
+        /// </remarks>
         public Color colorClearValue
         {
             get => m_ColorClearValue;
@@ -283,14 +293,14 @@ namespace UnityEngine.UIElements
 #endif
 
         /// <summary>
-        /// NEVER USE THIS DIRECTLY! Use m_Panel instead to guarantee correct initialization.
+        /// NEVER USE THIS DIRECTLY! Use panel instead to guarantee correct initialization.
         /// </summary>
         private BaseRuntimePanel m_RuntimePanel;
 
         /// <summary>
         /// Internal, typed access to the Panel used to draw UI of type Player.
         /// </summary>
-        private BaseRuntimePanel m_Panel
+        internal BaseRuntimePanel panel
         {
             get
             {
@@ -306,6 +316,8 @@ namespace UnityEngine.UIElements
                     // There's a single StyleSheet tracker for Live Reload per panel, so we can hook it up
                     // here instead of in individual UIDocuments (where VisualTreeAsset trackers are set up).
                     m_RuntimePanel.m_LiveReloadStyleSheetAssetTracker = CreateLiveReloadStyleSheetAssetTracker.Invoke();
+
+                    m_RuntimePanel.enableAssetReload = true;
 #endif
 
                     if (m_TargetTexture != null)
@@ -321,7 +333,7 @@ namespace UnityEngine.UIElements
 
                 return m_RuntimePanel;
             }
-            set
+            private set
             {
                 // Only acceptable value to set is null, in which case we dispose the panel.
                 Assert.IsNull(value);
@@ -335,17 +347,11 @@ namespace UnityEngine.UIElements
         }
 
         /// <summary>
-        /// The panel created with the configuration held by this object.
-        /// </summary>
-        internal IPanel panel => m_Panel;
-
-        /// <summary>
         /// The top level visual element.
         /// </summary>
-        internal VisualElement visualTree => m_Panel.visualTree;
+        internal VisualElement visualTree => panel.visualTree;
 
-        // UIDocument are added to the visual tree in order of their appearance in the Hierarchy View.
-        private SortedDictionary<UIDocumentHierarchicalIndex, UIDocument> m_AttachedUIDocuments = null;
+        private UIDocumentList m_AttachedUIDocumentsList;
 
         [HideInInspector]
         [SerializeField]
@@ -369,6 +375,9 @@ namespace UnityEngine.UIElements
         [HideInInspector]
         private Shader m_RuntimeWorldShader;
 
+        [SerializeField]
+        internal Object textSettings;
+
         private Rect m_TargetRect;
         private float m_ResolvedScale; // panel scaling factor (pixels <-> points)
 
@@ -387,17 +396,21 @@ namespace UnityEngine.UIElements
 
             m_AtlasBlitShader = m_RuntimeShader = m_RuntimeWorldShader = null;
             InitializeShaders();
+            InitializeTextSettings();
 #endif
         }
 
         private void OnEnable()
         {
             InitializeShaders();
+
+            // Handle automatic upgrade of PanelSettings that were created before the introduction of PanelTextSettings.
+            InitializeTextSettings();
         }
 
         private void OnDisable()
         {
-            m_Panel = null;
+            panel = null;
         }
 
         private void ApplyThemeStyleSheet(VisualElement root = null)
@@ -422,7 +435,6 @@ namespace UnityEngine.UIElements
         private BaseRuntimePanel CreateRelatedRuntimePanel()
         {
             var newPanel = (RuntimePanel)UIElementsRuntimeUtility.FindOrCreateRuntimePanel(this, RuntimePanel.Create);
-            newPanel.visualTree.pseudoStates |= PseudoStates.Root;
 #if UNITY_EDITOR
             UIElementsEditorRuntimeUtility.CreateRuntimePanelDebug(newPanel);
 #endif
@@ -432,6 +444,30 @@ namespace UnityEngine.UIElements
         private void DisposeRelatedPanel()
         {
             UIElementsRuntimeUtility.DisposeRuntimePanel(this);
+        }
+
+        void InitializeTextSettings()
+        {
+#if UNITY_EDITOR
+            if (textSettings == null)
+            {
+                if (TextDelegates.HasTextSettings?.Invoke() ?? false)
+                {
+                    textSettings = TextDelegates.GetTextSettings();
+                }
+                else
+                {
+                    TextDelegates.OnTextSettingsImported += OnTextSettingsImported;
+                    TextDelegates.ImportDefaultTextSettings?.Invoke();
+                }
+            }
+#endif
+        }
+
+        void OnTextSettingsImported()
+        {
+            TextDelegates.OnTextSettingsImported -= OnTextSettingsImported;
+            textSettings = TextDelegates.GetTextSettings();
         }
 
         void InitializeShaders()
@@ -466,17 +502,17 @@ namespace UnityEngine.UIElements
                 m_TargetRect.width != oldTargetRect.width ||
                 m_TargetRect.height != oldTargetRect.height)
             {
-                m_Panel.scale = m_ResolvedScale == 0.0f ? 0.0f : 1.0f / m_ResolvedScale;
+                panel.scale = m_ResolvedScale == 0.0f ? 0.0f : 1.0f / m_ResolvedScale;
                 visualTree.style.left = 0;
                 visualTree.style.top = 0;
                 visualTree.style.width = m_TargetRect.width * m_ResolvedScale;
                 visualTree.style.height = m_TargetRect.height * m_ResolvedScale;
             }
-            m_Panel.targetTexture = targetTexture;
-            m_Panel.drawToCameras = false; //we don`t support WorldSpace rendering just yet
-            m_Panel.clearSettings = new PanelClearSettings {clearColor = m_ClearColor, clearDepthStencil = m_ClearDepthStencil, color = m_ColorClearValue};
+            panel.targetTexture = targetTexture;
+            panel.drawToCameras = false; //we don`t support WorldSpace rendering just yet
+            panel.clearSettings = new PanelClearSettings {clearColor = m_ClearColor, clearDepthStencil = m_ClearDepthStencil, color = m_ColorClearValue};
 
-            var atlas = m_Panel.atlas as DynamicAtlas;
+            var atlas = panel.atlas as DynamicAtlas;
             if (atlas != null)
             {
                 atlas.minAtlasSize = dynamicAtlasSettings.minAtlasSize;
@@ -505,7 +541,7 @@ namespace UnityEngine.UIElements
         public void SetScreenToPanelSpaceFunction(Func<Vector2, Vector2> screentoPanelSpaceFunction)
         {
             m_AssignedScreenToPanel = screentoPanelSpaceFunction;
-            m_Panel.screenToPanelSpace = m_AssignedScreenToPanel;
+            panel.screenToPanelSpace = m_AssignedScreenToPanel;
         }
 
         private Func<Vector2, Vector2> m_AssignedScreenToPanel;
@@ -575,104 +611,39 @@ namespace UnityEngine.UIElements
             return new Rect(0, 0, Screen.width, Screen.height);
         }
 
-        private void AttachUIDocument(UIDocument uiDocument)
-        {
-            if (uiDocument == null)
-            {
-                return;
-            }
-
-            if (m_AttachedUIDocuments == null)
-            {
-                m_AttachedUIDocuments = new SortedDictionary<UIDocumentHierarchicalIndex, UIDocument>(UIDocumentHierarchyUtil.indexComparer);
-            }
-
-            m_AttachedUIDocuments[uiDocument.m_HierarchicalIndex] = uiDocument;
-        }
-
         internal void AttachAndInsertUIDocumentToVisualTree(UIDocument uiDocument)
         {
-            AttachUIDocument(uiDocument);
-
-            // Shouldn't be null but if it is there's nothing we can do about it.
-            if (visualTree == null)
+            if (m_AttachedUIDocumentsList == null)
             {
-                return;
+                m_AttachedUIDocumentsList = new UIDocumentList();
+            }
+            else
+            {
+                m_AttachedUIDocumentsList.RemoveFromListAndFromVisualTree(uiDocument);
             }
 
-            if (uiDocument.rootVisualElement != null)
-            {
-                int childIndex = UIDocumentHierarchyUtil.FindHierarchicalSortedIndex(m_AttachedUIDocuments, uiDocument);
-                visualTree.Insert(childIndex, uiDocument.rootVisualElement);
-            }
+            m_AttachedUIDocumentsList.AddToListAndToVisualTree(uiDocument, visualTree);
         }
 
         internal void DetachUIDocument(UIDocument uiDocument)
         {
-            if (m_AttachedUIDocuments == null || uiDocument == null || uiDocument.m_HierarchicalIndex.pathToParent == null)
+            if (m_AttachedUIDocumentsList == null)
             {
                 return;
             }
 
-            uiDocument.rootVisualElement?.RemoveFromHierarchy();
+            m_AttachedUIDocumentsList.RemoveFromListAndFromVisualTree(uiDocument);
 
-            m_AttachedUIDocuments.Remove(uiDocument.m_HierarchicalIndex);
-
-            if (m_AttachedUIDocuments.Count == 0)
+            if (m_AttachedUIDocumentsList.m_AttachedUIDocuments.Count == 0)
             {
                 // No references to the panel, we can dispose it and it'll be recreated if it's used again.
-                m_Panel = null;
+                panel = null;
             }
         }
 
-        internal void RemoveAttachedUIDocumentFromPreviousIndex(UIDocument uiDocument, UIDocumentHierarchicalIndex previousIndex)
-        {
-            if (m_AttachedUIDocuments == null || previousIndex.pathToParent == null)
-            {
-                return;
-            }
-
-            if (m_AttachedUIDocuments.TryGetValue(previousIndex, out UIDocument previousChild) &&
-                uiDocument == previousChild)
-            {
-                m_AttachedUIDocuments.Remove(previousIndex);
-            }
-
-            if (m_AttachedUIDocuments.Count == 0)
-            {
-                // No references to the panel, we can dispose it and it'll be recreated if it's used again.
-                m_Panel = null;
-            }
-        }
-
-        /// <summary>
-        /// In Play mode, this method makes it possible to present root-level UIDocument components
-        /// in the order in which they appear in the GameObject hierarchy.
-        /// </summary>
-        /// <remarks>
-        /// When you move GameObjects in the hierarchy, their index values become outdated. This method
-        /// updates the index values, and ensures that UI components are presented in the correct order.
-        ///
-        /// You must call this method when you move UIDocument components while in Play mode. You do not
-        /// need to call it in Edit mode because Editor scripts already guarantee that components appear
-        /// in the correct order.
-        /// </remarks>
-        public void OrderByHierarchy()
-        {
-            if (m_AttachedUIDocuments == null)
-            {
-                return;
-            }
-
-            // Asking each UIDocument to re-position themselves will alter the attached list so we need a copy
-            // to safely iterate on it.
-            var attachedUIDocumentsCopy = new List<UIDocument>(m_AttachedUIDocuments.Values);
-
-            foreach (var uiDocument in attachedUIDocumentsCopy)
-            {
-                uiDocument.ReactToTopLevelHierarchyChanged();
-            }
-        }
+        [Obsolete("UIDocument ordering is done by explicit sort order and the Game Object hierarchy is " +
+            "no longer used for automatic ordering like it was before.")]
+        public void OrderByHierarchy() {}
 
 #if UNITY_EDITOR
         private StyleSheet m_OldThemeUss;
@@ -682,6 +653,10 @@ namespace UnityEngine.UIElements
 
         private void OnValidate()
         {
+            // reassigning via the properties will re-run the value bounds check on the dpi values
+            referenceDpi = m_ReferenceDpi;
+            fallbackDpi = m_FallbackDpi;
+
             if (m_Scale < 0.0f || m_ScaleMode != PanelScaleModes.ConstantPixelSize)
             {
                 m_Scale = k_DefaultScaleValue;

@@ -201,10 +201,7 @@ namespace UnityEngine.UIElements
         /// Sets the focus controller for this panel.
         /// </summary>
         FocusController focusController { get; set; }
-        /// <summary>
-        /// Sets the event interpreter for this panel.
-        /// </summary>
-        IEventInterpreter eventInterpreter { get; set; }
+
         /// <summary>
         /// Sets the event dispatcher for this panel.
         /// </summary>
@@ -219,7 +216,6 @@ namespace UnityEngine.UIElements
         public abstract GetViewDataDictionary getViewDataDictionary { get; set; }
         public abstract int IMGUIContainersCount { get; set; }
         public abstract FocusController focusController { get; set; }
-        public abstract IEventInterpreter eventInterpreter { get; set; }
         public abstract IMGUIContainer rootIMGUIContainer { get; set; }
 
 #if UNITY_UIELEMENTS_DEBUG_DISPOSE
@@ -274,6 +270,9 @@ namespace UnityEngine.UIElements
 #if UNITY_EDITOR
         public abstract void UpdateAssetTrackers();
         public abstract void DirtyStyleSheets();
+
+        public bool enableAssetReload { get; set; }
+
 #endif
         private float m_Scale = 1;
         internal float scale
@@ -388,6 +387,10 @@ namespace UnityEngine.UIElements
         internal abstract uint version { get; }
         internal abstract uint repaintVersion { get; }
 
+#if UNITY_EDITOR
+        // Updaters can request an panel invalidation when some callbacks aren't coming from UIElements internally
+        internal abstract void RequestUpdateAfterExternalEvent(IVisualTreeUpdater updater);
+#endif
         internal abstract void OnVersionChanged(VisualElement ele, VersionChangeType changeTypeFlag);
         internal abstract void SetUpdater(IVisualTreeUpdater updater, VisualTreeUpdatePhase phase);
 
@@ -423,11 +426,11 @@ namespace UnityEngine.UIElements
         internal ILiveReloadAssetTracker<StyleSheet> m_LiveReloadStyleSheetAssetTracker
         {
             get =>
-                (GetEditorUpdater(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged) as
+                (GetEditorUpdater(VisualTreeEditorUpdatePhase.AssetChange) as
                     VisualTreeAssetChangeTrackerUpdater)?.m_LiveReloadStyleSheetAssetTracker;
             set
             {
-                if (GetEditorUpdater(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged) is VisualTreeAssetChangeTrackerUpdater updater)
+                if (GetEditorUpdater(VisualTreeEditorUpdatePhase.AssetChange) is VisualTreeAssetChangeTrackerUpdater updater)
                 {
                     updater.m_LiveReloadStyleSheetAssetTracker = value;
                 }
@@ -437,19 +440,31 @@ namespace UnityEngine.UIElements
         internal void StartVisualTreeAssetTracking(ILiveReloadAssetTracker<VisualTreeAsset> tracker,
             VisualElement visualElementUsingAsset)
         {
-            (GetEditorUpdater(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged) as
+            (GetEditorUpdater(VisualTreeEditorUpdatePhase.AssetChange) as
                 VisualTreeAssetChangeTrackerUpdater)?.StartVisualTreeAssetTracking(tracker, visualElementUsingAsset);
         }
 
         internal void StopVisualTreeAssetTracking(VisualElement visualElementUsingAsset)
         {
-            (GetEditorUpdater(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged) as
+            (GetEditorUpdater(VisualTreeEditorUpdatePhase.AssetChange) as
                 VisualTreeAssetChangeTrackerUpdater)?.StopVisualTreeAssetTracking(visualElementUsingAsset);
+        }
+
+        public void OnTextElementAdded(TextElement element)
+        {
+            (GetEditorUpdater(VisualTreeEditorUpdatePhase.AssetChange) as
+                VisualTreeAssetChangeTrackerUpdater)?.RegisterTextElement(element);
+        }
+
+        public void OnTextElementRemoved(TextElement element)
+        {
+            (GetEditorUpdater(VisualTreeEditorUpdatePhase.AssetChange) as
+                VisualTreeAssetChangeTrackerUpdater)?.UnregisterTextElement(element);
         }
 
         internal HashSet<ILiveReloadAssetTracker<VisualTreeAsset>> GetVisualTreeAssetTrackersListCopy()
         {
-            return (GetEditorUpdater(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged) as
+            return (GetEditorUpdater(VisualTreeEditorUpdatePhase.AssetChange) as
                 VisualTreeAssetChangeTrackerUpdater)?.GetVisualTreeAssetTrackersListCopy();
         }
 
@@ -614,8 +629,6 @@ namespace UnityEngine.UIElements
         public override GetViewDataDictionary getViewDataDictionary { get; set; }
 
         public sealed override FocusController focusController { get; set; }
-
-        public sealed override IEventInterpreter eventInterpreter { get; set; } = EventInterpreter.s_Instance;
 
         public override EventInterests IMGUIEventInterests { get; set; }
 
@@ -930,7 +943,7 @@ namespace UnityEngine.UIElements
 #if UNITY_EDITOR
         public override void UpdateAssetTrackers()
         {
-            m_VisualTreeUpdater.UpdateEditorVisualTreePhase(VisualTreeEditorUpdatePhase.VisualTreeAssetChanged);
+            m_VisualTreeUpdater.UpdateEditorVisualTreePhase(VisualTreeEditorUpdatePhase.AssetChange);
         }
 
 #endif
@@ -991,6 +1004,16 @@ namespace UnityEngine.UIElements
 #endif
         }
 
+#if UNITY_EDITOR
+        // Updaters can request an panel invalidation when some callbacks aren't coming from UIElements internally
+        internal override void RequestUpdateAfterExternalEvent(IVisualTreeUpdater updater)
+        {
+            if (updater == null)
+                throw new ArgumentNullException(nameof(updater));
+            ++m_Version;
+        }
+
+#endif
         internal override void OnVersionChanged(VisualElement ve, VersionChangeType versionChangeType)
         {
             ++m_Version;

@@ -100,6 +100,7 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("UnityEditor.AR")]
 [assembly: InternalsVisibleTo("UnityEditor.SpatialTracking")]
 [assembly: InternalsVisibleTo("Unity.WindowsMRAutomation")]
+[assembly: InternalsVisibleTo("Unity.InternalAPIEngineBridgeDev.003")] // for Graph Tools Foundation
 [assembly: InternalsVisibleTo("Unity.InternalAPIEditorBridge.001")]
 [assembly: InternalsVisibleTo("Unity.InternalAPIEditorBridge.002")]
 [assembly: InternalsVisibleTo("Unity.InternalAPIEditorBridge.003")]
@@ -140,12 +141,11 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("Unity.2D.Tilemap.Editor")]
 [assembly: InternalsVisibleTo("Unity.2D.Tilemap.EditorTests")]
 [assembly: InternalsVisibleTo("Unity.PackageCleanConsoleTest.Editor")]
-[assembly: InternalsVisibleTo("Unity.UIElements")]
-[assembly: InternalsVisibleTo("Unity.UIElements.Editor")]
 [assembly: InternalsVisibleTo("Unity.UIElements.Tests")]
 [assembly: InternalsVisibleTo("Unity.UIElements.EditorTests")]
 [assembly: InternalsVisibleTo("UnityEngine.UIElementsGameObjectsModule")]
 [assembly: InternalsVisibleTo("UnityEditor.UIElementsGameObjectsModule")]
+[assembly: InternalsVisibleTo("Unity.UIElements.Editor.Text")]
 
 [assembly: InternalsVisibleTo("Unity.SceneTemplate.Editor")]
 [assembly: InternalsVisibleTo("com.unity.purchasing.udp.Editor")]

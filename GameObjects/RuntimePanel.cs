@@ -7,7 +7,7 @@ namespace UnityEngine.UIElements
     {
         static readonly EventDispatcher s_EventDispatcher = RuntimeEventDispatcher.Create();
 
-        private PanelSettings m_PanelSettings;
+        internal PanelSettings m_PanelSettings;
         public static RuntimePanel Create(ScriptableObject ownerObject)
         {
             return new RuntimePanel(ownerObject);
@@ -17,7 +17,6 @@ namespace UnityEngine.UIElements
             : base(ownerObject, s_EventDispatcher)
         {
             focusController = new FocusController(new NavigateFocusRing(visualTree));
-            eventInterpreter = RuntimeEventInterpreter.s_Instance;
             m_PanelSettings  = ownerObject as PanelSettings;
         }
 

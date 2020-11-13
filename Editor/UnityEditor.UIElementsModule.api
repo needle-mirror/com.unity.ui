@@ -16,6 +16,7 @@ namespace UnityEditor.UIElements
         public static readonly string ussClassName;
         protected BaseCompositeField(string label, int fieldsByLine) {}
         public virtual void SetValueWithoutNotify(TValueType newValue);
+        protected virtual void UpdateMixedValueContent();
     }
 
     public abstract class BaseMaskField<TChoice> : UnityEditor.UIElements.BasePopupField<TChoice, string>
@@ -34,6 +35,7 @@ namespace UnityEditor.UIElements
         protected UnityEngine.UIElements.TextElement textElement { get; }
         protected virtual void ExecuteDefaultActionAtTarget(UnityEngine.UIElements.EventBase evt);
         public virtual void SetValueWithoutNotify(TValueType newValue);
+        protected virtual void UpdateMixedValueContent();
     }
 
     [System.Runtime.CompilerServices.Extension] public static class BindingExtensions
@@ -42,6 +44,7 @@ namespace UnityEditor.UIElements
         [System.Runtime.CompilerServices.Extension] public static void Bind(UnityEngine.UIElements.VisualElement element, UnityEditor.SerializedObject obj);
         [System.Runtime.CompilerServices.Extension] public static void BindProperty(UnityEngine.UIElements.IBindable field, UnityEditor.SerializedProperty property);
         [System.Runtime.CompilerServices.Extension] public static UnityEditor.SerializedProperty BindProperty(UnityEngine.UIElements.IBindable field, UnityEditor.SerializedObject obj);
+        [System.Runtime.CompilerServices.Extension] public static void TrackPropertyValue(UnityEngine.UIElements.VisualElement element, UnityEditor.SerializedProperty property, System.Action<UnityEditor.SerializedProperty> callback = default(System.Action<UnityEditor.SerializedProperty>));
         [System.Runtime.CompilerServices.Extension] public static void Unbind(UnityEngine.UIElements.VisualElement element);
     }
 
@@ -55,6 +58,7 @@ namespace UnityEditor.UIElements
         public BoundsField() {}
         public BoundsField(string label) {}
         public virtual void SetValueWithoutNotify(UnityEngine.Bounds newValue);
+        protected virtual void UpdateMixedValueContent();
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEditor.UIElements.BoundsField, UnityEditor.UIElements.BoundsField.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -76,6 +80,7 @@ namespace UnityEditor.UIElements
         public BoundsIntField() {}
         public BoundsIntField(string label) {}
         public virtual void SetValueWithoutNotify(UnityEngine.BoundsInt newValue);
+        protected virtual void UpdateMixedValueContent();
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEditor.UIElements.BoundsIntField, UnityEditor.UIElements.BoundsIntField.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -97,6 +102,7 @@ namespace UnityEditor.UIElements
         public bool showEyeDropper { get; set; }
         public ColorField() {}
         public ColorField(string label) {}
+        protected virtual void UpdateMixedValueContent();
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEditor.UIElements.ColorField, UnityEditor.UIElements.ColorField.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -122,6 +128,7 @@ namespace UnityEditor.UIElements
         public CurveField(string label) {}
         protected virtual void ExecuteDefaultAction(UnityEngine.UIElements.EventBase evt);
         public virtual void SetValueWithoutNotify(UnityEngine.AnimationCurve newValue);
+        protected virtual void UpdateMixedValueContent();
         public enum RenderMode
         {
             public const UnityEditor.UIElements.CurveField.RenderMode Default = 0;
@@ -183,6 +190,7 @@ namespace UnityEditor.UIElements
         public void Init(System.Enum defaultValue);
         public void Init(System.Enum defaultValue, bool includeObsoleteValues);
         public virtual void SetValueWithoutNotify(System.Enum newValue);
+        protected virtual void UpdateMixedValueContent();
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEditor.UIElements.EnumField, UnityEditor.UIElements.EnumField.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -260,11 +268,32 @@ namespace UnityEditor.UIElements
         public GradientField(string label) {}
         protected virtual void ExecuteDefaultAction(UnityEngine.UIElements.EventBase evt);
         public virtual void SetValueWithoutNotify(UnityEngine.Gradient newValue);
+        protected virtual void UpdateMixedValueContent();
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEditor.UIElements.GradientField, UnityEditor.UIElements.GradientField.UxmlTraits>
         {
             public UxmlFactory() {}
         }
         public class UxmlTraits : UnityEngine.UIElements.BaseField<UnityEngine.Gradient>
+        {
+            public UxmlTraits() {}
+        }
+    }
+
+    public class Hash128Field : UnityEngine.UIElements.TextInputBaseField<UnityEngine.Hash128>
+    {
+        public static readonly string inputUssClassName;
+        public static readonly string labelUssClassName;
+        public static readonly string ussClassName;
+        public virtual UnityEngine.Hash128 value { get; set; }
+        public Hash128Field() {}
+        public Hash128Field(int maxLength) {}
+        public Hash128Field(string label, int maxLength = -1) {}
+        public virtual void SetValueWithoutNotify(UnityEngine.Hash128 newValue);
+        public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEditor.UIElements.Hash128Field, UnityEditor.UIElements.Hash128Field.UxmlTraits>
+        {
+            public UxmlFactory() {}
+        }
+        public class UxmlTraits : UnityEditor.UIElements.TextValueFieldTraits<UnityEngine.Hash128, UnityEngine.UIElements.UxmlHash128AttributeDescription>
         {
             public UxmlTraits() {}
         }
@@ -289,6 +318,7 @@ namespace UnityEditor.UIElements
         public InspectorElement(UnityEditor.SerializedObject obj) {}
         public InspectorElement(UnityEngine.Object obj) {}
         protected virtual void ExecuteDefaultActionAtTarget(UnityEngine.UIElements.EventBase evt);
+        public static void FillDefaultInspector(UnityEngine.UIElements.VisualElement container, UnityEditor.SerializedObject serializedObject, UnityEditor.Editor editor);
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEditor.UIElements.InspectorElement, UnityEditor.UIElements.InspectorElement.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -434,6 +464,7 @@ namespace UnityEditor.UIElements
         public ObjectField() {}
         public ObjectField(string label) {}
         public virtual void SetValueWithoutNotify(UnityEngine.Object newValue);
+        protected virtual void UpdateMixedValueContent();
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEditor.UIElements.ObjectField, UnityEditor.UIElements.ObjectField.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -597,8 +628,6 @@ namespace UnityEditor.UIElements
         public virtual void SetValueWithoutNotify(TValueType newValue);
         public virtual void StartDragging();
         public virtual void StopDragging();
-        protected abstract TValueType StringToValue(string str);
-        protected abstract string ValueToString(TValueType value);
         protected abstract class TextValueInput<TValueType> : UnityEngine.UIElements.TextInputBaseField<TValueType>
         {
             protected abstract string allowedCharacters { get; }

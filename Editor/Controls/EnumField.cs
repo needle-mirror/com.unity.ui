@@ -120,6 +120,8 @@ namespace UnityEditor.UIElements
             labelElement.AddToClassList(labelUssClassName);
             visualInput.AddToClassList(inputUssClassName);
             Initialize(defaultValue);
+
+            RegisterCallback<PointerDownEvent>(OnPointerDownEvent);
         }
 
         /// <summary>
@@ -167,6 +169,18 @@ namespace UnityEditor.UIElements
             }
         }
 
+        void OnPointerDownEvent(PointerDownEvent evt)
+        {
+            if (evt.button == (int)MouseButton.LeftMouse)
+            {
+                if (visualInput.ContainsPoint(visualInput.WorldToLocal(evt.originalMousePosition)))
+                {
+                    ShowMenu();
+                    evt.StopPropagation();
+                }
+            }
+        }
+
         protected override void ExecuteDefaultActionAtTarget(EventBase evt)
         {
             base.ExecuteDefaultActionAtTarget(evt);
@@ -175,7 +189,7 @@ namespace UnityEditor.UIElements
             {
                 return;
             }
-            var showEnumMenu = false;
+
             KeyDownEvent kde = (evt as KeyDownEvent);
             if (kde != null)
             {
@@ -183,22 +197,9 @@ namespace UnityEditor.UIElements
                     (kde.keyCode == KeyCode.KeypadEnter) ||
                     (kde.keyCode == KeyCode.Return))
                 {
-                    showEnumMenu = true;
+                    ShowMenu();
+                    evt.StopPropagation();
                 }
-            }
-            else if ((evt as MouseDownEvent)?.button == (int)MouseButton.LeftMouse)
-            {
-                var mde = (MouseDownEvent)evt;
-                if (visualInput.ContainsPoint(visualInput.WorldToLocal(mde.mousePosition)))
-                {
-                    showEnumMenu = true;
-                }
-            }
-
-            if (showEnumMenu)
-            {
-                ShowMenu();
-                evt.StopPropagation();
             }
         }
 
@@ -228,6 +229,17 @@ namespace UnityEditor.UIElements
         private void ChangeValueFromMenu(object menuItem)
         {
             value = menuItem as Enum;
+        }
+
+        protected override void UpdateMixedValueContent()
+        {
+            if (showMixedValue)
+            {
+                m_TextElement.text = mixedValueString;
+            }
+
+            m_TextElement.EnableInClassList(labelUssClassName, showMixedValue);
+            m_TextElement.EnableInClassList(mixedValueLabelUssClassName, showMixedValue);
         }
     }
 }

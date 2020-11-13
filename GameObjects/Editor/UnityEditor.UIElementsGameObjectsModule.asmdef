@@ -1,10 +1,13 @@
 {
     "name": "UnityEditor.UIElementsGameObjectsModule",
+    "rootNamespace": "",
     "references": [
         "UnityEngine.UIElementsModule",
         "UnityEditor.UIElementsModule",
         "UnityEngine.UIElementsGameObjectsModule",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Unity.UIElements.Text",
+        "Unity.TextCore"
     ],
     "includePlatforms": [
         "Editor"
@@ -12,8 +15,7 @@
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
-    "precompiledReferences": [
-    ],
+    "precompiledReferences": [],
     "autoReferenced": false,
     "defineConstraints": [
         "UIE_PACKAGE"

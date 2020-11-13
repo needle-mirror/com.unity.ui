@@ -75,17 +75,36 @@ namespace UnityEditor.UIElements
         /// </summary>
         public bool allowSceneObjects { get; set; }
 
+        protected override void UpdateMixedValueContent()
+        {
+            m_ObjectFieldDisplay?.ShowMixedValue(showMixedValue);
+        }
+
         private class ObjectFieldDisplay : VisualElement
         {
             private readonly ObjectField m_ObjectField;
             private readonly Image m_ObjectIcon;
             private readonly Label m_ObjectLabel;
 
-            public static readonly string ussClassName = "unity-object-field-display";
-            public static readonly string iconUssClassName = ussClassName + "__icon";
-            public static readonly string labelUssClassName = ussClassName + "__label";
-            public static readonly string acceptDropVariantUssClassName = ussClassName + "--accept-drop";
+            static readonly string ussClassName = "unity-object-field-display";
+            static readonly string iconUssClassName = ussClassName + "__icon";
+            static readonly string labelUssClassName = ussClassName + "__label";
+            static readonly string acceptDropVariantUssClassName = ussClassName + "--accept-drop";
 
+            internal void ShowMixedValue(bool show)
+            {
+                if (show)
+                {
+                    m_ObjectLabel.text = mixedValueString;
+                    m_ObjectLabel.AddToClassList(mixedValueLabelUssClassName);
+                    m_ObjectIcon.image = null;
+                }
+                else
+                {
+                    m_ObjectLabel.RemoveFromClassList(mixedValueLabelUssClassName);
+                    Update();
+                }
+            }
 
             public ObjectFieldDisplay(ObjectField objectField)
             {
@@ -254,6 +273,8 @@ namespace UnityEditor.UIElements
         }
 
         private readonly ObjectFieldDisplay m_ObjectFieldDisplay;
+        private readonly Action m_AsyncOnProjectOrHierarchyChangedCallback;
+        private readonly Action m_OnProjectOrHierarchyChangedCallback;
 
         /// <summary>
         /// USS class name of elements of this type.
@@ -297,13 +318,28 @@ namespace UnityEditor.UIElements
 
             allowSceneObjects = true;
 
-            m_ObjectFieldDisplay = new ObjectFieldDisplay(this) {focusable = true};
+            m_ObjectFieldDisplay = new ObjectFieldDisplay(this) { focusable = true };
             m_ObjectFieldDisplay.AddToClassList(objectUssClassName);
             var objectSelector = new ObjectFieldSelector(this);
             objectSelector.AddToClassList(selectorUssClassName);
             visualInput.AddToClassList(inputUssClassName);
             visualInput.Add(m_ObjectFieldDisplay);
             visualInput.Add(objectSelector);
+
+            // Get notified when hierarchy or project changes so we can update the display to handle renamed/missing objects.
+            // This event is occasionally triggered before the reference in memory is updated, so we give it time to process.
+            m_AsyncOnProjectOrHierarchyChangedCallback = () => schedule.Execute(m_OnProjectOrHierarchyChangedCallback);
+            m_OnProjectOrHierarchyChangedCallback = () => m_ObjectFieldDisplay.Update();
+            RegisterCallback<AttachToPanelEvent>((evt) =>
+            {
+                EditorApplication.projectChanged += m_AsyncOnProjectOrHierarchyChangedCallback;
+                EditorApplication.hierarchyChanged += m_AsyncOnProjectOrHierarchyChangedCallback;
+            });
+            RegisterCallback<DetachFromPanelEvent>((evt) =>
+            {
+                EditorApplication.projectChanged -= m_AsyncOnProjectOrHierarchyChangedCallback;
+                EditorApplication.hierarchyChanged -= m_AsyncOnProjectOrHierarchyChangedCallback;
+            });
         }
 
         private void OnObjectChanged(Object obj)

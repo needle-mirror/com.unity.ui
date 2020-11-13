@@ -33,8 +33,6 @@ namespace UnityEngine.UIElements
         static UIElementsRuntimeUtility()
         {
             UIElementsRuntimeUtilityNative.RepaintOverlayPanelsCallback = RepaintOverlayPanels;
-            // Uncomment when the PR lands in trunk, and remove Panel.Update reference from PanelSettings/PanelRenderer
-            //UIElementsRuntimeUtilityNative.UpdateOverlayPanelsCallback = UpdateOverlayPanels;
         }
 
         public static EventBase CreateEvent(Event systemEvent)

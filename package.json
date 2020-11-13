@@ -1,9 +1,9 @@
 {
   "name": "com.unity.ui",
   "displayName": "UI Toolkit",
-  "version": "1.0.0-preview.9",
+  "version": "1.0.0-preview.11",
   "unity": "2020.1",
-  "unityRelease": "3f1",
+  "unityRelease": "9f1",
   "keywords": [
     "UI",
     "UIElements",
@@ -16,18 +16,19 @@
   "dependencies": {
     "nuget.moq": "1.0.0",
     "nuget.castle-core": "1.0.1",
-    "com.unity.modules.uielementsnative": "1.0.0"
+    "com.unity.modules.uielementsnative": "1.0.0",
+    "com.unity.textcore": "1.0.0-preview.2"
   },
   "relatedPackages": {
-    "com.unity.ui.tests": "1.0.0-preview.9"
+    "com.unity.ui.tests": "1.0.0-preview.11"
   },
   "upmCi": {
-    "footprint": "8ce1a15967ca7b556703ebc2ea3c667573f4e0b3"
+    "footprint": "48c65ef4c944416a94d4053e298e6d916e7416fe"
   },
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.ui.git",
     "type": "git",
-    "revision": "2aba7a0c4a3a1d94124de37a28c7a9a59fbe4c59"
+    "revision": "1a26ef167c430e18dfa4070469d7c2533cdc89b6"
   },
   "samples": [
     {

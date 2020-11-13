@@ -1,4 +1,5 @@
 <UXML xmlns="UnityEngine.UIElements">
+    <Style src="../StyleSheets/Events_PointerEvents.uss" />
     <VisualElement class="window-container">
         <VisualElement class="header">
             <Label class="header__label" text="Pointer Events Demonstration" />

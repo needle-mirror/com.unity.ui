@@ -15,14 +15,12 @@ namespace Samples.Editor.Events
         }
 
         [SerializeField] private VisualTreeAsset uxmlAsset = default;
-        [SerializeField] private StyleSheet styleAsset = default;
 
         private Label label;
 
         public void OnEnable()
         {
             uxmlAsset.CloneTree(rootVisualElement);
-            rootVisualElement.styleSheets.Add(styleAsset);
 
             var menu = rootVisualElement.Q<VisualElement>(className: "menu");
             label = rootVisualElement.Q<Label>(className: "container__label");

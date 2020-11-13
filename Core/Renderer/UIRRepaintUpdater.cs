@@ -59,8 +59,12 @@ namespace UnityEngine.UIElements
                 PanelClearSettings clearSettings = panel.clearSettings;
                 if (clearSettings.clearColor || clearSettings.clearDepthStencil)
                 {
+                    // Case 1277149: Clear color must be pre-multiplied like when we render.
+                    Color clearColor = clearSettings.color;
+                    clearColor = clearColor.RGBMultiplied(clearColor.a);
+
                     GL.Clear(clearSettings.clearDepthStencil, // Clearing may impact MVP
-                        clearSettings.clearColor, clearSettings.color, UIRUtility.k_ClearZ);
+                        clearSettings.clearColor, clearColor, UIRUtility.k_ClearZ);
                 }
 
                 renderChain.Render();

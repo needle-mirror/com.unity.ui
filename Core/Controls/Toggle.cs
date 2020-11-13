@@ -88,6 +88,7 @@ namespace UnityEngine.UIElements
         public static readonly string textUssClassName = ussClassName + "__text";
 
         private Label m_Label;
+        private readonly VisualElement m_CheckMark;
 
         /// <summary>
         /// Creates a <see cref="Toggle"/> with no label.
@@ -112,9 +113,9 @@ namespace UnityEngine.UIElements
             labelElement.AddToClassList(labelUssClassName);
 
             // Allocate and add the checkmark to the hierarchy
-            var checkMark = new VisualElement() { name = "unity-checkmark", pickingMode = PickingMode.Ignore };
-            checkMark.AddToClassList(checkmarkUssClassName);
-            visualInput.Add(checkMark);
+            m_CheckMark = new VisualElement() { name = "unity-checkmark", pickingMode = PickingMode.Ignore };
+            m_CheckMark.AddToClassList(checkmarkUssClassName);
+            visualInput.Add(m_CheckMark);
 
             // The picking mode needs to be Position in order to have the Pseudostate Hover applied...
             visualInput.pickingMode = PickingMode.Position;
@@ -122,7 +123,31 @@ namespace UnityEngine.UIElements
             // Set-up the label and text...
             text = null;
             this.AddManipulator(new Clickable(OnClickEvent));
+
+            RegisterCallback<NavigationSubmitEvent>(OnNavigationSubmit);
+            RegisterCallback<KeyDownEvent>(OnKeyDown);
         }
+
+        private void OnNavigationSubmit(NavigationSubmitEvent evt)
+        {
+            ToggleValue();
+            evt.StopPropagation();
+        }
+
+        private void OnKeyDown(KeyDownEvent evt)
+        {
+            if (panel?.contextType != ContextType.Editor)
+                return;
+
+            // KeyCodes are hardcoded in the Editor, but in runtime we should use the more versatile NavigationSubmit.
+            if (evt.keyCode == KeyCode.KeypadEnter || evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.Space)
+            {
+                ToggleValue();
+                evt.StopPropagation();
+            }
+        }
+
+        private string m_OriginalText;
 
         /// <summary>
         /// Optional text that appears after the Toggle.
@@ -197,7 +222,7 @@ namespace UnityEngine.UIElements
                 var ce = (IMouseEvent)evt;
                 if (ce.button == (int)MouseButton.LeftMouse)
                 {
-                    OnClick();
+                    ToggleValue();
                 }
             }
             else if (evt.eventTypeId == PointerUpEvent.TypeId() || evt.eventTypeId == ClickEvent.TypeId())
@@ -205,29 +230,34 @@ namespace UnityEngine.UIElements
                 var ce = (IPointerEvent)evt;
                 if (ce.button == (int)MouseButton.LeftMouse)
                 {
-                    OnClick();
+                    ToggleValue();
                 }
             }
         }
 
-        void OnClick()
+        void ToggleValue()
         {
             value = !value;
         }
 
-        protected override void ExecuteDefaultActionAtTarget(EventBase evt)
+        protected override void UpdateMixedValueContent()
         {
-            base.ExecuteDefaultActionAtTarget(evt);
-
-            if (evt == null)
+            if (showMixedValue)
             {
-                return;
+                visualInput.pseudoStates &= ~PseudoStates.Checked;
+                pseudoStates &= ~PseudoStates.Checked;
+
+                m_CheckMark.RemoveFromHierarchy();
+                visualInput.Add(mixedValueLabel);
+                m_OriginalText = text;
+                text = "";
             }
-
-            if (eventInterpreter.IsActivationEvent(evt))
+            else
             {
-                OnClick();
-                evt.StopPropagation();
+                mixedValueLabel.RemoveFromHierarchy();
+                visualInput.Add(m_CheckMark);
+                if (m_OriginalText != null)
+                    text = m_OriginalText;
             }
         }
     }

@@ -15,13 +15,11 @@ namespace Samples.Editor.General
         }
 
         [SerializeField] private VisualTreeAsset uxmlAsset = default;
-        [SerializeField] private StyleSheet styleAsset = default;
         [SerializeField] private Texture backgroundImage = default;
 
         public void OnEnable()
         {
             uxmlAsset.CloneTree(rootVisualElement);
-            rootVisualElement.styleSheets.Add(styleAsset);
 
             var backgrounds = rootVisualElement.Query<ScrollView>(className: "scrollview");
             backgrounds.ForEach(scrollview => scrollview.Add(new Image {image = backgroundImage}));

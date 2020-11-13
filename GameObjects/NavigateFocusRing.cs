@@ -25,23 +25,34 @@ namespace UnityEngine.UIElements
 
         public FocusChangeDirection GetFocusChangeDirection(Focusable currentFocusable, EventBase e)
         {
-            if (e.eventTypeId == MouseDownEvent.TypeId())
+            if (e.eventTypeId == PointerDownEvent.TypeId())
             {
                 if (e.target is Focusable focusable)
                     return VisualElementFocusChangeTarget.GetPooled(focusable);
             }
 
-            if (m_Root.eventInterpreter.IsNavigationEvent(e, out NavigationDirection navigationDirection))
+            if (e.eventTypeId == NavigationMoveEvent.TypeId())
             {
-                switch (navigationDirection)
+                switch (((NavigationMoveEvent)e).direction)
                 {
-                    case NavigationDirection.Left: return Left;
-                    case NavigationDirection.Up: return Up;
-                    case NavigationDirection.Right: return Right;
-                    case NavigationDirection.Down: return Down;
-                    case NavigationDirection.Next: return Next;
-                    case NavigationDirection.Previous: return Previous;
+                    case NavigationMoveEvent.Direction.Left: return Left;
+                    case NavigationMoveEvent.Direction.Up: return Up;
+                    case NavigationMoveEvent.Direction.Right: return Right;
+                    case NavigationMoveEvent.Direction.Down: return Down;
                 }
+            }
+            //TODO: make NavigationTabEvent public and use it here
+            else if (e.eventTypeId == KeyDownEvent.TypeId())
+            {
+                var kde = (KeyDownEvent)e;
+
+                // Important: using KeyDownEvent.character for focus prevents a TextField bug.
+                // IMGUI sends KeyDownEvent with keyCode != None, then it sends another one with character != '\0'.
+                // If we use keyCode instead of character, TextField will receive focus on the first KeyDownEvent,
+                // then text will become selected and, in the case of multiline, the KeyDownEvent with character = '\t'
+                // will immediately overwrite the text with a single Tab string.
+                if (kde.character == (char)25 || kde.character == '\t')
+                    return kde.shiftKey ? Previous : Next;
             }
 
             return FocusChangeDirection.none;

@@ -276,7 +276,10 @@ namespace UnityEngine.UIElements
             if (image != null)
                 rectParams = MeshGenerationContextUtils.RectangleParams.MakeTextured(contentRect, uv, image, scaleMode, panel.contextType);
             else if (sprite != null)
-                rectParams = MeshGenerationContextUtils.RectangleParams.MakeSprite(contentRect, sprite, scaleMode, panel.contextType, out _);
+            {
+                var slices = Vector4.zero;
+                rectParams = MeshGenerationContextUtils.RectangleParams.MakeSprite(contentRect, sprite, scaleMode, panel.contextType, false, ref slices);
+            }
             else if (vectorImage != null)
                 rectParams = MeshGenerationContextUtils.RectangleParams.MakeVectorTextured(contentRect, uv, vectorImage, scaleMode, panel.contextType);
             rectParams.color = tintColor;

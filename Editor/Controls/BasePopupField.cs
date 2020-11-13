@@ -112,6 +112,20 @@ namespace UnityEditor.UIElements
             visualInput.Add(m_ArrowElement);
 
             choices = new List<TValueChoice>();
+
+            RegisterCallback<PointerDownEvent>(OnPointerDownEvent);
+        }
+
+        void OnPointerDownEvent(PointerDownEvent evt)
+        {
+            if (evt.button == (int)MouseButton.LeftMouse)
+            {
+                if (visualInput.ContainsPoint(visualInput.WorldToLocal(evt.originalMousePosition)))
+                {
+                    ShowMenu();
+                    evt.StopPropagation();
+                }
+            }
         }
 
         protected override void ExecuteDefaultActionAtTarget(EventBase evt)
@@ -123,7 +137,6 @@ namespace UnityEditor.UIElements
                 return;
             }
 
-            var showPopupMenu = false;
             KeyDownEvent kde = (evt as KeyDownEvent);
             if (kde != null)
             {
@@ -131,22 +144,9 @@ namespace UnityEditor.UIElements
                     (kde.keyCode == KeyCode.KeypadEnter) ||
                     (kde.keyCode == KeyCode.Return))
                 {
-                    showPopupMenu = true;
+                    ShowMenu();
+                    evt.StopPropagation();
                 }
-            }
-            else if ((evt as MouseDownEvent)?.button == (int)MouseButton.LeftMouse)
-            {
-                var mde = (MouseDownEvent)evt;
-                if (visualInput.ContainsPoint(visualInput.WorldToLocal(mde.mousePosition)))
-                {
-                    showPopupMenu = true;
-                }
-            }
-
-            if (showPopupMenu)
-            {
-                ShowMenu();
-                evt.StopPropagation();
             }
         }
 
@@ -169,6 +169,16 @@ namespace UnityEditor.UIElements
                 }
                 return MeasureTextSize(textToMeasure, desiredWidth, widthMode, desiredHeight, heightMode);
             }
+        }
+
+        protected override void UpdateMixedValueContent()
+        {
+            if (showMixedValue)
+            {
+                textElement.text = mixedValueString;
+            }
+
+            textElement.EnableInClassList(mixedValueLabelUssClassName, showMixedValue);
         }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -59,18 +58,6 @@ namespace UnityEditor.UIElements
         // This property to alleviate the fact we have to cast all the time
         TextValueInput textValueInput => (TextValueInput)textInputBase;
 
-        /// <summary>
-        /// Converts the given value to a string.
-        /// </summary>
-        /// <param name="value">The value to be converted to string.</param>
-        /// <returns>The value as a string.</returns>
-        protected abstract string ValueToString(TValueType value);
-        /// <summary>
-        /// Converts a string to a value type.
-        /// </summary>
-        /// <param name="str">The string to convert.</param>
-        /// <returns>The value parsed from the string.</returns>
-        protected abstract TValueType StringToValue(string str);
 
         /// <summary>
         /// The format string for the value.
@@ -106,6 +93,11 @@ namespace UnityEditor.UIElements
         /// </summary>
         public void StartDragging()
         {
+            if (showMixedValue)
+            {
+                value = default(TValueType);
+            }
+
             textValueInput.StartDragging();
         }
 
@@ -127,7 +119,9 @@ namespace UnityEditor.UIElements
             {
                 base.value = value;
                 if (textValueInput.m_UpdateTextFromValue)
+                {
                     text = ValueToString(rawValue);
+                }
             }
         }
 
@@ -302,6 +296,13 @@ namespace UnityEditor.UIElements
                     else
                     {
                         UpdateValueFromText();
+                    }
+                }
+                else if (evt.eventTypeId == FocusEvent.TypeId())
+                {
+                    if (textValueFieldParent.showMixedValue)
+                    {
+                        textValueFieldParent.value = default(TValueType);
                     }
                 }
             }

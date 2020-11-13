@@ -1,0 +1,24 @@
+{
+    "name": "Unity.UIElements.Editor.Text",
+    "rootNamespace": "",
+    "references": [
+        "Unity.UIElements.Editor",
+        "UnityEditor.UIElementsModule",
+        "Unity.UIElements.Text",
+        "UnityEditor.TextCoreModule",
+        "UnityEngine.TextCoreModule",
+        "Unity.TextCore.Editor",
+        "Unity.TextCore"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

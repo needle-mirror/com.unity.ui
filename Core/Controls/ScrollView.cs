@@ -966,15 +966,32 @@ namespace UnityEngine.UIElements
             var oldValue = verticalScroller.value;
             if (contentContainer.boundingBox.height - layout.height > 0)
             {
+                var oldVerticalValue = verticalScroller.value;
+
                 if (evt.delta.y < 0)
                     verticalScroller.ScrollPageUp(Mathf.Abs(evt.delta.y));
                 else if (evt.delta.y > 0)
                     verticalScroller.ScrollPageDown(Mathf.Abs(evt.delta.y));
+
+                if (verticalScroller.value != oldVerticalValue)
+                {
+                    evt.StopPropagation();
+                }
             }
 
-            if (verticalScroller.value != oldValue)
+            if (contentContainer.layout.width - layout.width > 0)
             {
-                evt.StopPropagation();
+                var oldHorizontalValue = horizontalScroller.value;
+
+                if (evt.delta.x < 0)
+                    horizontalScroller.ScrollPageUp(Mathf.Abs(evt.delta.x));
+                else if (evt.delta.x > 0)
+                    horizontalScroller.ScrollPageDown(Mathf.Abs(evt.delta.x));
+
+                if (horizontalScroller.value != oldHorizontalValue)
+                {
+                    evt.StopPropagation();
+                }
             }
         }
     }

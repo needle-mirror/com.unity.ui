@@ -127,9 +127,17 @@ namespace UnityEngine.UIElements
                 if (m_Event.type == EventType.Repaint)
                     continue;
 
-                if (m_Event.type == EventType.KeyUp || m_Event.type == EventType.KeyDown || m_Event.type == EventType.ScrollWheel)
+                if (m_Event.type == EventType.KeyUp || m_Event.type == EventType.KeyDown)
                 {
                     SendFocusBasedEvent(self => UIElementsRuntimeUtility.CreateEvent(self.m_Event), this);
+                }
+                else if (m_Event.type == EventType.ScrollWheel)
+                {
+                    SendPositionBasedEvent(m_Event.mousePosition, m_Event.delta, (panelPosition, panelDelta, self) =>
+                    {
+                        self.m_Event.mousePosition = panelPosition;
+                        return UIElementsRuntimeUtility.CreateEvent(self.m_Event);
+                    }, this);
                 }
                 else
                 {

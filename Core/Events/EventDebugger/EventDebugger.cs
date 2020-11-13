@@ -393,6 +393,7 @@ namespace UnityEngine.UIElements
                     panel.dispatcher.Dispatch(UIElementsUtility.CreateEvent(newEvent, EventType.KeyUp), panel,
                         DispatchMode.Default);
                 }
+#if UNITY_EDITOR
                 else if (eventBase.eventTypeId == DragUpdatedEvent.TypeId())
                 {
                     newEvent.type = EventType.DragUpdated;
@@ -411,6 +412,7 @@ namespace UnityEngine.UIElements
                     panel.dispatcher.Dispatch(UIElementsUtility.CreateEvent(newEvent, EventType.DragExited), panel,
                         DispatchMode.Default);
                 }
+#endif
                 else if (eventBase.eventTypeId == ValidateCommandEvent.TypeId())
                 {
                     newEvent.type = EventType.ValidateCommand;

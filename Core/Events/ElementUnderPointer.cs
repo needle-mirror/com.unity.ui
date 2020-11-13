@@ -214,6 +214,7 @@ namespace UnityEngine.UIElements
                                 }
                             }
                         }
+#if UNITY_EDITOR
                         else if (baseEvent.eventTypeId == DragUpdatedEvent.TypeId() ||
                                  baseEvent.eventTypeId == DragExitedEvent.TypeId())
                         {
@@ -230,6 +231,7 @@ namespace UnityEngine.UIElements
                                     previous, current, triggerMouseEvent, mousePos);
                             }
                         }
+#endif
                     }
 
                     m_TriggerMouseEvent[i] = null;

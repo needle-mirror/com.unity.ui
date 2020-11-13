@@ -90,6 +90,7 @@ namespace UnityEditor.UIElements
         public static readonly string borderUssClassName = ussClassName + "__border";
 
         VisualElement m_GradientTextureImage;
+        readonly Background m_DefaultBackground = new Background();
 
         /// <summary>
         /// Constructor.
@@ -110,7 +111,6 @@ namespace UnityEditor.UIElements
             m_GradientTextureImage = new VisualElement() { pickingMode = PickingMode.Ignore };
             m_GradientTextureImage.AddToClassList(contentUssClassName);
             visualInput.Add(m_GradientTextureImage);
-
 
             VisualElement borderElement = new VisualElement() { name = "unity-border", pickingMode = PickingMode.Ignore };
             borderElement.AddToClassList(borderUssClassName);
@@ -185,9 +185,9 @@ namespace UnityEditor.UIElements
 
         void UpdateGradientTexture()
         {
-            if (m_ValueNull)
+            if (m_ValueNull || showMixedValue)
             {
-                visualInput.style.backgroundImage = new Background();
+                visualInput.style.backgroundImage = m_DefaultBackground;
             }
             else
             {
@@ -222,6 +222,20 @@ namespace UnityEditor.UIElements
                 rawValue.mode = GradientMode.Blend;
             }
             UpdateGradientTexture();
+        }
+
+        protected override void UpdateMixedValueContent()
+        {
+            if (showMixedValue)
+            {
+                visualInput.style.backgroundImage = m_DefaultBackground;
+                visualInput.Add(mixedValueLabel);
+            }
+            else
+            {
+                UpdateGradientTexture();
+                mixedValueLabel.RemoveFromHierarchy();
+            }
         }
     }
 }

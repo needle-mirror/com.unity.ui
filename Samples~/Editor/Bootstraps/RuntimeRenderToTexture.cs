@@ -4,7 +4,9 @@ using Samples.Runtime.Rendering;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -12,8 +14,8 @@ namespace Samples.Utils
 {
     public static partial class MenuItems
     {
-        [MenuItem("Window/UI Toolkit/Examples/Rendering/RenderTexture (Runtime)")]
-        public static void StartRuntimeRenderTexture()
+        [MenuItem("Window/UI Toolkit/Examples/Rendering/RenderTexture 3D (Runtime)")]
+        public static void StartRuntimeRenderTexture3D()
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
             {
@@ -36,6 +38,38 @@ namespace Samples.Utils
             cube.transform.localEulerAngles = new Vector3(0, 180, 0);
 
             CreatePrimitive(PrimitiveType.Cylinder, material, -0.8f);
+
+            EditorApplication.EnterPlaymode();
+            EditorGUIUtility.PingObject(MonoScript.FromMonoBehaviour(component));
+        }
+
+        [MenuItem("Window/UI Toolkit/Examples/Rendering/RenderTexture Background (Runtime)")]
+        public static void StartRuntimeRenderTextureBackground()
+        {
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                return;
+            }
+
+            EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects);
+
+            var go = new GameObject("UI");
+            var doc = go.AddComponent<UIDocument>();
+            go.AddComponent<EventSystem>();
+            var component = go.AddComponent<RenderTextureBackgroundDemo>();
+            doc.panelSettings = component.panelSettings;
+            doc.visualTreeAsset = component.visualTreeAsset;
+
+            go = new GameObject("Shapes");
+
+            RenderTexture capsuleRt = component.capsuleRt;
+
+            component.cubeRt = AddCameraSetup(go, PrimitiveType.Cube, null, "Cube", 0);
+            component.cylinderRt = AddCameraSetup(go, PrimitiveType.Cylinder, null, "Cylinder", 10);
+            component.capsuleRt = AddCameraSetup(go, PrimitiveType.Capsule, capsuleRt, "Capsule", 20);
+
+            // let's send it far away for now
+            go.transform.localPosition = new Vector3(100, 100, 100);
 
             EditorApplication.EnterPlaymode();
             EditorGUIUtility.PingObject(MonoScript.FromMonoBehaviour(component));
@@ -69,10 +103,11 @@ namespace Samples.Utils
             primitive.transform.localPosition = new Vector3(offset, 0.8f, -7);
 
             var rotator = primitive.AddComponent<Rotator>();
-            rotator.rotationSpeed = new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-10.0f, 10.0f), Random.Range(-10.0f, 10.0f));
+            rotator.rotationSpeed = new Vector3(Random.Range(3.0f, 10.0f), Random.Range(3.0f, 10.0f), Random.Range(3.0f, 10.0f));
 
             var meshRenderer = primitive.GetComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = mt;
+            if (mt != null)
+                meshRenderer.sharedMaterial = mt;
 
             Component collider = null;
 
@@ -101,6 +136,35 @@ namespace Samples.Utils
             }
 
             return primitive;
+        }
+
+        static RenderTexture AddCameraSetup(GameObject go, PrimitiveType type, RenderTexture rt, string label, float offset)
+        {
+            GameObject root = new GameObject(label);
+
+            root.transform.parent = go.transform;
+
+            var shape = CreatePrimitive(type, null, 0.0f);
+
+            shape.transform.parent = root.transform;
+            shape.transform.localPosition = new Vector3(0, 0, 3);
+
+            var camGo = new GameObject("camera");
+            var cam = camGo.AddComponent<Camera>();
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            camGo.transform.parent = root.transform;
+            cam.transform.localPosition = new Vector3(0, 0, 0);
+
+            if (rt == null)
+            {
+                rt = new RenderTexture(512, 512, 8, RenderTextureFormat.ARGB32);
+            }
+
+            cam.targetTexture = rt;
+            root.transform.localPosition = new Vector3(offset, 0, 0);
+
+
+            return rt;
         }
     }
 }

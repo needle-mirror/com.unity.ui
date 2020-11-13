@@ -45,19 +45,24 @@ namespace UnityEngine.UIElements
         public virtual string ToString();
     }
 
-    public abstract class BaseField<TValueType> : UnityEngine.UIElements.BindableElement, UnityEngine.UIElements.INotifyValueChanged<TValueType>
+    public abstract class BaseField<TValueType> : UnityEngine.UIElements.BindableElement, UnityEngine.UIElements.IMixedValueSupport, UnityEngine.UIElements.INotifyValueChanged<TValueType>
     {
         public static readonly string inputUssClassName;
         public static readonly string labelDraggerVariantUssClassName;
         public static readonly string labelUssClassName;
+        public static readonly string mixedValueLabelUssClassName;
+        protected static readonly string mixedValueString;
         public static readonly string noLabelVariantUssClassName;
         public static readonly string ussClassName;
         public string label { get; set; }
         public UnityEngine.UIElements.Label labelElement { get; }
+        protected UnityEngine.UIElements.Label mixedValueLabel { get; }
         protected TValueType rawValue { get; set; }
+        public virtual bool showMixedValue { get; set; }
         public virtual TValueType value { get; set; }
         protected BaseField(string label, UnityEngine.UIElements.VisualElement visualInput) {}
         public virtual void SetValueWithoutNotify(TValueType newValue);
+        protected virtual void UpdateMixedValueContent();
         public class UxmlTraits<TValueType> : UnityEngine.UIElements.BindableElement.UxmlTraits
         {
             public UxmlTraits() {}
@@ -85,6 +90,7 @@ namespace UnityEngine.UIElements
         public static readonly string verticalVariantUssClassName;
         public UnityEngine.UIElements.SliderDirection direction { get; set; }
         public TValueType highValue { get; set; }
+        public bool inverted { get; set; }
         public TValueType lowValue { get; set; }
         public virtual float pageSize { get; set; }
         public TValueType range { get; }
@@ -92,7 +98,10 @@ namespace UnityEngine.UIElements
         public virtual TValueType value { get; set; }
         public void AdjustDragElement(float factor);
         protected virtual void ExecuteDefaultAction(UnityEngine.UIElements.EventBase evt);
+        protected static float GetClosestPowerOfTen(float positiveNumber);
+        protected static float RoundToMultipleOf(float value, float roundingValue);
         public virtual void SetValueWithoutNotify(TValueType newValue);
+        protected virtual void UpdateMixedValueContent();
     }
 
     public class BindableElement : UnityEngine.UIElements.VisualElement, UnityEngine.UIElements.IBindable
@@ -136,7 +145,6 @@ namespace UnityEngine.UIElements
         public Button() {}
         public Button(System.Action clickEvent) {}
         protected virtual UnityEngine.Vector2 DoMeasure(float desiredWidth, UnityEngine.UIElements.VisualElement.MeasureMode widthMode, float desiredHeight, UnityEngine.UIElements.VisualElement.MeasureMode heightMode);
-        protected virtual void ExecuteDefaultActionAtTarget(UnityEngine.UIElements.EventBase evt);
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.Button, UnityEngine.UIElements.Button.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -551,6 +559,20 @@ namespace UnityEngine.UIElements
         }
     }
 
+    public struct FontDefinition : System.IEquatable<UnityEngine.UIElements.FontDefinition>
+    {
+        public UnityEngine.Font font { get; set; }
+        public UnityEngine.Object fontAsset { get; set; }
+        public virtual bool Equals(object obj);
+        public virtual bool Equals(UnityEngine.UIElements.FontDefinition other);
+        public static UnityEngine.UIElements.FontDefinition FromFont(UnityEngine.Font f);
+        public static UnityEngine.UIElements.FontDefinition FromSDFFont(UnityEngine.Object f);
+        public virtual int GetHashCode();
+        public static bool operator ==(UnityEngine.UIElements.FontDefinition left, UnityEngine.UIElements.FontDefinition right);
+        public static bool operator !=(UnityEngine.UIElements.FontDefinition left, UnityEngine.UIElements.FontDefinition right);
+        public virtual string ToString();
+    }
+
     public class GeometryChangedEvent : UnityEngine.UIElements.EventBase<UnityEngine.UIElements.GeometryChangedEvent>
     {
         public UnityEngine.Rect newRect { get; }
@@ -733,6 +755,11 @@ namespace UnityEngine.UIElements
         protected virtual void Init();
     }
 
+    public interface IMixedValueSupport
+    {
+        public abstract bool showMixedValue { get; set; }
+    }
+
     public abstract class ImmediateModeElement : UnityEngine.UIElements.VisualElement
     {
         public bool cullingEnabled { get; set; }
@@ -758,6 +785,10 @@ namespace UnityEngine.UIElements
         public abstract UnityEngine.Vector2 mousePosition { get; }
         public abstract int pressedButtons { get; }
         public abstract bool shiftKey { get; }
+    }
+
+    public interface INavigationEvent
+    {
     }
 
     public interface INotifyValueChanged<T>
@@ -858,6 +889,7 @@ namespace UnityEngine.UIElements
         public abstract float height { get; }
         public abstract UnityEngine.UIElements.Justify justifyContent { get; }
         public abstract float left { get; }
+        public abstract float letterSpacing { get; }
         public abstract float marginBottom { get; }
         public abstract float marginLeft { get; }
         public abstract float marginRight { get; }
@@ -878,16 +910,21 @@ namespace UnityEngine.UIElements
         public abstract UnityEngine.Color unityBackgroundImageTintColor { get; }
         public abstract UnityEngine.ScaleMode unityBackgroundScaleMode { get; }
         public abstract UnityEngine.Font unityFont { get; }
+        public abstract UnityEngine.UIElements.FontDefinition unityFontDefinition { get; }
         public abstract UnityEngine.FontStyle unityFontStyleAndWeight { get; }
+        public abstract float unityParagraphSpacing { get; }
         public abstract int unitySliceBottom { get; }
         public abstract int unitySliceLeft { get; }
         public abstract int unitySliceRight { get; }
         public abstract int unitySliceTop { get; }
         public abstract UnityEngine.TextAnchor unityTextAlign { get; }
+        public abstract UnityEngine.Color unityTextOutlineColor { get; }
+        public abstract float unityTextOutlineWidth { get; }
         public abstract UnityEngine.UIElements.TextOverflowPosition unityTextOverflowPosition { get; }
         public abstract UnityEngine.UIElements.Visibility visibility { get; }
         public abstract UnityEngine.UIElements.WhiteSpace whiteSpace { get; }
         public abstract float width { get; }
+        public abstract float wordSpacing { get; }
     }
 
     public interface IStyle
@@ -922,6 +959,7 @@ namespace UnityEngine.UIElements
         public abstract UnityEngine.UIElements.StyleLength height { get; set; }
         public abstract UnityEngine.UIElements.StyleEnum<UnityEngine.UIElements.Justify> justifyContent { get; set; }
         public abstract UnityEngine.UIElements.StyleLength left { get; set; }
+        public abstract UnityEngine.UIElements.StyleLength letterSpacing { get; set; }
         public abstract UnityEngine.UIElements.StyleLength marginBottom { get; set; }
         public abstract UnityEngine.UIElements.StyleLength marginLeft { get; set; }
         public abstract UnityEngine.UIElements.StyleLength marginRight { get; set; }
@@ -939,21 +977,27 @@ namespace UnityEngine.UIElements
         public abstract UnityEngine.UIElements.StyleEnum<UnityEngine.UIElements.Position> position { get; set; }
         public abstract UnityEngine.UIElements.StyleLength right { get; set; }
         public abstract UnityEngine.UIElements.StyleEnum<UnityEngine.UIElements.TextOverflow> textOverflow { get; set; }
+        public abstract UnityEngine.UIElements.StyleTextShadow textShadow { get; set; }
         public abstract UnityEngine.UIElements.StyleLength top { get; set; }
         public abstract UnityEngine.UIElements.StyleColor unityBackgroundImageTintColor { get; set; }
         public abstract UnityEngine.UIElements.StyleEnum<UnityEngine.ScaleMode> unityBackgroundScaleMode { get; set; }
         public abstract UnityEngine.UIElements.StyleFont unityFont { get; set; }
+        public abstract UnityEngine.UIElements.StyleFontDefinition unityFontDefinition { get; set; }
         public abstract UnityEngine.UIElements.StyleEnum<UnityEngine.FontStyle> unityFontStyleAndWeight { get; set; }
         public abstract UnityEngine.UIElements.StyleEnum<UnityEngine.UIElements.OverflowClipBox> unityOverflowClipBox { get; set; }
+        public abstract UnityEngine.UIElements.StyleLength unityParagraphSpacing { get; set; }
         public abstract UnityEngine.UIElements.StyleInt unitySliceBottom { get; set; }
         public abstract UnityEngine.UIElements.StyleInt unitySliceLeft { get; set; }
         public abstract UnityEngine.UIElements.StyleInt unitySliceRight { get; set; }
         public abstract UnityEngine.UIElements.StyleInt unitySliceTop { get; set; }
         public abstract UnityEngine.UIElements.StyleEnum<UnityEngine.TextAnchor> unityTextAlign { get; set; }
+        public abstract UnityEngine.UIElements.StyleColor unityTextOutlineColor { get; set; }
+        public abstract UnityEngine.UIElements.StyleFloat unityTextOutlineWidth { get; set; }
         public abstract UnityEngine.UIElements.StyleEnum<UnityEngine.UIElements.TextOverflowPosition> unityTextOverflowPosition { get; set; }
         public abstract UnityEngine.UIElements.StyleEnum<UnityEngine.UIElements.Visibility> visibility { get; set; }
         public abstract UnityEngine.UIElements.StyleEnum<UnityEngine.UIElements.WhiteSpace> whiteSpace { get; set; }
         public abstract UnityEngine.UIElements.StyleLength width { get; set; }
+        public abstract UnityEngine.UIElements.StyleLength wordSpacing { get; set; }
     }
 
     public interface ITransform
@@ -1112,7 +1156,6 @@ namespace UnityEngine.UIElements
         public void AddToSelection(int index);
         public void ClearSelection();
         protected virtual void ExecuteDefaultAction(UnityEngine.UIElements.EventBase evt);
-        protected virtual void ExecuteDefaultActionAtTarget(UnityEngine.UIElements.EventBase evt);
         public void OnKeyDown(UnityEngine.UIElements.KeyDownEvent evt);
         public void Refresh();
         public void RemoveFromSelection(int index);
@@ -1194,6 +1237,7 @@ namespace UnityEngine.UIElements
         public MinMaxSlider(string label, float minValue = 0, float maxValue = 10, float minLimit = -3.402823E+38, float maxLimit = 3.402823E+38) {}
         protected virtual void ExecuteDefaultAction(UnityEngine.UIElements.EventBase evt);
         public virtual void SetValueWithoutNotify(UnityEngine.Vector2 newValue);
+        protected virtual void UpdateMixedValueContent();
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.MinMaxSlider, UnityEngine.UIElements.MinMaxSlider.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -1326,6 +1370,40 @@ namespace UnityEngine.UIElements
     {
         public MouseUpEvent() {}
         public static UnityEngine.UIElements.MouseUpEvent GetPooled(UnityEngine.Event systemEvent);
+    }
+
+    public class NavigationCancelEvent : UnityEngine.UIElements.NavigationEventBase<UnityEngine.UIElements.NavigationCancelEvent>
+    {
+        public NavigationCancelEvent() {}
+    }
+
+    public abstract class NavigationEventBase<T> : UnityEngine.UIElements.EventBase<T>, UnityEngine.UIElements.INavigationEvent where T : UnityEngine.UIElements.NavigationEventBase<T>, new()
+    {
+        protected NavigationEventBase() {}
+        protected virtual void Init();
+    }
+
+    public class NavigationMoveEvent : UnityEngine.UIElements.NavigationEventBase<UnityEngine.UIElements.NavigationMoveEvent>
+    {
+        public UnityEngine.UIElements.NavigationMoveEvent.Direction direction { get; }
+        public UnityEngine.Vector2 move { get; }
+        public NavigationMoveEvent() {}
+        public static UnityEngine.UIElements.NavigationMoveEvent GetPooled(UnityEngine.Vector2 moveVector);
+        protected virtual void Init();
+        public enum Direction
+        {
+            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Down = 4;
+            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Left = 1;
+            public const UnityEngine.UIElements.NavigationMoveEvent.Direction None = 0;
+            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Right = 3;
+            public const UnityEngine.UIElements.NavigationMoveEvent.Direction Up = 2;
+            public int value__;
+        }
+    }
+
+    public class NavigationSubmitEvent : UnityEngine.UIElements.NavigationEventBase<UnityEngine.UIElements.NavigationSubmitEvent>
+    {
+        public NavigationSubmitEvent() {}
     }
 
     public enum Overflow
@@ -1798,6 +1876,23 @@ namespace UnityEngine.UIElements
         public virtual string ToString();
     }
 
+    public struct StyleFontDefinition : System.IEquatable<UnityEngine.UIElements.StyleFontDefinition>, UnityEngine.UIElements.IStyleValue<UnityEngine.UIElements.FontDefinition>
+    {
+        public virtual UnityEngine.UIElements.StyleKeyword keyword { get; set; }
+        public virtual UnityEngine.UIElements.FontDefinition value { get; set; }
+        public StyleFontDefinition(UnityEngine.Font f) {}
+        public StyleFontDefinition(UnityEngine.Object f) {}
+        public StyleFontDefinition(UnityEngine.UIElements.FontDefinition f) {}
+        public StyleFontDefinition(UnityEngine.UIElements.StyleKeyword keyword) {}
+        public virtual bool Equals(object obj);
+        public virtual bool Equals(UnityEngine.UIElements.StyleFontDefinition other);
+        public virtual int GetHashCode();
+        public static bool operator ==(UnityEngine.UIElements.StyleFontDefinition left, UnityEngine.UIElements.StyleFontDefinition right);
+        public static UnityEngine.UIElements.StyleFontDefinition op_Implicit(UnityEngine.UIElements.FontDefinition f);
+        public static UnityEngine.UIElements.StyleFontDefinition op_Implicit(UnityEngine.UIElements.StyleKeyword keyword);
+        public static bool operator !=(UnityEngine.UIElements.StyleFontDefinition left, UnityEngine.UIElements.StyleFontDefinition right);
+    }
+
     public struct StyleInt : System.IEquatable<UnityEngine.UIElements.StyleInt>, UnityEngine.UIElements.IStyleValue<int>
     {
         public virtual UnityEngine.UIElements.StyleKeyword keyword { get; set; }
@@ -1848,6 +1943,22 @@ namespace UnityEngine.UIElements
         public StyleSheet() {}
     }
 
+    public struct StyleTextShadow : System.IEquatable<UnityEngine.UIElements.StyleTextShadow>, UnityEngine.UIElements.IStyleValue<UnityEngine.UIElements.TextShadow>
+    {
+        public virtual UnityEngine.UIElements.StyleKeyword keyword { get; set; }
+        public virtual UnityEngine.UIElements.TextShadow value { get; set; }
+        public StyleTextShadow(UnityEngine.UIElements.StyleKeyword keyword) {}
+        public StyleTextShadow(UnityEngine.UIElements.TextShadow v) {}
+        public virtual bool Equals(object obj);
+        public virtual bool Equals(UnityEngine.UIElements.StyleTextShadow other);
+        public virtual int GetHashCode();
+        public static bool operator ==(UnityEngine.UIElements.StyleTextShadow lhs, UnityEngine.UIElements.StyleTextShadow rhs);
+        public static UnityEngine.UIElements.StyleTextShadow op_Implicit(UnityEngine.UIElements.StyleKeyword keyword);
+        public static UnityEngine.UIElements.StyleTextShadow op_Implicit(UnityEngine.UIElements.TextShadow v);
+        public static bool operator !=(UnityEngine.UIElements.StyleTextShadow lhs, UnityEngine.UIElements.StyleTextShadow rhs);
+        public virtual string ToString();
+    }
+
     public class TemplateContainer : UnityEngine.UIElements.BindableElement
     {
         public virtual UnityEngine.UIElements.VisualElement contentContainer { get; }
@@ -1872,10 +1983,12 @@ namespace UnityEngine.UIElements
     {
         public static readonly string ussClassName;
         public bool displayTooltipWhenElided { get; set; }
+        public bool enableRichText { get; set; }
         public bool isElided { get; }
         public virtual string text { get; set; }
         public TextElement() {}
         protected virtual UnityEngine.Vector2 DoMeasure(float desiredWidth, UnityEngine.UIElements.VisualElement.MeasureMode widthMode, float desiredHeight, UnityEngine.UIElements.VisualElement.MeasureMode heightMode);
+        public virtual void HandleEvent(UnityEngine.UIElements.EventBase evt);
         public UnityEngine.Vector2 MeasureTextSize(string textToMeasure, float width, UnityEngine.UIElements.VisualElement.MeasureMode widthMode, float height, UnityEngine.UIElements.VisualElement.MeasureMode heightMode);
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.TextElement, UnityEngine.UIElements.TextElement.UxmlTraits>
         {
@@ -1900,9 +2013,10 @@ namespace UnityEngine.UIElements
         public TextField(string label) {}
         public TextField(int maxLength, bool multiline, bool isPasswordField, char maskChar) {}
         public TextField(string label, int maxLength, bool multiline, bool isPasswordField, char maskChar) {}
-        protected virtual void ExecuteDefaultActionAtTarget(UnityEngine.UIElements.EventBase evt);
         public void SelectRange(int rangeCursorIndex, int selectionIndex);
         public virtual void SetValueWithoutNotify(string newValue);
+        protected virtual string StringToValue(string str);
+        protected virtual string ValueToString(string value);
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.TextField, UnityEngine.UIElements.TextField.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -1918,6 +2032,8 @@ namespace UnityEngine.UIElements
     {
         public static readonly string inputUssClassName;
         public static readonly string labelUssClassName;
+        public static readonly string multilineInputUssClassName;
+        public static readonly string singleLineInputUssClassName;
         public static readonly string textInputUssName;
         public static readonly string ussClassName;
         public UnityEngine.Color cursorColor { get; }
@@ -1938,6 +2054,9 @@ namespace UnityEngine.UIElements
         protected virtual void ExecuteDefaultActionAtTarget(UnityEngine.UIElements.EventBase evt);
         public UnityEngine.Vector2 MeasureTextSize(string textToMeasure, float width, UnityEngine.UIElements.VisualElement.MeasureMode widthMode, float height, UnityEngine.UIElements.VisualElement.MeasureMode heightMode);
         public void SelectAll();
+        protected virtual TValueType StringToValue(string str);
+        protected virtual void UpdateMixedValueContent();
+        protected virtual string ValueToString(TValueType value);
         public class UxmlTraits<TValueType> : UnityEngine.UIElements.BaseFieldTraits<string, UnityEngine.UIElements.UxmlStringAttributeDescription>
         {
             public UxmlTraits() {}
@@ -1960,6 +2079,7 @@ namespace UnityEngine.UIElements
             protected virtual UnityEngine.Vector2 DoMeasure(float desiredWidth, UnityEngine.UIElements.VisualElement.MeasureMode widthMode, float desiredHeight, UnityEngine.UIElements.VisualElement.MeasureMode heightMode);
             protected virtual void ExecuteDefaultAction(UnityEngine.UIElements.EventBase evt);
             protected virtual void ExecuteDefaultActionAtTarget(UnityEngine.UIElements.EventBase evt);
+            public void ResetValueAndText();
             public void SelectAll();
             protected virtual TValueType StringToValue(string str);
         }
@@ -1978,6 +2098,19 @@ namespace UnityEngine.UIElements
         public const UnityEngine.UIElements.TextOverflowPosition Middle = 2;
         public const UnityEngine.UIElements.TextOverflowPosition Start = 1;
         public int value__;
+    }
+
+    public struct TextShadow : System.IEquatable<UnityEngine.UIElements.TextShadow>
+    {
+        public float blurRadius;
+        public UnityEngine.Color color;
+        public UnityEngine.Vector2 offset;
+        public virtual bool Equals(object obj);
+        public virtual bool Equals(UnityEngine.UIElements.TextShadow other);
+        public virtual int GetHashCode();
+        public static bool operator ==(UnityEngine.UIElements.TextShadow style1, UnityEngine.UIElements.TextShadow style2);
+        public static bool operator !=(UnityEngine.UIElements.TextShadow style1, UnityEngine.UIElements.TextShadow style2);
+        public virtual string ToString();
     }
 
     public class ThemeStyleSheet : UnityEngine.UIElements.StyleSheet
@@ -2008,8 +2141,8 @@ namespace UnityEngine.UIElements
         public string text { get; set; }
         public Toggle() {}
         public Toggle(string label) {}
-        protected virtual void ExecuteDefaultActionAtTarget(UnityEngine.UIElements.EventBase evt);
         public virtual void SetValueWithoutNotify(bool newValue);
+        protected virtual void UpdateMixedValueContent();
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.Toggle, UnityEngine.UIElements.Toggle.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -2274,6 +2407,14 @@ namespace UnityEngine.UIElements
         public UxmlFloatAttributeDescription() {}
         public virtual float GetValueFromBag(UnityEngine.UIElements.IUxmlAttributes bag, UnityEngine.UIElements.CreationContext cc);
         public bool TryGetValueFromBag(UnityEngine.UIElements.IUxmlAttributes bag, UnityEngine.UIElements.CreationContext cc, ref float value);
+    }
+
+    public class UxmlHash128AttributeDescription : UnityEngine.UIElements.TypedUxmlAttributeDescription<UnityEngine.Hash128>
+    {
+        public virtual string defaultValueAsString { get; }
+        public UxmlHash128AttributeDescription() {}
+        public virtual UnityEngine.Hash128 GetValueFromBag(UnityEngine.UIElements.IUxmlAttributes bag, UnityEngine.UIElements.CreationContext cc);
+        public bool TryGetValueFromBag(UnityEngine.UIElements.IUxmlAttributes bag, UnityEngine.UIElements.CreationContext cc, ref UnityEngine.Hash128 value);
     }
 
     public class UxmlIntAttributeDescription : UnityEngine.UIElements.TypedUxmlAttributeDescription<int>

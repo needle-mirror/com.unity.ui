@@ -1,5 +1,6 @@
 namespace UnityEngine.UIElements
 {
+#if UNITY_EDITOR
     /// <summary>
     /// Interface for drag and drop events.
     /// </summary>
@@ -177,4 +178,5 @@ namespace UnityEngine.UIElements
     public class DragPerformEvent : DragAndDropEventBase<DragPerformEvent>
     {
     }
+#endif
 }
