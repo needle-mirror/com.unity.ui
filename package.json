@@ -1,7 +1,7 @@
 {
   "name": "com.unity.ui",
   "displayName": "UI Toolkit",
-  "version": "1.0.0-preview.11",
+  "version": "1.0.0-preview.12",
   "unity": "2020.1",
   "unityRelease": "9f1",
   "keywords": [
@@ -20,15 +20,15 @@
     "com.unity.textcore": "1.0.0-preview.2"
   },
   "relatedPackages": {
-    "com.unity.ui.tests": "1.0.0-preview.11"
+    "com.unity.ui.tests": "1.0.0-preview.12"
   },
   "upmCi": {
-    "footprint": "48c65ef4c944416a94d4053e298e6d916e7416fe"
+    "footprint": "3dcc482092e297547ac23de000810ba4d3fa6371"
   },
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.ui.git",
     "type": "git",
-    "revision": "1a26ef167c430e18dfa4070469d7c2533cdc89b6"
+    "revision": "873b50a16799da4a06c6de8cf32f0865fd034ec0"
   },
   "samples": [
     {

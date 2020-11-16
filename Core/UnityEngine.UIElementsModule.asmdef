@@ -2,7 +2,6 @@
     "name": "UnityEngine.UIElementsModule",
     "rootNamespace": "",
     "references": [
-        "GUID:75469ad4d38634e559750d17036d5f7c"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -18,11 +17,6 @@
             "name": "com.unity.ui",
             "expression": "",
             "define": "UIE_PACKAGE"
-        },
-        {
-            "name": "com.unity.inputsystem",
-            "expression": "",
-            "define": "UNITY_INPUT_SYSTEM"
         }
     ],
     "noEngineReferences": false
