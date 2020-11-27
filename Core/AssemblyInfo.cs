@@ -54,6 +54,7 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] // for Moq
 [assembly: InternalsVisibleTo("Unity.2D.Sprite.Editor")]
 [assembly: InternalsVisibleTo("Unity.UI.Builder.Editor")]
+[assembly: InternalsVisibleTo("UnityEditor.UIBuilderModule")]
 [assembly: InternalsVisibleTo("Unity.UI.Builder.EditorTests")]
 [assembly: InternalsVisibleTo("Unity.DeviceSimulator.Editor")] // Temporary, see case 1279828
 
