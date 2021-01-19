@@ -5,7 +5,6 @@
         "UnityEngine.UIElementsModule",
         "UnityEditor.UIElementsModule",
         "UnityEngine.UIElementsGameObjectsModule",
-        "Unity.InputSystem",
         "Unity.UIElements.Text",
         "Unity.TextCore"
     ],
@@ -25,11 +24,6 @@
             "name": "com.unity.ui",
             "expression": "",
             "define": "UIE_PACKAGE"
-        },
-        {
-            "name": "com.unity.inputsystem",
-            "expression": "",
-            "define": "UNITY_INPUT_SYSTEM"
         }
     ],
     "noEngineReferences": false

@@ -132,9 +132,13 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("Unity.InternalAPIEditorBridgeDev.005")]
 [assembly: InternalsVisibleTo("Unity.XR.Remoting.Editor")]
 [assembly: InternalsVisibleTo("UnityEngine.Common")]
+
+// UI Builder
 [assembly: InternalsVisibleTo("Unity.UI.Builder.Editor")]
-[assembly: InternalsVisibleTo("UnityEditor.UIBuilderModule")]
 [assembly: InternalsVisibleTo("Unity.UI.Builder.EditorTests")]
+[assembly: InternalsVisibleTo("UnityEditor.UIBuilderModule")]
+[assembly: InternalsVisibleTo("Unity.UI.Builder")]
+
 [assembly: InternalsVisibleTo("Unity.GraphViewTestUtilities.Editor")]
 [assembly: InternalsVisibleTo("Unity.ProBuilder.Editor")]
 [assembly: InternalsVisibleTo("Unity.2D.Sprite.Editor")]
@@ -146,6 +150,8 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("Unity.UIElements.EditorTests")]
 [assembly: InternalsVisibleTo("UnityEngine.UIElementsGameObjectsModule")]
 [assembly: InternalsVisibleTo("UnityEditor.UIElementsGameObjectsModule")]
+[assembly: InternalsVisibleTo("UnityEngine.UIElementsInputSystemModule")]
+[assembly: InternalsVisibleTo("UnityEditor.UIElementsInputSystemModule")]
 [assembly: InternalsVisibleTo("Unity.UIElements.Editor.Text")]
 
 [assembly: InternalsVisibleTo("Unity.SceneTemplate.Editor")]

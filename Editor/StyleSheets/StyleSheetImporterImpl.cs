@@ -133,18 +133,17 @@ namespace UnityEditor.UIElements.StyleSheets
                 UnityEngine.Object asset = DeclareDependencyAndLoad(projectRelativePath, subAssetPath);
 
                 bool isTexture = asset is Texture2D;
+                Sprite spriteAsset = asset as Sprite;
 
                 if (isTexture && string.IsNullOrEmpty(subAssetPath))
                 {
                     // Try to load a sprite sub-asset associated with this texture.
                     // Sprites have extra data, such as slices and tight-meshes that
                     // aren't stored in plain textures.
-                    var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(projectRelativePath);
-                    if (sprite != null)
-                        asset = sprite;
+                    spriteAsset = AssetDatabase.LoadAssetAtPath<Sprite>(projectRelativePath);
                 }
 
-                if (isTexture || asset is Sprite || asset is Font || IsFontAssetInternal(asset) || asset is VectorImage || asset is RenderTexture)
+                if (isTexture || spriteAsset != null || asset is Font || IsFontAssetInternal(asset) || asset is VectorImage || asset is RenderTexture)
                 {
                     // Looking suffixed images files only
                     if (isTexture)
@@ -166,13 +165,15 @@ namespace UnityEditor.UIElements.StyleSheets
                             return;
                         }
                         // If we didn't find an high res variant, tell ADB we depend on that potential file existing
-                        DeclareDependencyAndLoad(hiResImageLocation);
+                        if (spriteAsset != null)
+                            DeclareDependencyAndLoad(hiResImageLocation);
                     }
-                    m_Builder.AddValue(asset);
+
+                    m_Builder.AddValue(spriteAsset != null ? spriteAsset : asset);
                 }
                 else
                 {
-                    m_Errors.AddSemanticError(StyleSheetImportErrorCode.InvalidURIProjectAssetType, string.Format("Invalid asset type {0}, only Font, FontAssets, Texture2D and VectorImage are supported", asset.GetType().Name));
+                    m_Errors.AddSemanticError(StyleSheetImportErrorCode.InvalidURIProjectAssetType, string.Format("Invalid asset type {0}, only Font, FontAssets, Sprite, Texture2D and VectorImage are supported", asset.GetType().Name));
                 }
             }
         }

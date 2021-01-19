@@ -295,7 +295,7 @@ void uie_fragment_clip(v2f IN)
     clip(dot(float3(s,1),float3(1,1,-7.95f)));
 }
 
-float2 uie_decode_shader_info_texel_pos(float2 pageXY, float id)
+float2 uie_decode_shader_info_texel_pos(float2 pageXY, float id, float yStride)
 {
     const float kShaderInfoPageWidth = 32;
     const float kShaderInfoPageHeight = 8;
@@ -306,16 +306,14 @@ float2 uie_decode_shader_info_texel_pos(float2 pageXY, float id)
 
     return float2(
         pageXY.x * kShaderInfoPageWidth + idX,
-        pageXY.y * kShaderInfoPageHeight + idY);
+        pageXY.y * kShaderInfoPageHeight + idY * yStride);
 }
 
 void uie_vert_load_payload(appdata_t v)
 {
 #if UIE_SHADER_INFO_IN_VS
 
-    float2 xformTexel = uie_decode_shader_info_texel_pos(v.xformClipPages.xy, v.ids.x);
-    xformTexel.y *= 3.0f; // Because each transform entry is 3 texels high
-
+    float2 xformTexel = uie_decode_shader_info_texel_pos(v.xformClipPages.xy, v.ids.x, 3.0f);
     float2 row0UV = (xformTexel + float2(0, 0) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
     float2 row1UV = (xformTexel + float2(0, 1) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
     float2 row2UV = (xformTexel + float2(0, 2) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
@@ -455,8 +453,6 @@ float3 sd_to_coverage(float3 sd, float2 uv, float sdfSizeRCP, float sdfScale, fl
 
 UIE_FRAG_T uie_textcore(float textAlpha, float2 uv, float2 textCoreUV, float4 faceColor, float extraDilate)
 {
-    textCoreUV.y *= 3.0f; // Because each TextCore settings entry is 3 texels high
-
     float2 row0UV = (textCoreUV + float2(0, 0) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
     float2 row1UV = (textCoreUV + float2(0, 1) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
     float2 row2UV = (textCoreUV + float2(0, 2) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
@@ -498,9 +494,9 @@ float4 uie_std_vert_shader_info(appdata_t v, out UIE_V2F_COLOR_T color)
     color = UIE_V2F_COLOR_T(GammaToLinearSpace(v.color.rgb), v.color.a);
 #endif // UIE_COLORSPACE_GAMMA
 
-    const float2 opacityUV = (uie_decode_shader_info_texel_pos(v.opacityPageSettingIndex.xy, v.ids.z) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
+    const float2 opacityUV = (uie_decode_shader_info_texel_pos(v.opacityPageSettingIndex.xy, v.ids.z, 1.0f) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
 #if UIE_SHADER_INFO_IN_VS
-    const float2 clipRectUV = (uie_decode_shader_info_texel_pos(v.xformClipPages.zw, v.ids.y) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
+    const float2 clipRectUV = (uie_decode_shader_info_texel_pos(v.xformClipPages.zw, v.ids.y, 1.0f) + 0.5f) * _ShaderInfoTex_TexelSize.xy;
     color.a *= tex2Dlod(_ShaderInfoTex, float4(opacityUV, 0, 0)).a;
 #else // !UIE_SHADER_INFO_IN_VS
     const float2 clipRectUV = float2(v.ids.y * 255.0f, 0.0f);
@@ -556,7 +552,7 @@ v2f uie_std_vert(appdata_t v, out float4 clipSpacePos)
         OUT.uvXY.xy *= _TextureInfo[textureSlot].yz;
 
     OUT.clipRectOpacityUVs = uie_std_vert_shader_info(v, OUT.color);
-    OUT.textCoreUVs = uie_decode_shader_info_texel_pos(v.opacityPageSettingIndex.zw, v.ids.w);
+    OUT.textCoreUVs = uie_decode_shader_info_texel_pos(v.opacityPageSettingIndex.zw, v.ids.w, 3.0f);
 
 #if UIE_SHADER_INFO_IN_VS
     OUT.clipRect = tex2Dlod(_ShaderInfoTex, float4(OUT.clipRectOpacityUVs.xy, 0, 0));

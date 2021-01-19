@@ -494,29 +494,6 @@ namespace UnityEditor.UIElements
         public virtual void SetValueWithoutNotify(T newValue);
     }
 
-    public class ProgressBar : UnityEngine.UIElements.BindableElement, UnityEngine.UIElements.INotifyValueChanged<float>
-    {
-        public static readonly string backgroundUssClassName;
-        public static readonly string containerUssClassName;
-        public static readonly string progressUssClassName;
-        public static readonly string titleContainerUssClassName;
-        public static readonly string titleUssClassName;
-        public static readonly string ussClassName;
-        public string title { get; set; }
-        public virtual float value { get; set; }
-        public ProgressBar() {}
-        public virtual void SetValueWithoutNotify(float newValue);
-        public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEditor.UIElements.ProgressBar, UnityEditor.UIElements.ProgressBar.UxmlTraits>
-        {
-            public UxmlFactory() {}
-        }
-        public class UxmlTraits : UnityEngine.UIElements.BindableElement.UxmlTraits
-        {
-            public UxmlTraits() {}
-            public virtual void Init(UnityEngine.UIElements.VisualElement ve, UnityEngine.UIElements.IUxmlAttributes bag, UnityEngine.UIElements.CreationContext cc);
-        }
-    }
-
     public class PropertyField : UnityEngine.UIElements.VisualElement, UnityEngine.UIElements.IBindable
     {
         public static readonly string inputUssClassName;

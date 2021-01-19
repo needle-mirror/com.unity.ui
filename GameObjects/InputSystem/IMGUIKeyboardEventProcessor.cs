@@ -1,6 +1,6 @@
-#if UNITY_INPUT_SYSTEM && ENABLE_INPUT_SYSTEM
+#if UNITY_INPUT_SYSTEM
 
-namespace UnityEngine.UIElements
+namespace UnityEngine.UIElements.InputSystem
 {
     internal class IMGUIKeyboardEventProcessor : IKeyboardEventProcessor
     {
@@ -10,7 +10,7 @@ namespace UnityEngine.UIElements
 
         public void OnDisable() {}
 
-        public void ProcessKeyboardEvents(EventSystem eventSystem)
+        public void ProcessKeyboardEvents(InputSystemEventSystem eventSystem)
         {
             while (Event.PopEvent(m_Event))
             {

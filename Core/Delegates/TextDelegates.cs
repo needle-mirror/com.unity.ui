@@ -42,6 +42,30 @@ namespace UnityEngine.UIElements
         internal static Action OnTextSettingsImported;
         internal static Func<bool> HasTextSettings;
 
+        internal static bool IsFontAssetSafe(UnityEngine.Object obj)
+        {
+            if (IsFontAsset == null)
+                return false;
+
+            return IsFontAsset(obj);
+        }
+
+        internal static int GetIDGradientScaleSafe()
+        {
+            if (GetIDGradientScale == null)
+                return Shader.PropertyToID("_GradientScale");
+
+            return GetIDGradientScale();
+        }
+
+        internal static TextCoreSettings GetTextCoreSettingsForElementSafe(VisualElement ve)
+        {
+            if (GetTextCoreSettingsForElement == null)
+                return new TextCoreSettings();
+
+            return GetTextCoreSettingsForElement(ve);
+        }
+
         //Inspector events when FontAsset changed
 #if UNITY_EDITOR
         internal static void RaiseTextAssetChange(Object font) => OnTextAssetChange?.Invoke(font);

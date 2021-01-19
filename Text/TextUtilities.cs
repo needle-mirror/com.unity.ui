@@ -45,7 +45,7 @@ namespace UnityEngine.UIElements.Text
         internal static PanelTextSettings GetTextSettingsFrom(VisualElement ve)
         {
             if (ve.panel is RuntimePanel runtimePanel)
-                return runtimePanel.m_PanelSettings.textSettings as PanelTextSettings;
+                return runtimePanel.panelSettings.textSettings as PanelTextSettings;
             return PanelTextSettings.EditorTextSettings;
         }
 
@@ -53,9 +53,9 @@ namespace UnityEngine.UIElements.Text
         {
             if (textParam.panel is RuntimePanel runtimePanel)
             {
-                var textsettings = runtimePanel.m_PanelSettings.textSettings as PanelTextSettings;
+                var textsettings = runtimePanel.panelSettings.textSettings as PanelTextSettings;
                 if (textsettings == null)
-                    Debug.LogFormat(runtimePanel.m_PanelSettings, "PanelSettings is invalid. Please assign a valid PanelTextSettings.");
+                    Debug.LogFormat(runtimePanel.panelSettings, "PanelSettings is invalid. Please assign a valid PanelTextSettings.");
                 return textsettings;
             }
             return PanelTextSettings.EditorTextSettings;

@@ -357,8 +357,7 @@ namespace UnityEngine.UIElements
             float measuredWidth = float.NaN;
             float measuredHeight = float.NaN;
 
-            Font usedFont = ve.computedStyle.unityFont;
-            if (textToMeasure == null || usedFont == null)
+            if (textToMeasure == null || (ve.computedStyle.unityFont == null && ve.computedStyle.unityFontDefinition.IsEmpty()))
                 return new Vector2(measuredWidth, measuredHeight);
 
             var elementScaling = ve.ComputeGlobalScale();

@@ -1,0 +1,36 @@
+{
+    "name": "UnityEditor.UIElementsInputSystemModule",
+    "references": [
+        "UnityEngine.UIElementsModule",
+        "UnityEditor.UIElementsModule",
+        "UnityEngine.UIElementsGameObjectsModule",
+        "UnityEditor.UIElementsGameObjectsModule",
+        "UnityEngine.UIElementsInputSystemModule",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UIE_PACKAGE"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.ui",
+            "expression": "",
+            "define": "UIE_PACKAGE"
+        },
+        {
+            "name": "com.unity.inputsystem",
+            "expression": "",
+            "define": "UNITY_INPUT_SYSTEM"
+        }
+    ],
+    "noEngineReferences": false
+}

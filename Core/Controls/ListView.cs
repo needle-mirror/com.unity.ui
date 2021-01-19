@@ -472,7 +472,7 @@ namespace UnityEngine.UIElements
         private int m_LastFocusedElementIndex = -1;
         private List<int> m_LastFocusedElementTreeChildIndexes = new List<int>();
 
-        private int m_RangeSelectionOrigin = -1;
+        private bool m_IsRangeSelectionDirectionUp;
         private ListViewDragger m_Dragger;
 
         /// <summary>
@@ -728,7 +728,9 @@ namespace UnityEngine.UIElements
             if (evt.destinationPanel == null)
                 return;
 
+            m_ScrollView.contentContainer.RegisterCallback<PointerMoveEvent>(OnPointerMove);
             m_ScrollView.contentContainer.RegisterCallback<PointerDownEvent>(OnPointerDown);
+            m_ScrollView.contentContainer.RegisterCallback<PointerCancelEvent>(OnPointerCancel);
             m_ScrollView.contentContainer.RegisterCallback<PointerUpEvent>(OnPointerUp);
             m_ScrollView.contentContainer.RegisterCallback<KeyDownEvent>(OnKeyDown);
 
@@ -742,7 +744,9 @@ namespace UnityEngine.UIElements
             if (evt.originPanel == null)
                 return;
 
+            m_ScrollView.contentContainer.UnregisterCallback<PointerMoveEvent>(OnPointerMove);
             m_ScrollView.contentContainer.UnregisterCallback<PointerDownEvent>(OnPointerDown);
+            m_ScrollView.contentContainer.UnregisterCallback<PointerCancelEvent>(OnPointerCancel);
             m_ScrollView.contentContainer.UnregisterCallback<PointerUpEvent>(OnPointerUp);
             m_ScrollView.contentContainer.UnregisterCallback<KeyDownEvent>(OnKeyDown);
 
@@ -777,16 +781,18 @@ namespace UnityEngine.UIElements
                 return false;
             }
 
-            void HandleRangeSelection()
+            void HandleSelectionAndScroll(int index)
             {
-                if (selectionType == SelectionType.Multiple && shiftKey && m_RangeSelectionOrigin != -1)
+                if (selectionType == SelectionType.Multiple && shiftKey && m_SelectedIndices.Count != 0)
                 {
-                    DoRangeSelection(selectedIndex);
+                    DoRangeSelection(index);
                 }
                 else
                 {
-                    m_RangeSelectionOrigin = selectedIndex;
+                    selectedIndex = index;
                 }
+
+                ScrollToItem(index);
             }
 
             switch (op)
@@ -795,7 +801,6 @@ namespace UnityEngine.UIElements
                     SelectAll();
                     return true;
                 case ListOperation.Cancel:
-                    m_RangeSelectionOrigin = -1;
                     ClearSelection();
                     return true;
                 case ListOperation.Submit:
@@ -809,40 +814,28 @@ namespace UnityEngine.UIElements
                 case ListOperation.Previous:
                     if (selectedIndex > 0)
                     {
-                        selectedIndex--;
-                        HandleRangeSelection();
-                        ScrollToItem(selectedIndex);
+                        HandleSelectionAndScroll(selectedIndex - 1);
                         return true;
                     }
                     break; // Allow focus to move outside the ListView
                 case ListOperation.Next:
                     if (selectedIndex + 1 < itemsSource.Count)
                     {
-                        selectedIndex++;
-                        HandleRangeSelection();
-                        ScrollToItem(selectedIndex);
+                        HandleSelectionAndScroll(selectedIndex + 1);
                         return true;
                     }
                     break; // Allow focus to move outside the ListView
                 case ListOperation.Begin:
-                    selectedIndex = 0;
-                    HandleRangeSelection();
-                    ScrollToItem(selectedIndex);
+                    HandleSelectionAndScroll(0);
                     return true;
                 case ListOperation.End:
-                    selectedIndex = itemsSource.Count - 1;
-                    HandleRangeSelection();
-                    ScrollToItem(selectedIndex);
+                    HandleSelectionAndScroll(itemsSource.Count - 1);
                     return true;
                 case ListOperation.PageDown:
-                    selectedIndex = Math.Min(itemsSource.Count - 1, selectedIndex + (int)(m_LastHeight / resolvedItemHeight));
-                    HandleRangeSelection();
-                    ScrollToItem(selectedIndex);
+                    HandleSelectionAndScroll(Math.Min(itemsSource.Count - 1, selectedIndex + (int)(m_LastHeight / resolvedItemHeight)));
                     return true;
                 case ListOperation.PageUp:
-                    selectedIndex = Math.Max(0, selectedIndex - (int)(m_LastHeight / resolvedItemHeight));
-                    HandleRangeSelection();
-                    ScrollToItem(selectedIndex);
+                    HandleSelectionAndScroll(Math.Max(0, selectedIndex - (int)(m_LastHeight / resolvedItemHeight)));
                     return true;
             }
 
@@ -967,7 +960,44 @@ namespace UnityEngine.UIElements
         private long m_TouchDownTime = 0;
         private Vector3 m_TouchDownPosition;
 
+        private void OnPointerMove(PointerMoveEvent evt)
+        {
+            // Support cases where PointerMove corresponds to a MouseDown or MouseUp event with multiple buttons.
+            if (evt.button == (int)MouseButton.LeftMouse)
+            {
+                if ((evt.pressedButtons & (1 << (int)MouseButton.LeftMouse)) == 0)
+                {
+                    ProcessPointerUp(evt);
+                }
+                else
+                {
+                    ProcessPointerDown(evt);
+                }
+            }
+        }
+
         private void OnPointerDown(PointerDownEvent evt)
+        {
+            ProcessPointerDown(evt);
+        }
+
+        private void OnPointerCancel(PointerCancelEvent evt)
+        {
+            if (!HasValidDataAndBindings())
+                return;
+
+            if (!evt.isPrimary)
+                return;
+
+            ClearSelection();
+        }
+
+        private void OnPointerUp(PointerUpEvent evt)
+        {
+            ProcessPointerUp(evt);
+        }
+
+        private void ProcessPointerDown(IPointerEvent evt)
         {
             if (!HasValidDataAndBindings())
                 return;
@@ -980,7 +1010,7 @@ namespace UnityEngine.UIElements
 
             if (evt.pointerType != PointerType.mouse)
             {
-                m_TouchDownTime = evt.timestamp;
+                m_TouchDownTime = ((EventBase)evt).timestamp;
                 m_TouchDownPosition = evt.position;
                 return;
             }
@@ -988,7 +1018,7 @@ namespace UnityEngine.UIElements
             DoSelect(evt.localPosition, evt.clickCount, evt.actionKey, evt.shiftKey);
         }
 
-        private void OnPointerUp(PointerUpEvent evt)
+        private void ProcessPointerUp(IPointerEvent evt)
         {
             if (!HasValidDataAndBindings())
                 return;
@@ -1001,7 +1031,7 @@ namespace UnityEngine.UIElements
 
             if (evt.pointerType != PointerType.mouse)
             {
-                var delay = evt.timestamp - m_TouchDownTime;
+                var delay = ((EventBase)evt).timestamp - m_TouchDownTime;
                 var delta = evt.position - m_TouchDownPosition;
                 if (delay < 500 && delta.sqrMagnitude <= 100)
                 {
@@ -1037,8 +1067,6 @@ namespace UnityEngine.UIElements
 
                     if (selectionType == SelectionType.Multiple && actionKey)
                     {
-                        m_RangeSelectionOrigin = clickedIndex;
-
                         // Add/remove single clicked element
                         if (m_SelectedIds.Contains(clickedItemId))
                             RemoveFromSelection(clickedIndex);
@@ -1047,9 +1075,8 @@ namespace UnityEngine.UIElements
                     }
                     else if (selectionType == SelectionType.Multiple && shiftKey)
                     {
-                        if (m_RangeSelectionOrigin == -1)
+                        if (m_SelectedIndices.Count == 0)
                         {
-                            m_RangeSelectionOrigin = clickedIndex;
                             SetSelection(clickedIndex);
                         }
                         else
@@ -1064,7 +1091,6 @@ namespace UnityEngine.UIElements
                     }
                     else // single
                     {
-                        m_RangeSelectionOrigin = clickedIndex;
                         SetSelection(clickedIndex);
                     }
                     break;
@@ -1081,18 +1107,21 @@ namespace UnityEngine.UIElements
 
         private void DoRangeSelection(int rangeSelectionFinalIndex)
         {
+            var selectionOrigin = m_IsRangeSelectionDirectionUp ? m_SelectedIndices.Max() : m_SelectedIndices.Min();
+
             ClearSelectionWithoutValidation();
 
             // Add range
             var range = new List<int>();
-            if (rangeSelectionFinalIndex < m_RangeSelectionOrigin)
+            m_IsRangeSelectionDirectionUp = rangeSelectionFinalIndex < selectionOrigin;
+            if (m_IsRangeSelectionDirectionUp)
             {
-                for (var i = rangeSelectionFinalIndex; i <= m_RangeSelectionOrigin; i++)
+                for (var i = rangeSelectionFinalIndex; i <= selectionOrigin; i++)
                     range.Add(i);
             }
             else
             {
-                for (var i = rangeSelectionFinalIndex; i >= m_RangeSelectionOrigin; i--)
+                for (var i = rangeSelectionFinalIndex; i >= selectionOrigin; i--)
                     range.Add(i);
             }
             AddToSelection(range);
@@ -1100,7 +1129,6 @@ namespace UnityEngine.UIElements
 
         private void ProcessSingleClick(int clickedIndex)
         {
-            m_RangeSelectionOrigin = clickedIndex;
             SetSelection(clickedIndex);
         }
 

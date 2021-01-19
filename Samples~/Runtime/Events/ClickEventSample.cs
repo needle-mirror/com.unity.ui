@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 namespace Samples.Runtime.Events
 {
-    [RequireComponent(typeof(UIDocument), typeof(EventSystem))]
+    [RequireComponent(typeof(UIDocument))]
     public class ClickEventSample : MonoBehaviour
     {
         private enum GameState

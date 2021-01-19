@@ -4,6 +4,27 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-preview.14] - 2021-01-19
+---
+
+### Added
+
+- UQuery: Enumerator support allows for foreach iteration with no or minimal GC allocations
+
+### Fixed
+
+- UI Toolkit Debugger: Allowed debugger to pick elements from Game View in Edit Mode (and not only in Play Mode like before)
+- UI Toolkit Debugger: Overlay, "Show Layout" now work for Game View in Edit Mode (and not only in Play Mode like before)
+- UQuery: Query<VisualElement> now correctly returns all elements (case 1288531)
+- Not allowing text changes on text input field when they are disabled (case 1286143)
+- Fixed Images failing to load if using the url("") syntax while having multiple resolution variants (case 1293843)
+- Fixed ListView item selection through PointerMoveEvent, for example when holding right-click down while clicking (case 1287031)
+- Fixed bug where multiple elements could be shown as being focused at the same time due to delayed focus events not being well tracked when there is more than 1 of them in the queue (case 1154256)
+- Fixed wrong addressing of dynamic transforms when new atlas slot is used (case 1293058)
+- PropertyField now able to have no label displayed if an empty string is passed as the label argument. Note that if a null value is passed, the label will still be displayed using the localized display name, like before (case 1293580)
+- Fixed a bug where users were able to drag slider outside its container when a text field was present
+
+
 ## [1.0.0-preview.13] - 2020-11-27
 ---
 

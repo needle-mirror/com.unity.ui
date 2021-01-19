@@ -115,6 +115,11 @@ namespace UnityEngine.UIElements
         }
     }
 
+    internal class StringListPool : ObjectListPool<string>
+    {
+    }
+
+
     internal class StringObjectListPool : ObjectListPool<string>
     {
     }
@@ -878,6 +883,10 @@ namespace UnityEngine.UIElements
                 if ((int)diff > 0)
                 {
                     m_PseudoStates = value;
+
+                    if ((m_PseudoStates & PseudoStates.Root) == PseudoStates.Root)
+                        isRootVisualContainer = true;
+
 
                     // If only the root changed do not trigger a new style update since the root
                     // pseudo state change base on the current style sheet when selectors are matched.

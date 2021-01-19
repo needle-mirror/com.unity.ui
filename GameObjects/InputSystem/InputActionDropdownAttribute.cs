@@ -1,6 +1,6 @@
 #if UNITY_INPUT_SYSTEM
 
-namespace UnityEngine.UIElements
+namespace UnityEngine.UIElements.InputSystem
 {
     internal class InputActionDropdownAttribute : PropertyAttribute
     {

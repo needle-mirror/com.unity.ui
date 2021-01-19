@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Samples.Runtime.Events
 {
-    [RequireComponent(typeof(UIDocument), typeof(EventSystem))]
+    [RequireComponent(typeof(UIDocument))]
     public class GeometryChanged : MonoBehaviour
     {
         [SerializeField] private PanelSettings panelSettings = default;

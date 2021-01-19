@@ -1,4 +1,4 @@
-#if UNITY_INPUT_SYSTEM && ENABLE_INPUT_SYSTEM
+#if UNITY_INPUT_SYSTEM
 using System;
 using System.Collections.Generic;
 using UnityEngine.Assertions;
@@ -7,7 +7,7 @@ using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UIElements.Collections;
 
-namespace UnityEngine.UIElements
+namespace UnityEngine.UIElements.InputSystem
 {
     internal class InputSystemKeyboardEventProcessor : IKeyboardEventProcessor
     {
@@ -16,12 +16,12 @@ namespace UnityEngine.UIElements
 
         public void OnEnable()
         {
-            InputSystem.InputSystem.onEvent += OnEvent;
+            UnityEngine.InputSystem.InputSystem.onEvent += OnEvent;
         }
 
         public void OnDisable()
         {
-            InputSystem.InputSystem.onEvent -= OnEvent;
+            UnityEngine.InputSystem.InputSystem.onEvent -= OnEvent;
         }
 
         void OnEvent(InputEventPtr eventPtr, InputDevice device)
@@ -46,7 +46,7 @@ namespace UnityEngine.UIElements
             m_DirtyKeyboards.Add(keyboard);
         }
 
-        void OnTextInput(EventSystem eventSystem, char c, EventModifiers modifiers, Keyboard keyboard)
+        void OnTextInput(InputSystemEventSystem eventSystem, char c, EventModifiers modifiers, Keyboard keyboard)
         {
             SendEvent(eventSystem, keyboard, t => KeyDownEvent.GetPooled(t.c, KeyCode.None, t.modifiers), (c, modifiers));
         }
@@ -55,7 +55,7 @@ namespace UnityEngine.UIElements
         private float m_LastPressedTime;
         private Keyboard m_LastPressedKeyboard;
 
-        void ReadKeyboardEvents(EventSystem eventSystem, Keyboard keyboard)
+        void ReadKeyboardEvents(InputSystemEventSystem eventSystem, Keyboard keyboard)
         {
             var keys = keyboard.allKeys;
             var count = keys.Count;
@@ -112,7 +112,7 @@ namespace UnityEngine.UIElements
             return false;
         }
 
-        void CheckForRepeatedEvents(EventSystem eventSystem)
+        void CheckForRepeatedEvents(InputSystemEventSystem eventSystem)
         {
             if (m_LastPressedKey >= 0 && Time.unscaledTime >= m_LastPressedTime + eventSystem.m_RepeatDelay)
             {
@@ -142,7 +142,7 @@ namespace UnityEngine.UIElements
             }
         }
 
-        bool SendEvent<TArg>(EventSystem eventSystem, Keyboard keyboard, Func<TArg, EventBase> evtFactory, TArg arg, InputEventPtr inputEventPtr)
+        bool SendEvent<TArg>(InputSystemEventSystem eventSystem, Keyboard keyboard, Func<TArg, EventBase> evtFactory, TArg arg, InputEventPtr inputEventPtr)
         {
             if (SendEvent(eventSystem, keyboard, evtFactory, arg))
             {
@@ -152,9 +152,9 @@ namespace UnityEngine.UIElements
             return false;
         }
 
-        bool SendEvent<TArg>(EventSystem eventSystem, Keyboard keyboard, Func<TArg, EventBase> evtFactory, TArg arg)
+        bool SendEvent<TArg>(InputSystemEventSystem eventSystem, Keyboard keyboard, Func<TArg, EventBase> evtFactory, TArg arg)
         {
-            var context = new EventSystem.InputContext(null, keyboard);
+            var context = new InputSystemEventSystem.InputContext(null, keyboard);
             return eventSystem.SendFocusBasedEvent(context, evtFactory, arg);
         }
 
@@ -236,7 +236,7 @@ namespace UnityEngine.UIElements
             return '\0';
         }
 
-        public void ProcessKeyboardEvents(EventSystem eventSystem)
+        public void ProcessKeyboardEvents(InputSystemEventSystem eventSystem)
         {
             foreach (var keyboard in m_DirtyKeyboards)
             {

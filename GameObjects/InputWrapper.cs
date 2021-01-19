@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace UnityEngine.UIElements
@@ -5,6 +6,7 @@ namespace UnityEngine.UIElements
     /// <summary>
     /// Interface to the Input system used by the BaseInputModule. With this it is possible to bypass the Input system with your own but still use the same InputModule. For example this can be used to feed fake input into the UI or interface with a different input system.
     /// </summary>
+    [Obsolete("EventSystem no longer supports input override for legacy input. Install Input System package for full input binding functionality.")]
     public class InputWrapper : MonoBehaviour
     {
         /// <summary>

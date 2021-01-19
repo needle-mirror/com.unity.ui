@@ -48,15 +48,23 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("Unity.UIElements")] // Graphic tests
 [assembly: InternalsVisibleTo("UnityEngine.UIElementsGameObjectsModule")]
 [assembly: InternalsVisibleTo("UnityEditor.UIElementsGameObjectsModule")]
+[assembly: InternalsVisibleTo("UnityEngine.UIElementsInputSystemModule")]
+[assembly: InternalsVisibleTo("UnityEditor.UIElementsInputSystemModule")]
 [assembly: InternalsVisibleTo("Unity.UIElements.Samples.Editor")]
 [assembly: InternalsVisibleTo("Assembly-CSharp-testable")]
 [assembly: InternalsVisibleTo("Assembly-CSharp-Editor-testable")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] // for Moq
 [assembly: InternalsVisibleTo("Unity.2D.Sprite.Editor")]
+
+// UI Builder
 [assembly: InternalsVisibleTo("Unity.UI.Builder.Editor")]
-[assembly: InternalsVisibleTo("UnityEditor.UIBuilderModule")]
 [assembly: InternalsVisibleTo("Unity.UI.Builder.EditorTests")]
+[assembly: InternalsVisibleTo("UnityEditor.UIBuilderModule")]
+[assembly: InternalsVisibleTo("Unity.UI.Builder")]
+
+
 [assembly: InternalsVisibleTo("Unity.DeviceSimulator.Editor")] // Temporary, see case 1279828
+[assembly: InternalsVisibleTo("UnityEngine.UI")]
 
 [assembly: InternalsVisibleTo("Unity.InternalAPIEngineBridge.001")]
 [assembly: InternalsVisibleTo("Unity.InternalAPIEngineBridge.002")]

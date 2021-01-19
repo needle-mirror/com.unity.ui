@@ -88,7 +88,7 @@ namespace UnityEditor.UIElements
         /// <remarks>
         /// You will still have to call Bind() on the PropertyField afterwards.
         /// </remarks>
-        public PropertyField() : this(null, string.Empty) {}
+        public PropertyField() : this(null, null) {}
 
         /// <summary>
         /// PropertyField constructor.
@@ -97,7 +97,7 @@ namespace UnityEditor.UIElements
         /// <remarks>
         /// You will still have to call Bind() on the PropertyField afterwards.
         /// </remarks>
-        public PropertyField(SerializedProperty property) : this(property, string.Empty) {}
+        public PropertyField(SerializedProperty property) : this(property, null) {}
 
         /// <summary>
         /// PropertyField constructor.
@@ -156,6 +156,7 @@ namespace UnityEditor.UIElements
             if (handler.hasPropertyDrawer)
             {
                 var customPropertyGUI = handler.propertyDrawer.CreatePropertyGUI(m_SerializedProperty);
+
                 if (customPropertyGUI == null)
                 {
                     customPropertyGUI = new IMGUIContainer(() =>
@@ -170,9 +171,13 @@ namespace UnityEditor.UIElements
                             if (m_FoldoutDepth > 0)
                                 EditorGUI.indentLevel += m_FoldoutDepth;
 
-                            if (string.IsNullOrEmpty(label))
+                            if (label == null)
                             {
                                 EditorGUILayout.PropertyField(m_SerializedProperty, true);
+                            }
+                            else if (label == string.Empty)
+                            {
+                                EditorGUILayout.PropertyField(m_SerializedProperty, GUIContent.none, true);
                             }
                             else
                             {
@@ -350,7 +355,7 @@ namespace UnityEditor.UIElements
             where TField : BaseField<TValue>
         {
             var propertyCopy = property.Copy();
-            var fieldLabel = string.IsNullOrEmpty(label) ? property.localizedDisplayName : label;
+            var fieldLabel = label ?? property.localizedDisplayName;
             field.bindingPath = property.propertyPath;
             field.userData = propertyCopy;
             field.name = "unity-input-" + property.propertyPath;

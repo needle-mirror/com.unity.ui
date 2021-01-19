@@ -30,9 +30,20 @@ namespace UnityEngine.UIElements
             }
         }
 
+        public static event Action<BaseRuntimePanel> onCreatePanel;
+
         static UIElementsRuntimeUtility()
         {
+#if UNITY_2021_1_OR_NEWER
+            // We no longer need it
+            UIElementsRuntimeUtilityNative.RepaintOverlayPanelsCallback = () => {};  //RepaintOverlayPanels;
+
+            Canvas.externBeginRenderOverlays = BeginRenderOverlays;
+            Canvas.externRenderOverlaysBefore = (displayIndex, sortOrder) => RenderOverlaysBeforePriority(displayIndex, sortOrder);
+            Canvas.externEndRenderOverlays = EndRenderOverlays;
+#else
             UIElementsRuntimeUtilityNative.RepaintOverlayPanelsCallback = RepaintOverlayPanels;
+#endif
         }
 
         public static EventBase CreateEvent(Event systemEvent)
@@ -55,6 +66,7 @@ namespace UnityEngine.UIElements
             var panel = createDelegate(ownerObject);
             panel.IMGUIEventInterests = new EventInterests {wantsMouseMove = true, wantsMouseEnterLeaveWindow = true};
             RegisterCachedPanelInternal(ownerObject.GetInstanceID(), panel);
+            onCreatePanel?.Invoke(panel);
             return panel;
         }
 
@@ -78,6 +90,9 @@ namespace UnityEngine.UIElements
             {
                 s_RegisteredPlayerloopCallback = true;
                 RegisterPlayerloopCallback();
+#if UNITY_2021_1_OR_NEWER
+                Canvas.SetExternalCanvasEnabled(true);
+#endif
             }
         }
 
@@ -97,6 +112,9 @@ namespace UnityEngine.UIElements
             {
                 s_RegisteredPlayerloopCallback = false;
                 UnregisterPlayerloopCallback();
+#if UNITY_2021_1_OR_NEWER
+                Canvas.SetExternalCanvasEnabled(false);
+#endif
             }
         }
 
@@ -112,11 +130,7 @@ namespace UnityEngine.UIElements
             {
                 if (!panel.drawToCameras)
                 {
-                    using (s_RepaintProfilerMarker.Auto())
-                        panel.Repaint(Event.current);
-#if UNITY_EDITOR
-                    (panel.panelDebug?.debuggerOverlayPanel as Panel)?.Repaint(Event.current);
-#endif
+                    RepaintOverlayPanel(panel);
                 }
             }
 
@@ -125,11 +139,79 @@ namespace UnityEngine.UIElements
                 s_onRepaintOverlayPanels();
         }
 
+        public static void RepaintOverlayPanel(BaseRuntimePanel panel)
+        {
+            using (s_RepaintProfilerMarker.Auto())
+                panel.Repaint(Event.current);
+#if UNITY_EDITOR
+            (panel.panelDebug?.debuggerOverlayPanel as Panel)?.Repaint(Event.current);
+#endif
+        }
+
+        private static int currentOverlayIndex = -1;
+        internal static void BeginRenderOverlays(int displayIndex)
+        {
+            currentOverlayIndex = 0;
+        }
+
+        internal static void RenderOverlaysBeforePriority(int displayIndex, float maxPriority)
+        {
+            if (currentOverlayIndex < 0)
+                return;
+
+            var runTimePanels = GetSortedPlayerPanels();
+
+            for (; currentOverlayIndex < runTimePanels.Count; ++currentOverlayIndex)
+            {
+                if (runTimePanels[currentOverlayIndex] is BaseRuntimePanel p)
+                {
+                    if (p.sortingPriority >= maxPriority)
+                        return;
+
+                    if (p.targetDisplay == displayIndex)
+                    {
+                        RepaintOverlayPanel(p);
+                    }
+                }
+            }
+        }
+
+        internal static void EndRenderOverlays(int displayIndex)
+        {
+            RenderOverlaysBeforePriority(displayIndex, float.MaxValue);
+            currentOverlayIndex = -1;
+        }
+
+        internal static Object activeEventSystem { get; private set; }
+        internal static bool useDefaultEventSystem => activeEventSystem == null;
+
+        public static void RegisterEventSystem(Object eventSystem)
+        {
+            if (activeEventSystem != null && activeEventSystem != eventSystem)
+                Debug.LogWarning("There can be only one active Event System.");
+            activeEventSystem = eventSystem;
+        }
+
+        public static void UnregisterEventSystem(Object eventSystem)
+        {
+            if (activeEventSystem == eventSystem)
+                activeEventSystem = null;
+        }
+
+        private static DefaultEventSystem s_DefaultEventSystem;
+        internal static DefaultEventSystem defaultEventSystem =>
+            s_DefaultEventSystem ?? (s_DefaultEventSystem = new DefaultEventSystem());
+
         public static void UpdateRuntimePanels()
         {
             foreach (BaseRuntimePanel panel in GetSortedPlayerPanels())
             {
                 panel.Update();
+            }
+
+            if (Application.isPlaying && useDefaultEventSystem)
+            {
+                defaultEventSystem.Update();
             }
         }
 

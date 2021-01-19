@@ -2,10 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Assertions;
 using UnityEngine.UIElements.UIR;
-#if UNITY_EDITOR
-using UnityEditor;
-using UnityEditor.UIElements;
-#endif
 
 namespace UnityEngine.UIElements
 {
@@ -241,6 +237,34 @@ namespace UnityEngine.UIElements
         }
 
         [SerializeField]
+        private int m_TargetDisplay = 0;
+
+        /// <summary>
+        /// When the Scene uses more than one panel, this value determines where this panel appears in the sorting
+        /// order relative to other panels.
+        /// </summary>
+        /// <remarks>
+        /// Unity renders panels with a higher sorting order value on top of panels with a lower value.
+        /// </remarks>
+        public int targetDisplay
+        {
+            get => m_TargetDisplay;
+            set
+            {
+                if (value < -128 || value > 127)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(targetDisplay), "Display index is out of supported range");
+                }
+
+                m_TargetDisplay = value;
+                if (m_RuntimePanel != null)
+                {
+                    m_RuntimePanel.targetDisplay = m_TargetDisplay;
+                }
+            }
+        }
+
+        [SerializeField]
         bool m_ClearDepthStencil = true;
 
         /// <summary>
@@ -290,6 +314,7 @@ namespace UnityEngine.UIElements
 
 #if UNITY_EDITOR
         internal static Func<ILiveReloadAssetTracker<StyleSheet>> CreateLiveReloadStyleSheetAssetTracker;
+        internal static Action<IPanel> CreateRuntimePanelDebug;
 #endif
 
         /// <summary>
@@ -329,6 +354,9 @@ namespace UnityEngine.UIElements
                     {
                         SetScreenToPanelSpaceFunction(m_AssignedScreenToPanel);
                     }
+
+                    m_RuntimePanel.targetDisplay = targetDisplay;
+                    m_RuntimePanel.sortingPriority = sortingOrder;
                 }
 
                 return m_RuntimePanel;
@@ -392,7 +420,7 @@ namespace UnityEngine.UIElements
             referenceDpi = Screen.dpi;
             scaleMode = PanelScaleModes.ConstantPhysicalSize;
 
-            themeStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(k_DefaultStyleSheetPath);
+            themeStyleSheet = AssetOperationsAccess.LoadStyleSheetAtPath(k_DefaultStyleSheetPath);
 
             m_AtlasBlitShader = m_RuntimeShader = m_RuntimeWorldShader = null;
             InitializeShaders();
@@ -436,7 +464,7 @@ namespace UnityEngine.UIElements
         {
             var newPanel = (RuntimePanel)UIElementsRuntimeUtility.FindOrCreateRuntimePanel(this, RuntimePanel.Create);
 #if UNITY_EDITOR
-            UIElementsEditorRuntimeUtility.CreateRuntimePanelDebug(newPanel);
+            CreateRuntimePanelDebug?.Invoke(newPanel);
 #endif
             return newPanel;
         }
@@ -495,7 +523,7 @@ namespace UnityEngine.UIElements
             Rect oldTargetRect = m_TargetRect;
             float oldResolvedScaling = m_ResolvedScale;
             m_TargetRect = GetDisplayRect(); // Expensive to evaluate, so cache
-            m_ResolvedScale = ResolveScale(m_TargetRect, Screen.dpi);
+            m_ResolvedScale = ResolveScale(m_TargetRect, Screen.dpi); // dpi should be constant across all displays
 
             if (visualTree.style.width.value == 0 || // TODO is this check valid? This prevents having to resize the game view!
                 m_ResolvedScale != oldResolvedScaling ||
@@ -509,6 +537,7 @@ namespace UnityEngine.UIElements
                 visualTree.style.height = m_TargetRect.height * m_ResolvedScale;
             }
             panel.targetTexture = targetTexture;
+            panel.targetDisplay = targetDisplay;
             panel.drawToCameras = false; //we don`t support WorldSpace rendering just yet
             panel.clearSettings = new PanelClearSettings {clearColor = m_ClearColor, clearDepthStencil = m_ClearDepthStencil, color = m_ColorClearValue};
 
@@ -608,6 +637,11 @@ namespace UnityEngine.UIElements
             }
 
             // Overlay.
+            if (targetDisplay > 0 && targetDisplay < Display.displays.Length)
+            {
+                return new Rect(0, 0, Display.displays[targetDisplay].renderingWidth, Display.displays[targetDisplay].renderingHeight);
+            }
+
             return new Rect(0, 0, Screen.width, Screen.height);
         }
 

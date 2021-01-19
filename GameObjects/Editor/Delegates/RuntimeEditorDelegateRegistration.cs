@@ -11,6 +11,9 @@ namespace UnityEditor.UIElements
             UIDocument.IsEditorPlaying = IsEditorPlaying;
             UIDocument.IsEditorPlayingOrWillChangePlaymode = IsEditorPlayingOrWillChangePlaymode;
             UIDocument.UpdateGameView = UpdateGameView;
+            AssetOperationsAccess.LoadStyleSheetAtPath = LoadAssetAtPath<StyleSheet>;
+            AssetOperationsAccess.LoadThemeAtPath = LoadAssetAtPath<ThemeStyleSheet>;
+            PanelSettings.CreateRuntimePanelDebug = UIElementsEditorRuntimeUtility.CreateRuntimePanelDebug;
 #if !UNITY_2020_2_OR_NEWER
             // This is a copy of an assignment in the Editor module used only for 2020.1 compatibility and should be
             // removed when support for 2020.1 is dropped.
@@ -23,6 +26,11 @@ namespace UnityEditor.UIElements
         internal static string GetAssetPath(Object asset)
         {
             return AssetDatabase.GetAssetPath(asset);
+        }
+
+        internal static T LoadAssetAtPath<T>(string asset) where T : UnityEngine.Object
+        {
+            return AssetDatabase.LoadAssetAtPath<T>(asset);
         }
 
         internal static int GetAssetDirtyCount(Object asset)

@@ -100,13 +100,7 @@ namespace UnityEngine.UIElements
         /// </summary>
         public virtual void Blur()
         {
-            if (focusController != null)
-            {
-                if (focusController.IsFocused(this))
-                {
-                    focusController.SwitchFocus(null);
-                }
-            }
+            focusController?.Blur(this);
         }
 
         // Use the tree to find the first focusable child.
@@ -311,13 +305,44 @@ namespace UnityEngine.UIElements
         }
 
         private Focusable m_LastFocusedElement;
+        private Focusable m_LastPendingFocusedElement;
+        private int m_PendingFocusCount = 0;
+
+#if UNITY_EDITOR
+        internal void ValidateInternalState(IPanel panel)
+        {
+            if (m_PendingFocusCount != 0 && !panel.dispatcher.processingEvents)
+            {
+                Debug.LogWarning("FocusController has unprocessed focus events. Clearing.");
+                ClearPendingFocusEvents();
+            }
+        }
+
+#endif
+
+        internal void ClearPendingFocusEvents()
+        {
+            m_PendingFocusCount = 0;
+            m_LastPendingFocusedElement = null;
+        }
+
+        internal bool IsPendingFocus(Focusable f)
+        {
+            // Search for f in pending focused hierarchy
+            var pending = m_LastPendingFocusedElement as VisualElement;
+            while (pending != null)
+            {
+                if (f == pending)
+                    return true;
+                pending = pending.hierarchy.parent;
+            }
+            return false;
+        }
 
         internal void SetFocusToLastFocusedElement()
         {
             if (m_LastFocusedElement != null && !(m_LastFocusedElement is IMGUIContainer))
                 m_LastFocusedElement.Focus();
-
-            m_LastFocusedElement = null;
         }
 
         internal void BlurLastFocusedElement()
@@ -336,8 +361,6 @@ namespace UnityEngine.UIElements
             m_FocusedElements.Clear();
 
             VisualElement ve = f as VisualElement;
-            if (!(f is IMGUIContainer))
-                m_LastFocusedElement = f;
 
             while (ve != null)
             {
@@ -348,6 +371,10 @@ namespace UnityEngine.UIElements
                 }
                 ve = ve.hierarchy.parent;
             }
+
+            m_PendingFocusCount--;
+            if (m_PendingFocusCount == 0)
+                m_LastPendingFocusedElement = null;
         }
 
         void AboutToReleaseFocus(Focusable focusable, Focusable willGiveFocusTo, FocusChangeDirection direction)
@@ -382,6 +409,15 @@ namespace UnityEngine.UIElements
             }
         }
 
+        internal void Blur(Focusable focusable, bool bIsFocusDelegated = false)
+        {
+            var ownsFocus = m_PendingFocusCount > 0 ? IsPendingFocus(focusable) : IsFocused(focusable);
+            if (ownsFocus)
+            {
+                SwitchFocus(null, bIsFocusDelegated);
+            }
+        }
+
         internal void SwitchFocus(Focusable newFocusedElement, bool bIsFocusDelegated = false)
         {
             SwitchFocus(newFocusedElement, FocusChangeDirection.unspecified, bIsFocusDelegated);
@@ -389,17 +425,22 @@ namespace UnityEngine.UIElements
 
         internal void SwitchFocus(Focusable newFocusedElement, FocusChangeDirection direction, bool bIsFocusDelegated = false)
         {
-            if (GetLeafFocusedElement() == newFocusedElement)
+            m_LastFocusedElement = newFocusedElement;
+
+            var oldFocusedElement = m_PendingFocusCount > 0 ? m_LastPendingFocusedElement : GetLeafFocusedElement();
+
+            if (oldFocusedElement == newFocusedElement)
             {
                 return;
             }
-
-            var oldFocusedElement = GetLeafFocusedElement();
 
             if (newFocusedElement == null || !newFocusedElement.canGrabFocus)
             {
                 if (oldFocusedElement != null)
                 {
+                    m_LastPendingFocusedElement = null;
+                    m_PendingFocusCount++; // ReleaseFocus will always trigger DoFocusChange
+
                     AboutToReleaseFocus(oldFocusedElement, null, direction);
                     ReleaseFocus(oldFocusedElement, null, direction);
                 }
@@ -407,8 +448,11 @@ namespace UnityEngine.UIElements
             else if (newFocusedElement != oldFocusedElement)
             {
                 // Retarget event.relatedTarget so it is in the same tree as event.target.
-                var retargetedNewFocusedElement = (newFocusedElement as VisualElement)?.RetargetElement(oldFocusedElement as VisualElement);
-                var retargetedOldFocusedElement = (oldFocusedElement as VisualElement)?.RetargetElement(newFocusedElement as VisualElement);
+                var retargetedNewFocusedElement = (newFocusedElement as VisualElement)?.RetargetElement(oldFocusedElement as VisualElement) ?? newFocusedElement;
+                var retargetedOldFocusedElement = (oldFocusedElement as VisualElement)?.RetargetElement(newFocusedElement as VisualElement) ?? oldFocusedElement;
+
+                m_LastPendingFocusedElement = newFocusedElement;
+                m_PendingFocusCount++; // GrabFocus will always trigger DoFocusChange, but ReleaseFocus won't
 
                 if (oldFocusedElement != null)
                 {
@@ -419,6 +463,7 @@ namespace UnityEngine.UIElements
 
                 if (oldFocusedElement != null)
                 {
+                    // Since retargetedNewFocusedElement != null, so ReleaseFocus will not trigger DoFocusChange
                     ReleaseFocus(oldFocusedElement, retargetedNewFocusedElement, direction);
                 }
 

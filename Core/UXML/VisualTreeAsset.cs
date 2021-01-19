@@ -537,6 +537,12 @@ namespace UnityEngine.UIElements
 
         internal static VisualElement Create(VisualElementAsset asset, CreationContext ctx)
         {
+            VisualElement CreateError()
+            {
+                Debug.LogErrorFormat("Element '{0}' has no registered factory method.", asset.fullTypeName);
+                return new Label(string.Format("Unknown type: '{0}'", asset.fullTypeName));
+            }
+
             List<IUxmlFactory> factoryList;
             if (!VisualElementFactoryRegistry.TryGetValue(asset.fullTypeName, out factoryList))
             {
@@ -545,8 +551,15 @@ namespace UnityEngine.UIElements
                     string experimentalTypeName = asset.fullTypeName.Replace(".Experimental.UIElements", ".UIElements");
                     if (!VisualElementFactoryRegistry.TryGetValue(experimentalTypeName, out factoryList))
                     {
-                        Debug.LogErrorFormat("Element '{0}' has no registered factory method.", asset.fullTypeName);
-                        return new Label(string.Format("Unknown type: '{0}'", asset.fullTypeName));
+                        return CreateError();
+                    }
+                }
+                else if (asset.fullTypeName == "UnityEditor.UIElements.ProgressBar")
+                {
+                    string runtimeTypeName = asset.fullTypeName.Replace("UnityEditor", "UnityEngine");
+                    if (!VisualElementFactoryRegistry.TryGetValue(runtimeTypeName, out factoryList))
+                    {
+                        return CreateError();
                     }
                 }
                 else if (asset.fullTypeName == UxmlRootElementFactory.k_ElementName)
@@ -556,8 +569,7 @@ namespace UnityEngine.UIElements
                 }
                 else
                 {
-                    Debug.LogErrorFormat("Element '{0}' has no registered factory method.", asset.fullTypeName);
-                    return new Label(string.Format("Unknown type: '{0}'", asset.fullTypeName));
+                    return CreateError();
                 }
             }
 

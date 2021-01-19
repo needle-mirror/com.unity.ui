@@ -1,0 +1,12 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace UnityEngine.UIElements.InputSystem
+{
+    [UnityEngine.AddComponentMenu(@"UI Toolkit/Input System Event System (UI Toolkit)")] public class InputSystemEventSystem : UnityEngine.MonoBehaviour
+    {
+        [System.Obsolete(@"EventSystem no longer supports input override for legacy input. Install Input System package for full input binding functionality.")] public UnityEngine.UIElements.InputWrapper inputOverride { get; set; }
+        public bool isAppFocused { get; }
+        protected InputSystemEventSystem() {}
+    }
+}

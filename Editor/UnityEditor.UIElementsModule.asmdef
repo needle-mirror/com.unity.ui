@@ -24,11 +24,6 @@
             "name": "com.unity.ui",
             "expression": "",
             "define": "UIE_PACKAGE"
-        },
-        {
-            "name": "com.unity.inputsystem",
-            "expression": "",
-            "define": "UNITY_INPUT_SYSTEM"
         }
     ],
     "noEngineReferences": false

@@ -80,7 +80,7 @@ namespace UnityEngine.UIElements
             var inline = new StyleValue();
             if (TryGetStyleValue(id, ref inline))
             {
-                var font = inline.resource.IsAllocated ? inline.resource.Target as Object : null;
+                var font = inline.resource.IsAllocated ? inline.resource.Target as object : null;
                 return new StyleFontDefinition(font, inline.keyword);
             }
             return StyleKeyword.Null;
@@ -449,7 +449,7 @@ namespace UnityEngine.UIElements
             {
                 var font = sv.resource.IsAllocated ? sv.resource.Target as Font : null;
                 var obj = sv.resource.Target as Object;
-                var fontAsset = sv.resource.IsAllocated && TextDelegates.IsFontAsset(obj) ? obj : null;
+                var fontAsset = sv.resource.IsAllocated && TextDelegates.IsFontAssetSafe(obj) ? obj : null;
                 if ((font == inlineValue.value.font && fontAsset == inlineValue.value.fontAsset) && sv.keyword == inlineValue.keyword)
                     return false;
 

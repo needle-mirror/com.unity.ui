@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine.UIElements.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -70,6 +71,13 @@ namespace UnityEditor.UIElements.Inspector
 
             m_ClearColorField = m_RootVisualElement.MandatoryQ<PropertyField>("clearColor");
             m_ColorClearValueField = m_RootVisualElement.MandatoryQ<PropertyField>("colorClearValue");
+
+            var choices = new List<int> {0, 1, 2, 3, 4, 5, 6, 7};
+            var targetDisplayField = new PopupField<int>("Target Display", choices, 0, i => $"Display {i + 1}", i => $"Display {i + 1}");
+            targetDisplayField.bindingPath = "m_TargetDisplay";
+
+            m_TargetTextureField.parent.Add(targetDisplayField);
+            targetDisplayField.PlaceInFront(m_TargetTextureField);
 
             m_SortOrderField = m_RootVisualElement.MandatoryQ<FloatField>("sortingOrder");
             m_SortOrderField.isDelayed = true;

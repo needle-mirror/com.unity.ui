@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace Samples.Runtime.Events
 {
-    [RequireComponent(typeof(UIDocument), typeof(EventSystem))]
+    [RequireComponent(typeof(UIDocument))]
     public class KeyboardEvents : MonoBehaviour
     {
         [SerializeField] private PanelSettings panelSettings = default;

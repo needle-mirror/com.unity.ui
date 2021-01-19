@@ -40,6 +40,7 @@ using UnityEngine;
 
 [assembly: InternalsVisibleTo("Unity.UIElements.Tests")]
 [assembly: InternalsVisibleTo("Unity.UIElements.EditorTests")]
+[assembly: InternalsVisibleTo("UnityEditor.UIElementsInputSystemModule")]
 
 [assembly: InternalsVisibleTo("Unity.InternalAPIEditorBridge.001")]
 [assembly: InternalsVisibleTo("Unity.InternalAPIEditorBridge.002")]

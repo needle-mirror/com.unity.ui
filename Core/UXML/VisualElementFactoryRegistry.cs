@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace UnityEngine.UIElements
 {
-    static class VisualElementFactoryRegistry
+    internal static class VisualElementFactoryRegistry
     {
         private static Dictionary<string, List<IUxmlFactory>> s_Factories;
 
@@ -75,12 +75,19 @@ namespace UnityEngine.UIElements
                 new Slider.UxmlFactory(),
                 new SliderInt.UxmlFactory(),
                 new MinMaxSlider.UxmlFactory(),
+                new GroupBox.UxmlFactory(),
+                new RadioButton.UxmlFactory(),
+                new RadioButtonGroup.UxmlFactory(),
                 new Toggle.UxmlFactory(),
                 new TextField.UxmlFactory(),
                 new TemplateContainer.UxmlFactory(),
                 new Box.UxmlFactory(),
+                new DropdownField.UxmlFactory(),
                 new HelpBox.UxmlFactory(),
                 new PopupWindow.UxmlFactory(),
+#if UNITY_2021_1_OR_NEWER
+                new ProgressBar.UxmlFactory(),
+#endif
                 new ListView.UxmlFactory(),
                 new TwoPaneSplitView.UxmlFactory(),
                 new TreeView.UxmlFactory(),

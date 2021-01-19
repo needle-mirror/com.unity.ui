@@ -414,7 +414,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
                     m_CurrentEntry.isTextEntry = true;
                     m_CurrentEntry.clipRectID = m_ClipRectID;
                     m_CurrentEntry.isStencilClipped = m_StencilClip;
-                    m_CurrentEntry.fontTexSDFScale = textInfo.meshInfos[i].material.GetFloat(TextDelegates.GetIDGradientScale());
+                    m_CurrentEntry.fontTexSDFScale = textInfo.meshInfos[i].material.GetFloat(TextDelegates.GetIDGradientScaleSafe());
                     m_CurrentEntry.font = textInfo.meshInfos[i].material.mainTexture;
 
                     MeshBuilder.MakeText(

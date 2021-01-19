@@ -574,7 +574,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 
             bool allocatesID = RenderChainVEData.AllocatesID(ve.renderChainData.textCoreSettingsID);
 
-            var settings = TextDelegates.GetTextCoreSettingsForElement(ve);
+            var settings = TextDelegates.GetTextCoreSettingsForElementSafe(ve);
             if (settings.outlineWidth == 0.0f && settings.underlayOffset == Vector2.zero && settings.underlaySoftness == 0.0f && !allocatesID)
             {
                 // Use default TextCore settings
@@ -790,26 +790,26 @@ namespace UnityEngine.UIElements.UIR.Implementation
                             vertexDataComputed = true;
                             GetVerticesTransformInfo(ve, out transform);
                             ve.renderChainData.verticesSpace = transform; // This is the space for the generated vertices below
-                        }
 
-                        Color32 transformData = renderChain.shaderInfoAllocator.TransformAllocToVertexData(ve.renderChainData.transformID);
-                        Color32 opacityData = renderChain.shaderInfoAllocator.OpacityAllocToVertexData(ve.renderChainData.opacityID);
-                        Color32 textCoreSettingsData = renderChain.shaderInfoAllocator.TextCoreSettingsToVertexData(ve.renderChainData.textCoreSettingsID);
-                        xformClipPages.r = transformData.r;
-                        xformClipPages.g = transformData.g;
-                        ids.r = transformData.b;
-                        opacityPage.r = opacityData.r;
-                        opacityPage.g = opacityData.g;
-                        ids.b = opacityData.b;
-                        if (entry.isTextEntry)
-                        {
-                            // It's important to avoid writing these values when the vertices aren't for text,
-                            // as these settings are shared with the vector graphics gradients.
-                            // The same applies to the CopyTransformVertsPos* methods below.
-                            textCoreSettingsPage.r = textCoreSettingsData.r;
-                            textCoreSettingsPage.g = textCoreSettingsData.g;
+                            Color32 transformData = renderChain.shaderInfoAllocator.TransformAllocToVertexData(ve.renderChainData.transformID);
+                            Color32 opacityData = renderChain.shaderInfoAllocator.OpacityAllocToVertexData(ve.renderChainData.opacityID);
+                            Color32 textCoreSettingsData = renderChain.shaderInfoAllocator.TextCoreSettingsToVertexData(ve.renderChainData.textCoreSettingsID);
+                            xformClipPages.r = transformData.r;
+                            xformClipPages.g = transformData.g;
+                            ids.r = transformData.b;
+                            opacityPage.r = opacityData.r;
+                            opacityPage.g = opacityData.g;
+                            ids.b = opacityData.b;
+                            if (entry.isTextEntry)
+                            {
+                                // It's important to avoid writing these values when the vertices aren't for text,
+                                // as these settings are shared with the vector graphics gradients.
+                                // The same applies to the CopyTransformVertsPos* methods below.
+                                textCoreSettingsPage.r = textCoreSettingsData.r;
+                                textCoreSettingsPage.g = textCoreSettingsData.g;
+                            }
+                            ids.a = textCoreSettingsData.b;
                         }
-                        ids.a = textCoreSettingsData.b;
 
                         Color32 clipRectData = renderChain.shaderInfoAllocator.ClipRectAllocToVertexData(entry.clipRectID);
                         xformClipPages.b = clipRectData.r;

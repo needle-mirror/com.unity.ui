@@ -56,8 +56,8 @@ namespace UnityEngine.UIElements
         /// <returns>A new FontDefinition object.</returns>
         public static FontDefinition FromSDFFont(Object f)
         {
-            if (TextDelegates.IsFontAsset == null || TextDelegates.IsFontAsset(f))
-                return new FontDefinition() { m_FontAsset = f };
+            if (TextDelegates.IsFontAssetSafe(f))
+                return new FontDefinition() { fontAsset = f };
 
             Debug.LogError("Cannot create a FontDefinition, the type must be FontAsset");
             return default;

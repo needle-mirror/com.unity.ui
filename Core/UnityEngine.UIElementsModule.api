@@ -3,6 +3,25 @@
 // make sure the XML doc file is present and located next to the scraped dll
 namespace UnityEngine.UIElements
 {
+    public abstract class AbstractProgressBar : UnityEngine.UIElements.BindableElement, UnityEngine.UIElements.INotifyValueChanged<float>
+    {
+        public static readonly string backgroundUssClassName;
+        public static readonly string containerUssClassName;
+        public static readonly string progressUssClassName;
+        public static readonly string titleContainerUssClassName;
+        public static readonly string titleUssClassName;
+        public static readonly string ussClassName;
+        public string title { get; set; }
+        public virtual float value { get; set; }
+        public AbstractProgressBar() {}
+        public virtual void SetValueWithoutNotify(float newValue);
+        public class UxmlTraits : UnityEngine.UIElements.BindableElement.UxmlTraits
+        {
+            public UxmlTraits() {}
+            public virtual void Init(UnityEngine.UIElements.VisualElement ve, UnityEngine.UIElements.IUxmlAttributes bag, UnityEngine.UIElements.CreationContext cc);
+        }
+    }
+
     public enum Align
     {
         public const UnityEngine.UIElements.Align Auto = 0;
@@ -43,6 +62,18 @@ namespace UnityEngine.UIElements
         public static bool operator ==(UnityEngine.UIElements.Background lhs, UnityEngine.UIElements.Background rhs);
         public static bool operator !=(UnityEngine.UIElements.Background lhs, UnityEngine.UIElements.Background rhs);
         public virtual string ToString();
+    }
+
+    public abstract class BaseBoolField : UnityEngine.UIElements.BaseField<bool>
+    {
+        protected readonly UnityEngine.UIElements.VisualElement m_CheckMark;
+        protected UnityEngine.UIElements.Label m_Label;
+        public string text { get; set; }
+        public BaseBoolField(string label) {}
+        protected virtual void InitLabel();
+        public virtual void SetValueWithoutNotify(bool newValue);
+        protected virtual void ToggleValue();
+        protected virtual void UpdateMixedValueContent();
     }
 
     public abstract class BaseField<TValueType> : UnityEngine.UIElements.BindableElement, UnityEngine.UIElements.IMixedValueSupport, UnityEngine.UIElements.INotifyValueChanged<TValueType>
@@ -192,6 +223,7 @@ namespace UnityEngine.UIElements
         protected void OnMouseDown(UnityEngine.UIElements.MouseDownEvent evt);
         protected void OnMouseMove(UnityEngine.UIElements.MouseMoveEvent evt);
         protected void OnMouseUp(UnityEngine.UIElements.MouseUpEvent evt);
+        protected virtual void ProcessCancelEvent(UnityEngine.UIElements.EventBase evt, int pointerId);
         protected virtual void ProcessDownEvent(UnityEngine.UIElements.EventBase evt, UnityEngine.Vector2 localPosition, int pointerId);
         protected virtual void ProcessMoveEvent(UnityEngine.UIElements.EventBase evt, UnityEngine.Vector2 localPosition);
         protected virtual void ProcessUpEvent(UnityEngine.UIElements.EventBase evt, UnityEngine.Vector2 localPosition, int pointerId);
@@ -339,6 +371,32 @@ namespace UnityEngine.UIElements
         public DragUpdatedEvent() {}
         public static UnityEngine.UIElements.DragUpdatedEvent GetPooled(UnityEngine.Event systemEvent);
         protected virtual void PostDispatch(UnityEngine.UIElements.IPanel panel);
+    }
+
+    public class DropdownField : UnityEngine.UIElements.BaseField<string>
+    {
+        public int index { get; set; }
+        public string text { get; }
+        protected UnityEngine.UIElements.TextElement textElement { get; }
+        public virtual string value { get; set; }
+        public DropdownField() {}
+        public DropdownField(string label) {}
+        public DropdownField(System.Collections.Generic.List<string> choices, int defaultIndex, System.Func<string, string> formatSelectedValueCallback = default(System.Func<string, string>), System.Func<string, string> formatListItemCallback = default(System.Func<string, string>)) {}
+        public DropdownField(System.Collections.Generic.List<string> choices, string defaultValue, System.Func<string, string> formatSelectedValueCallback = default(System.Func<string, string>), System.Func<string, string> formatListItemCallback = default(System.Func<string, string>)) {}
+        public DropdownField(string label, System.Collections.Generic.List<string> choices, int defaultIndex, System.Func<string, string> formatSelectedValueCallback = default(System.Func<string, string>), System.Func<string, string> formatListItemCallback = default(System.Func<string, string>)) {}
+        public DropdownField(string label, System.Collections.Generic.List<string> choices, string defaultValue, System.Func<string, string> formatSelectedValueCallback = default(System.Func<string, string>), System.Func<string, string> formatListItemCallback = default(System.Func<string, string>)) {}
+        protected virtual void ExecuteDefaultActionAtTarget(UnityEngine.UIElements.EventBase evt);
+        public virtual void SetValueWithoutNotify(string newValue);
+        protected virtual void UpdateMixedValueContent();
+        public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.DropdownField, UnityEngine.UIElements.DropdownField.UxmlTraits>
+        {
+            public UxmlFactory() {}
+        }
+        public class UxmlTraits : UnityEngine.UIElements.BaseField<string>
+        {
+            public UxmlTraits() {}
+            public virtual void Init(UnityEngine.UIElements.VisualElement ve, UnityEngine.UIElements.IUxmlAttributes bag, UnityEngine.UIElements.CreationContext cc);
+        }
     }
 
     public class DropdownMenu
@@ -573,6 +631,24 @@ namespace UnityEngine.UIElements
         public virtual string ToString();
     }
 
+    public class GenericDropdownMenu : UnityEngine.UIElements.IGenericMenu
+    {
+        public static readonly string checkmarkUssClassName;
+        public static readonly string containerInnerUssClassName;
+        public static readonly string containerOuterUssClassName;
+        public static readonly string itemUssClassName;
+        public static readonly string labelUssClassName;
+        public static readonly string separatorUssClassName;
+        public static readonly string ussClassName;
+        public UnityEngine.UIElements.VisualElement contentContainer { get; }
+        public GenericDropdownMenu() {}
+        public virtual void AddDisabledItem(string itemName, bool isChecked);
+        public virtual void AddItem(string itemName, bool isChecked, System.Action action);
+        public virtual void AddItem(string itemName, bool isChecked, System.Action<object> action, object data);
+        public virtual void AddSeparator(string path);
+        public virtual void DropDown(UnityEngine.Rect position, UnityEngine.UIElements.VisualElement targetElement = default(UnityEngine.UIElements.VisualElement), bool anchored = False);
+    }
+
     public class GeometryChangedEvent : UnityEngine.UIElements.EventBase<UnityEngine.UIElements.GeometryChangedEvent>
     {
         public UnityEngine.Rect newRect { get; }
@@ -580,6 +656,24 @@ namespace UnityEngine.UIElements
         public GeometryChangedEvent() {}
         public static UnityEngine.UIElements.GeometryChangedEvent GetPooled(UnityEngine.Rect oldRect, UnityEngine.Rect newRect);
         protected virtual void Init();
+    }
+
+    public class GroupBox : UnityEngine.UIElements.BindableElement, UnityEngine.UIElements.IGroupBox
+    {
+        public static readonly string labelUssClassName;
+        public static readonly string ussClassName;
+        public string text { get; set; }
+        public GroupBox() {}
+        public GroupBox(string text) {}
+        public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.GroupBox, UnityEngine.UIElements.GroupBox.UxmlTraits>
+        {
+            public UxmlFactory() {}
+        }
+        public class UxmlTraits : UnityEngine.UIElements.BindableElement.UxmlTraits
+        {
+            public UxmlTraits() {}
+            public virtual void Init(UnityEngine.UIElements.VisualElement ve, UnityEngine.UIElements.IUxmlAttributes bag, UnityEngine.UIElements.CreationContext cc);
+        }
     }
 
     public class HelpBox : UnityEngine.UIElements.VisualElement
@@ -1071,6 +1165,28 @@ namespace UnityEngine.UIElements
         public static T GetPooled(UnityEngine.Event systemEvent);
         public static T GetPooled(char c, UnityEngine.KeyCode keyCode, UnityEngine.EventModifiers modifiers);
         protected virtual void Init();
+    }
+
+    public class KeyboardNavigationManipulator : UnityEngine.UIElements.Manipulator
+    {
+        public KeyboardNavigationManipulator(System.Action<UnityEngine.UIElements.KeyboardNavigationOperation, UnityEngine.UIElements.EventBase> action) {}
+        protected virtual void RegisterCallbacksOnTarget();
+        protected virtual void UnregisterCallbacksFromTarget();
+    }
+
+    public enum KeyboardNavigationOperation
+    {
+        public const UnityEngine.UIElements.KeyboardNavigationOperation Begin = 8;
+        public const UnityEngine.UIElements.KeyboardNavigationOperation Cancel = 2;
+        public const UnityEngine.UIElements.KeyboardNavigationOperation End = 9;
+        public const UnityEngine.UIElements.KeyboardNavigationOperation Next = 5;
+        public const UnityEngine.UIElements.KeyboardNavigationOperation None = 0;
+        public const UnityEngine.UIElements.KeyboardNavigationOperation PageDown = 7;
+        public const UnityEngine.UIElements.KeyboardNavigationOperation PageUp = 6;
+        public const UnityEngine.UIElements.KeyboardNavigationOperation Previous = 4;
+        public const UnityEngine.UIElements.KeyboardNavigationOperation SelectAll = 1;
+        public const UnityEngine.UIElements.KeyboardNavigationOperation Submit = 3;
+        public int value__;
     }
 
     public class KeyDownEvent : UnityEngine.UIElements.KeyboardEventBase<UnityEngine.UIElements.KeyDownEvent>
@@ -1605,6 +1721,15 @@ namespace UnityEngine.UIElements
         public int value__;
     }
 
+    [UnityEngine.Scripting.APIUpdating.MovedFrom(true, @"UnityEditor.UIElements", @"UnityEditor.UIElementsModule", )] public class ProgressBar : UnityEngine.UIElements.AbstractProgressBar
+    {
+        public ProgressBar() {}
+        public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.ProgressBar, UnityEngine.UIElements.AbstractProgressBar.UxmlTraits>
+        {
+            public UxmlFactory() {}
+        }
+    }
+
     public enum PropagationPhase
     {
         public const UnityEngine.UIElements.PropagationPhase AtTarget = 2;
@@ -1614,6 +1739,51 @@ namespace UnityEngine.UIElements
         public const UnityEngine.UIElements.PropagationPhase None = 0;
         public const UnityEngine.UIElements.PropagationPhase TrickleDown = 1;
         public int value__;
+    }
+
+    public class RadioButton : UnityEngine.UIElements.BaseBoolField, UnityEngine.UIElements.IGroupBoxOption
+    {
+        public static readonly string checkmarkBackgroundUssClassName;
+        public static readonly string checkmarkUssClassName;
+        public static readonly string inputUssClassName;
+        public static readonly string labelUssClassName;
+        public static readonly string textUssClassName;
+        public static readonly string ussClassName;
+        public virtual bool value { get; set; }
+        public RadioButton() {}
+        public RadioButton(string label) {}
+        protected virtual void InitLabel();
+        public virtual void SetSelected(bool selected);
+        public virtual void SetValueWithoutNotify(bool newValue);
+        protected virtual void ToggleValue();
+        protected virtual void UpdateMixedValueContent();
+        public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.RadioButton, UnityEngine.UIElements.RadioButton.UxmlTraits>
+        {
+            public UxmlFactory() {}
+        }
+        public class UxmlTraits : UnityEngine.UIElements.BaseFieldTraits<bool, UnityEngine.UIElements.UxmlBoolAttributeDescription>
+        {
+            public UxmlTraits() {}
+            public virtual void Init(UnityEngine.UIElements.VisualElement ve, UnityEngine.UIElements.IUxmlAttributes bag, UnityEngine.UIElements.CreationContext cc);
+        }
+    }
+
+    public class RadioButtonGroup : UnityEngine.UIElements.BaseField<int>, UnityEngine.UIElements.IGroupBox
+    {
+        public static readonly string ussClassName;
+        public System.Collections.Generic.IEnumerable<string> choices { get; set; }
+        public RadioButtonGroup() {}
+        public RadioButtonGroup(string label, System.Collections.Generic.List<string> radioButtonChoices = default(System.Collections.Generic.List<string>)) {}
+        public virtual void SetValueWithoutNotify(int newValue);
+        public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.RadioButtonGroup, UnityEngine.UIElements.RadioButtonGroup.UxmlTraits>
+        {
+            public UxmlFactory() {}
+        }
+        public class UxmlTraits : UnityEngine.UIElements.BaseFieldTraits<int, UnityEngine.UIElements.UxmlIntAttributeDescription>
+        {
+            public UxmlTraits() {}
+            public virtual void Init(UnityEngine.UIElements.VisualElement ve, UnityEngine.UIElements.IUxmlAttributes bag, UnityEngine.UIElements.CreationContext cc);
+        }
     }
 
     public class RepeatButton : UnityEngine.UIElements.TextElement
@@ -1668,6 +1838,14 @@ namespace UnityEngine.UIElements
         }
     }
 
+    public enum ScrollerVisibility
+    {
+        public const UnityEngine.UIElements.ScrollerVisibility AlwaysVisible = 1;
+        public const UnityEngine.UIElements.ScrollerVisibility Auto = 0;
+        public const UnityEngine.UIElements.ScrollerVisibility Hidden = 2;
+        public int value__;
+    }
+
     public class ScrollView : UnityEngine.UIElements.VisualElement
     {
         public static readonly string contentUssClassName;
@@ -1684,13 +1862,15 @@ namespace UnityEngine.UIElements
         public float elasticity { get; set; }
         public float horizontalPageSize { get; set; }
         public UnityEngine.UIElements.Scroller horizontalScroller { get; }
+        public UnityEngine.UIElements.ScrollerVisibility horizontalScrollerVisibility { get; set; }
         public float scrollDecelerationRate { get; set; }
         public UnityEngine.Vector2 scrollOffset { get; set; }
-        public bool showHorizontal { get; set; }
-        public bool showVertical { get; set; }
+        [System.Obsolete(@"showHorizontal is obsolete. Use horizontalScrollerVisibility instead")] public bool showHorizontal { get; set; }
+        [System.Obsolete(@"showVertical is obsolete. Use verticalScrollerVisibility instead")] public bool showVertical { get; set; }
         public UnityEngine.UIElements.ScrollView.TouchScrollBehavior touchScrollBehavior { get; set; }
         public float verticalPageSize { get; set; }
         public UnityEngine.UIElements.Scroller verticalScroller { get; }
+        public UnityEngine.UIElements.ScrollerVisibility verticalScrollerVisibility { get; set; }
         public ScrollView() {}
         public ScrollView(UnityEngine.UIElements.ScrollViewMode scrollViewMode) {}
         public void ScrollTo(UnityEngine.UIElements.VisualElement child);
@@ -1881,7 +2061,6 @@ namespace UnityEngine.UIElements
         public virtual UnityEngine.UIElements.StyleKeyword keyword { get; set; }
         public virtual UnityEngine.UIElements.FontDefinition value { get; set; }
         public StyleFontDefinition(UnityEngine.Font f) {}
-        public StyleFontDefinition(UnityEngine.Object f) {}
         public StyleFontDefinition(UnityEngine.UIElements.FontDefinition f) {}
         public StyleFontDefinition(UnityEngine.UIElements.StyleKeyword keyword) {}
         public virtual bool Equals(object obj);
@@ -2130,19 +2309,17 @@ namespace UnityEngine.UIElements
         public static bool operator !=(UnityEngine.UIElements.TimerState state1, UnityEngine.UIElements.TimerState state2);
     }
 
-    public class Toggle : UnityEngine.UIElements.BaseField<bool>
+    public class Toggle : UnityEngine.UIElements.BaseBoolField
     {
         public static readonly string checkmarkUssClassName;
         public static readonly string inputUssClassName;
         public static readonly string labelUssClassName;
-        public static readonly string noTextVariantUssClassName;
+        [System.Obsolete] public static readonly string noTextVariantUssClassName;
         public static readonly string textUssClassName;
         public static readonly string ussClassName;
-        public string text { get; set; }
         public Toggle() {}
         public Toggle(string label) {}
-        public virtual void SetValueWithoutNotify(bool newValue);
-        protected virtual void UpdateMixedValueContent();
+        protected virtual void InitLabel();
         public class UxmlFactory : UnityEngine.UIElements.UxmlFactory<UnityEngine.UIElements.Toggle, UnityEngine.UIElements.Toggle.UxmlTraits>
         {
             public UxmlFactory() {}
@@ -2268,7 +2445,7 @@ namespace UnityEngine.UIElements
         [System.Runtime.CompilerServices.Extension] public static UnityEngine.UIElements.UQueryBuilder<UnityEngine.UIElements.VisualElement> Query(UnityEngine.UIElements.VisualElement e, string name = default(string), params string[] classes);
     }
 
-    public struct UQueryState<T> : System.IEquatable<UnityEngine.UIElements.UQueryState<T>> where T : UnityEngine.UIElements.VisualElement
+    public struct UQueryState<T> : System.Collections.Generic.IEnumerable<T>, System.Collections.IEnumerable, System.IEquatable<UnityEngine.UIElements.UQueryState<T>> where T : UnityEngine.UIElements.VisualElement
     {
         public T AtIndex(int index);
         public virtual bool Equals(object obj);
@@ -2277,6 +2454,7 @@ namespace UnityEngine.UIElements
         public System.Collections.Generic.List<T2> ForEach<T2>(System.Func<T, T2> funcCall);
         public void ForEach(System.Action<T> funcCall);
         public void ForEach<T2>(System.Collections.Generic.List<T2> result, System.Func<T, T2> funcCall);
+        public UnityEngine.UIElements.UQueryState<T> GetEnumerator();
         public virtual int GetHashCode();
         public T Last();
         public static bool operator ==(UnityEngine.UIElements.UQueryState<T> state1, UnityEngine.UIElements.UQueryState<T> state2);
@@ -2284,6 +2462,13 @@ namespace UnityEngine.UIElements
         public UnityEngine.UIElements.UQueryState<T> RebuildOn(UnityEngine.UIElements.VisualElement element);
         public System.Collections.Generic.List<T> ToList();
         public void ToList(System.Collections.Generic.List<T> results);
+        public struct Enumerator<T> : System.Collections.Generic.IEnumerator<T>, System.Collections.IEnumerator, System.IDisposable where T : UnityEngine.UIElements.VisualElement
+        {
+            public virtual T Current { get; }
+            public virtual void Dispose();
+            public virtual bool MoveNext();
+            public virtual void Reset();
+        }
     }
 
     [System.Flags] public enum UsageHints

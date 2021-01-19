@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Samples.Runtime.Text
 {
-    [RequireComponent(typeof(UIDocument), typeof(EventSystem))]
+    [RequireComponent(typeof(UIDocument))]
     public class BasicStyleTags : MonoBehaviour
     {
         [SerializeField] private PanelSettings panelSettings = default;

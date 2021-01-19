@@ -37,7 +37,11 @@ using UnityEngine;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: InternalsVisibleTo("UnityEditor.UIElementsGameObjectsModule")]
+[assembly: InternalsVisibleTo("UnityEngine.UIElementsInputSystemModule")]
+[assembly: InternalsVisibleTo("UnityEditor.UIElementsInputSystemModule")]
 [assembly: InternalsVisibleTo("Unity.UIElements.PlayModeTests")]
 [assembly: InternalsVisibleTo("Unity.UIElements.EditorTests")]
 [assembly: InternalsVisibleTo("Unity.UIElements.InputSystem")]
 [assembly: InternalsVisibleTo("Unity.UIElements.Text")]
+[assembly: InternalsVisibleTo("Assembly-CSharp-testable")]
+[assembly: InternalsVisibleTo("Assembly-CSharp-Editor-testable")]

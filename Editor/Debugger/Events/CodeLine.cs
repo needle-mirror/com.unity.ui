@@ -39,7 +39,7 @@ namespace UnityEditor.UIElements.Debugger
             // TODO: Figure out why we can't make this work
             // CodeEditor.Editor.Current.OpenProject(m_FileName, m_LineNumber);
 #else
-            CodeEditor.Editor.Current.OpenProject(m_FileName, m_LineNumber);
+            CodeEditor.Editor.CurrentCodeEditor.OpenProject(m_FileName, m_LineNumber);
 #endif
         }
     }

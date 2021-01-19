@@ -48,13 +48,6 @@ namespace UnityEditor.UIElements.GameObjects
             Selection.activeGameObject = root;
 
 
-            // Look for our event system, if there's none create one.
-            var eventSystems = UnityEngine.Object.FindObjectOfType(typeof(EventSystem));
-            if (eventSystems == null)
-            {
-                root.AddComponent<EventSystem>();
-            }
-
             // Set a PanelSettings instance so that the UI appears immediately on selecting the UXML.
             // If the UIDocument was created as a child of another UIDocument, this step is not necessary.
             if (uiDocument.parentUI == null)

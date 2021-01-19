@@ -62,6 +62,9 @@ namespace UnityEditor.UIElements
                 new EnumFlagsField.UxmlFactory(),
                 new Hash128Field.UxmlFactory(),
 
+#if !UNITY_2021_1_OR_NEWER
+                new ProgressBar.UxmlFactory(),
+#endif
                 // Compounds
                 new RectField.UxmlFactory(),
                 new Vector2Field.UxmlFactory(),
@@ -74,8 +77,6 @@ namespace UnityEditor.UIElements
                 new Vector2IntField.UxmlFactory(),
                 new Vector3IntField.UxmlFactory(),
                 new BoundsIntField.UxmlFactory(),
-
-                new ProgressBar.UxmlFactory(),
 
                 new EventTypeSelectField.UxmlFactory()
             };

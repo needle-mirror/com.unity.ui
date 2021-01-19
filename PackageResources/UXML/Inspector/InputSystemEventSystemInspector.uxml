@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:HelpBox name="inputSystemDisabledInfo" message-type="Info" text="This component will be ignored in your current ProjectSettings configuration.&#10;To enable it, select Player &gt; Input &gt; Input System Package (New)." />
     <ui:HelpBox name="noAssetWarning" message-type="Warning" text="No InputActionAsset selected." class="unity-input-system-event-system-inspector--warning unity-input-system-event-system-inspector--warning--hidden" />
     <uie:FloatField label="Repeat Delay" name="repeatDelayField" binding-path="m_RepeatDelay" tooltip="Delay in seconds before a navigation or keyboard event starts repeating if input control is held down." />
     <uie:FloatField label="Repeat Rate" name="repeatRateField" binding-path="m_RepeatRate" tooltip="Delay in seconds between successive repeated navigation or keyboard events after the first one." />

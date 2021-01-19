@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Samples.Runtime.General
 {
-    [RequireComponent(typeof(UIDocument), typeof(EventSystem))]
+    [RequireComponent(typeof(UIDocument))]
     public class RootSelector : MonoBehaviour
     {
         [SerializeField] private PanelSettings panelSettings = default;

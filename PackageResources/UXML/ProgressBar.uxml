@@ -1,8 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" >
-    <ui:VisualElement class="unity-progress-bar__background">
-        <ui:VisualElement class="unity-progress-bar__progress"/>
-        <ui:VisualElement class="unity-progress-bar__title-container">
-            <ui:Label class="unity-progress-bar__title"/>
-        </ui:VisualElement>
-    </ui:VisualElement>
-</ui:UXML>

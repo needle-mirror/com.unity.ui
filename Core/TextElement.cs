@@ -75,6 +75,8 @@ namespace UnityEngine.UIElements
             set { m_TextHandle = value; }
         }
 
+        internal static int maxTextVertices = MeshBuilder.s_MaxTextMeshVertices;
+
         public override void HandleEvent(EventBase evt)
         {
             if (evt.eventTypeId == AttachToPanelEvent.TypeId() && evt is AttachToPanelEvent attachEvent)

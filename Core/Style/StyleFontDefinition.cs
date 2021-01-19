@@ -33,13 +33,6 @@ namespace UnityEngine.UIElements
             : this(f, StyleKeyword.Undefined)
         {}
 
-        /// <summary>
-        /// Creates from either a <see cref="FontDefinition"/> or a <see cref="StyleKeyword"/>.
-        /// </summary>
-        public StyleFontDefinition(Object f)
-            : this(f, StyleKeyword.Undefined)
-        {}
-
         public StyleFontDefinition(Font f)
             : this(f, StyleKeyword.Undefined)
         {}
@@ -51,15 +44,15 @@ namespace UnityEngine.UIElements
             : this(new FontDefinition(), keyword)
         {}
 
+        internal StyleFontDefinition(object obj, StyleKeyword keyword)
+            : this(FontDefinition.FromObject(obj), keyword)
+        {
+        }
+
         internal StyleFontDefinition(object obj)
             : this(FontDefinition.FromObject(obj), StyleKeyword.Undefined)
         {
         }
-
-        internal StyleFontDefinition(Object f, StyleKeyword keyword)
-            : this(FontDefinition.FromSDFFont(f), keyword)
-        {}
-
 
         internal StyleFontDefinition(Font f, StyleKeyword keyword)
             : this(FontDefinition.FromFont(f), keyword)
@@ -74,6 +67,12 @@ namespace UnityEngine.UIElements
         {
             m_Keyword = keyword;
             m_Value = f;
+        }
+
+        internal StyleFontDefinition(StyleFontDefinition sfd)
+        {
+            m_Keyword = sfd.keyword;
+            m_Value = sfd.value;
         }
 
         private StyleKeyword m_Keyword;

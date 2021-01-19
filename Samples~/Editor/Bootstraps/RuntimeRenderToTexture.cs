@@ -55,7 +55,6 @@ namespace Samples.Utils
 
             var go = new GameObject("UI");
             var doc = go.AddComponent<UIDocument>();
-            go.AddComponent<EventSystem>();
             var component = go.AddComponent<RenderTextureBackgroundDemo>();
             doc.panelSettings = component.panelSettings;
             doc.visualTreeAsset = component.visualTreeAsset;

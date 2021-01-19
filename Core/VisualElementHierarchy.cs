@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using UnityEngine.UIElements.UIR;
 
 namespace UnityEngine.UIElements
 {
@@ -14,6 +12,8 @@ namespace UnityEngine.UIElements
     /// </remarks>
     public partial class VisualElement
     {
+        internal const string k_RootVisualContainerName = "rootVisualContainer";
+
         /// <summary>
         ///  Access to this element physical hierarchy
         ///
@@ -22,6 +22,11 @@ namespace UnityEngine.UIElements
         {
             get; private set;
         }
+
+        /// <summary>
+        /// Whether or not this VisualElement is a root for visual styling, i.e. has :root selector.
+        /// </summary>
+        internal bool isRootVisualContainer { get; set; }
 
         [Obsolete("VisualElement.cacheAsBitmap is deprecated and has no effect")]
         public bool cacheAsBitmap { get; set; }
@@ -887,6 +892,22 @@ namespace UnityEngine.UIElements
             }
 
             return root;
+        }
+
+        internal VisualElement GetRootVisualContainer()
+        {
+            var hierarchyParent = this;
+            while (hierarchyParent != null)
+            {
+                if (hierarchyParent.isRootVisualContainer)
+                {
+                    return hierarchyParent;
+                }
+
+                hierarchyParent = hierarchyParent.hierarchy.parent;
+            }
+
+            return null;
         }
 
         internal VisualElement GetNextElementDepthFirst()

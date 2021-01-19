@@ -3,6 +3,11 @@ namespace UnityEngine.UIElements
     internal class TouchScreenTextEditorEventHandler : TextEditorEventHandler
     {
         private IVisualElementScheduledItem m_TouchKeyboardPoller = null;
+        private VisualElement m_LastPointerDownTarget;
+
+#if UNITY_IOS || UNITY_ANDROID
+        static TouchScreenKeyboard s_KeyboardOnScreen;
+#endif
 
         public TouchScreenTextEditorEventHandler(TextEditorEngine editorEngine, ITextInputField textInputField)
             : base(editorEngine, textInputField)
@@ -30,6 +35,14 @@ namespace UnityEngine.UIElements
             {
                 if (textInputField.editorEngine.keyboardOnScreen != null)
                 {
+#if UNITY_IOS || UNITY_ANDROID
+                    if (s_KeyboardOnScreen != textInputField.editorEngine.keyboardOnScreen)
+                    {
+                        textInputField.editorEngine.keyboardOnScreen = null;
+                        m_TouchKeyboardPoller.Pause();
+                        return;
+                    }
+#endif
                     textInputField.UpdateText(textInputField.CullString(textInputField.editorEngine.keyboardOnScreen.text));
 
                     if (!textInputField.isDelayed)
@@ -55,14 +68,16 @@ namespace UnityEngine.UIElements
         {
             base.ExecuteDefaultActionAtTarget(evt);
 
-#if !UNITY_METRO
-            long mouseEventType = MouseDownEvent.TypeId();
-#else
-            long mouseEventType = MouseUpEvent.TypeId();
-#endif
-
-            if (!textInputField.isReadOnly && evt.eventTypeId == mouseEventType && editorEngine.keyboardOnScreen == null)
+            if (!textInputField.isReadOnly && evt.eventTypeId == PointerDownEvent.TypeId() && editorEngine.keyboardOnScreen == null)
             {
+                m_LastPointerDownTarget = evt.target as VisualElement;
+            }
+            else if (!textInputField.isReadOnly && evt.eventTypeId == PointerUpEvent.TypeId() && editorEngine.keyboardOnScreen == null)
+            {
+                var pointerUpEvent = evt as PointerUpEvent;
+                if (m_LastPointerDownTarget == null || !m_LastPointerDownTarget.worldBound.Contains(pointerUpEvent.position))
+                    return;
+
                 textInputField.SyncTextEngine();
                 textInputField.UpdateText(editorEngine.text);
 
@@ -71,6 +86,10 @@ namespace UnityEngine.UIElements
                     true,     // autocorrection
                     editorEngine.multiline,
                     textInputField.isPasswordField);
+
+#if UNITY_IOS || UNITY_ANDROID
+                s_KeyboardOnScreen = editorEngine.keyboardOnScreen;
+#endif
 
                 if (editorEngine.keyboardOnScreen != null)
                 {

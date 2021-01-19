@@ -15,14 +15,7 @@ namespace UnityEngine.UIElements
         public DynamicAtlasSettings() {}
     }
 
-    [UnityEngine.AddComponentMenu(@"UI Toolkit/Event System (UI Toolkit)")] public class EventSystem : UnityEngine.MonoBehaviour
-    {
-        public UnityEngine.UIElements.InputWrapper inputOverride { get; set; }
-        public bool isAppFocused { get; }
-        protected EventSystem() {}
-    }
-
-    public class InputWrapper : UnityEngine.MonoBehaviour
+    [System.Obsolete(@"EventSystem no longer supports input override for legacy input. Install Input System package for full input binding functionality.")] public class InputWrapper : UnityEngine.MonoBehaviour
     {
         public virtual UnityEngine.Vector2 compositionCursorPos { get; set; }
         public virtual string compositionString { get; }
@@ -72,6 +65,7 @@ namespace UnityEngine.UIElements
         public UnityEngine.UIElements.PanelScaleModes scaleMode { get; set; }
         public UnityEngine.UIElements.PanelScreenMatchModes screenMatchMode { get; set; }
         public float sortingOrder { get; set; }
+        public int targetDisplay { get; set; }
         public UnityEngine.RenderTexture targetTexture { get; set; }
         public UnityEngine.UIElements.StyleSheet themeStyleSheet { get; set; }
         [System.Obsolete(@"UIDocument ordering is done by explicit sort order and the Game Object hierarchy is no longer used for automatic ordering like it was before.")] public void OrderByHierarchy();

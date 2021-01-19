@@ -53,7 +53,7 @@ namespace UnityEditor.UIElements
         /// <summary>
         /// Disconnects all properties bound to fields in the element's hierarchy.
         /// </summary>
-        /// <param name="element">Root VisualElement contaning IBindable fields.</param>
+        /// <param name="element">Root VisualElement containing IBindable fields.</param>
         public static void Unbind(this VisualElement element)
         {
             bindingImpl.Unbind(element);
@@ -85,6 +85,13 @@ namespace UnityEditor.UIElements
             bindingImpl.HandleStyleUpdate(element);
         }
 
+        /// <summary>
+        /// Checks the property values for changes every frame. Executes the callback when the property value changes.
+        /// If no callback is specified, a SerializedPropertyChangeEvent is sent to the target element.
+        /// </summary>
+        /// <param name="element">VisualElement tracking a property.</param>
+        /// <param name="property">The SerializedProperty to track.</param>
+        /// <param name="callback">Invoked when the tracked SerializedProperty value changes.</param>
         public static void TrackPropertyValue(this VisualElement element, SerializedProperty property, Action<SerializedProperty> callback = null)
         {
             bindingImpl.TrackPropertyValue(element, property, callback);

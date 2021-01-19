@@ -1,25 +1,76 @@
-#if UNITY_INPUT_SYSTEM && ENABLE_INPUT_SYSTEM
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Scripting.APIUpdating;
+#if UNITY_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+#endif
 using UnityEngine.UIElements.Collections;
 
-namespace UnityEngine.UIElements
+namespace UnityEngine.UIElements.InputSystem
 {
     /// <summary>
     /// Handles input and sending events to UIElements Panel through use of Unity's Input System package.
     /// </summary>
-    public partial class EventSystem : MonoBehaviour
+    [AddComponentMenu("UI Toolkit/Input System Event System (UI Toolkit)")]
+    public class InputSystemEventSystem : MonoBehaviour
     {
+        /// <summary>
+        /// Returns true if the application has the focus. Events are sent only if this flag is set to true.
+        /// </summary>
+        public bool isAppFocused { get; private set; } = true;
+
+        /// <summary>
+        /// Overrides the default input when NavigationEvents are sent.
+        /// </summary>
+        /// <remarks>
+        /// Use this override to bypass the default input system with your own input system.
+        /// This is useful when you want to send fake input to the event system.
+        /// This property will be ignored if the New Input System is used.
+        /// </remarks>
+        [Obsolete("EventSystem no longer supports input override for legacy input. Install Input System package for full input binding functionality.")]
+        public InputWrapper inputOverride { get; set; }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        protected InputSystemEventSystem()
+        {
+        }
+
+        void OnApplicationFocus(bool hasFocus)
+        {
+            isAppFocused = hasFocus;
+        }
+
+#if UNITY_INPUT_SYSTEM
+        private bool ShouldIgnoreEventsOnAppNotFocused()
+        {
+            switch (SystemInfo.operatingSystemFamily)
+            {
+                case OperatingSystemFamily.Windows:
+                case OperatingSystemFamily.Linux:
+                case OperatingSystemFamily.MacOSX:
+#if UNITY_EDITOR
+                    if (UnityEditor.EditorApplication.isRemoteConnected)
+                        return false;
+#endif
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         [Tooltip("The Initial delay (in seconds) between an initial keyboard action and a repeated action.")]
         [SerializeField] internal float m_RepeatDelay = 0.5f;
 
         [Tooltip("The speed (in seconds) that the keyboard action repeats itself once repeating (max 1 per frame).")]
         [SerializeField] internal float m_RepeatRate = 0.05f;
 
+#pragma warning disable CS0414
         [SerializeField] private bool m_FallbackOnIMGUIKeyboardEvents = false;
+#pragma warning restore CS0414
 
         [SerializeField] private InputActionAsset m_InputActionAsset = null;
         [SerializeField, InputActionDropdown(nameof(m_InputActionAsset))] private InputActionReference m_NavigateAction;
@@ -32,7 +83,9 @@ namespace UnityEngine.UIElements
         [SerializeField, InputActionDropdown(nameof(m_InputActionAsset))] private InputActionReference m_MiddleClickAction;
         [SerializeField, InputActionDropdown(nameof(m_InputActionAsset))] private InputActionReference m_RightClickAction;
 
+#pragma warning disable CS0067
         private event Action OnDisableEvent;
+#pragma warning restore CS0067
 
         private RuntimePanel m_FocusedPanel;
 
@@ -43,8 +96,9 @@ namespace UnityEngine.UIElements
             {
                 if (m_FocusedPanel != value)
                 {
-                    m_FocusedPanel?.focusController.BlurLastFocusedElement();
+                    m_FocusedPanel?.Blur();
                     m_FocusedPanel = value;
+                    m_FocusedPanel?.Focus();
                 }
             }
         }
@@ -59,22 +113,20 @@ namespace UnityEngine.UIElements
 
         void Awake()
         {
-#if UNITY_EDITOR
-            var playerSettings = Resources.FindObjectsOfTypeAll<UnityEditor.PlayerSettings>().FirstOrDefault();
-            var enableNativePlatformBackendsForNewInputSystem = new UnityEditor.SerializedObject(playerSettings).FindProperty("enableNativePlatformBackendsForNewInputSystem");
-            if (enableNativePlatformBackendsForNewInputSystem != null && !enableNativePlatformBackendsForNewInputSystem.boolValue)
-            {
-                Debug.LogError("EventSystem has detected new Input System package but can't currently use it. Please enable \"Input System Package (New)\" in ProjectSettings/Player/Input or uninstall Input System package.");
-            }
-#endif
-
+#if ENABLE_INPUT_SYSTEM
             m_KeyboardEventProcessor = m_FallbackOnIMGUIKeyboardEvents
                 ? (IKeyboardEventProcessor) new IMGUIKeyboardEventProcessor()
                 : new InputSystemKeyboardEventProcessor();
+#endif
         }
 
         void OnEnable()
         {
+            // Keep #if inside OnEnable so the inspector shows an Enable/Disable option regardless of the
+            // input system being active. This makes the script's internal behavior less visible to the user.
+#if ENABLE_INPUT_SYSTEM
+            UIElementsRuntimeUtility.RegisterEventSystem(this);
+
             RegisterCallback(m_NavigateAction, OnNavigatePerformed, OnNavigationCanceled);
             RegisterCallback(m_TabAction, OnTabPerformed, OnNavigationCanceled);
             RegisterCallback(m_SubmitAction, OnSubmitPerformed, OnNavigationCanceled);
@@ -86,16 +138,22 @@ namespace UnityEngine.UIElements
             RegisterCallback(m_RightClickAction, OnRightClickPerformed);
 
             m_KeyboardEventProcessor.OnEnable();
+#endif
         }
 
         void OnDisable()
         {
+#if ENABLE_INPUT_SYSTEM
+            UIElementsRuntimeUtility.UnregisterEventSystem(this);
+
             OnDisableEvent?.Invoke();
             OnDisableEvent = null;
 
             m_KeyboardEventProcessor.OnDisable();
+#endif
         }
 
+#if ENABLE_INPUT_SYSTEM
         void Update()
         {
             if (!isAppFocused && ShouldIgnoreEventsOnAppNotFocused())
@@ -105,10 +163,14 @@ namespace UnityEngine.UIElements
             CheckForRepeatedNavigationEvents();
         }
 
+#endif
+
         void Reset()
         {
 #if UNITY_EDITOR
-            m_InputActionAsset = Resources.FindObjectsOfTypeAll<InputActionAsset>().FirstOrDefault();
+            m_InputActionAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<InputActionAsset>(
+                UnityEditor.AssetDatabase.GUIDToAssetPath(
+                    UnityEditor.AssetDatabase.FindAssets("UIToolkitInputActions t:InputActionAsset a:all").First()));
 #endif
             SetActionsToDefault();
         }
@@ -354,7 +416,7 @@ namespace UnityEngine.UIElements
                 altKey = false;
                 actionKey = false;
 
-                foreach (var device in InputSystem.InputSystem.devices)
+                foreach (var device in UnityEngine.InputSystem.InputSystem.devices)
                 {
                     if (device is Keyboard keyboard)
                     {
@@ -461,7 +523,7 @@ namespace UnityEngine.UIElements
             private static int GetPenPointerId(Pen pen)
             {
                 var n = 0;
-                foreach (var device in InputSystem.InputSystem.devices)
+                foreach (var device in UnityEngine.InputSystem.InputSystem.devices)
                     if (device is Pen otherPen)
                     {
                         if (pen == otherPen)
@@ -636,13 +698,13 @@ namespace UnityEngine.UIElements
             public static implicit operator InputContext(InputAction.CallbackContext context) =>
                 new InputContext(context.action, context.control);
         }
+#endif
     }
 
     internal interface IKeyboardEventProcessor
     {
         void OnEnable();
         void OnDisable();
-        void ProcessKeyboardEvents(EventSystem eventSystem);
+        void ProcessKeyboardEvents(InputSystemEventSystem eventSystem);
     }
 }
-#endif
