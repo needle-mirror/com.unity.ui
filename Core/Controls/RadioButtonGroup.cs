@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace UnityEngine.UIElements
 {
+    /// <summary>
+    /// A control that allows single selection out of a logical group of <see cref="RadioButton"/> elements. Selecting one will deselect the others.
+    /// </summary>
     public class RadioButtonGroup : BaseField<int>, IGroupBox
     {
         /// <summary>
@@ -26,9 +28,10 @@ namespace UnityEngine.UIElements
             /// <param name="cc">The creation context; unused.</param>
             public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
             {
-                // Need to update choices first so that radio buttons are created before the value is set.
-                ((RadioButtonGroup)ve).choices = m_Choices.GetValueFromBag(bag, cc).Split(',').Select(e => e.Trim()).ToList();
                 base.Init(ve, bag, cc);
+
+                var f = (RadioButtonGroup)ve;
+                f.choices = ParseChoiceList(m_Choices.GetValueFromBag(bag, cc));
             }
         }
 
@@ -45,6 +48,13 @@ namespace UnityEngine.UIElements
         List<RadioButton> m_RadioButtons = new List<RadioButton>();
         EventCallback<ChangeEvent<bool>> m_RadioButtonValueChangedCallback;
 
+        /// <summary>
+        /// The list of available choices in the group.
+        /// </summary>
+        /// <remarks>
+        /// Writing to this property removes existing <see cref="RadioButton"/> elements and
+        /// re-creates them to display the new list.
+        /// </remarks>
         public IEnumerable<string> choices
         {
             get => m_Choices;
@@ -69,15 +79,23 @@ namespace UnityEngine.UIElements
                         m_RadioButtons.Add(radioButton);
                         visualInput.Add(radioButton);
                     }
+
+                    UpdateRadioButtons();
                 }
             }
         }
 
+        /// <summary>
+        /// Initializes and returns an instance of RadioButtonGroup.
+        /// </summary>
         public RadioButtonGroup()
-            : this(null)
-        {
-        }
+            : this(null) {}
 
+        /// <summary>
+        /// Initializes and returns an instance of RadioButtonGroup.
+        /// </summary>
+        /// <param name="label">The label for this group</param>
+        /// <param name="radioButtonChoices">The choices to display in this group</param>
         public RadioButtonGroup(string label, List<string> radioButtonChoices = null)
             : base(label, null)
         {
@@ -86,6 +104,8 @@ namespace UnityEngine.UIElements
             m_RadioButtonValueChangedCallback = RadioButtonValueChangedCallback;
             choices = radioButtonChoices;
             value = -1;
+            visualInput.focusable = false;
+            delegatesFocus = true;
         }
 
         void RadioButtonValueChangedCallback(ChangeEvent<bool> evt)

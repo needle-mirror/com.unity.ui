@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 13807, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: RadioButtonSnippet_cs
+  m_EditorClassIdentifier: 
+  m_Text: "using UnityEngine;\nusing UnityEngine.UIElements;\n\nnamespace UnityEditor.UIElements.Samples\n{\n   
+    internal class RadioButtonSnippet : ElementSnippet<RadioButtonSnippet>\n    {\n       
+    internal override void Apply(VisualElement container)\n        {\n           
+    /// <sample>\n            // Note: See also RadioButtonGroup in the ChoiceField
+    section of UI Toolkit Samples\n\n            // Get a reference to the first
+    radio button from UXML and assign it its value.\n            var uxmlField1 =
+    container.Q<RadioButton>(\"the-uxml-field1\");\n            var uxmlField2 =
+    container.Q<RadioButton>(\"the-uxml-field2\");\n            uxmlField1.value
+    = true;\n\n            // Create two RadioButtons in a separate group, disable
+    them, and give them a style class.\n            var groupBox = new GroupBox();\n           
+    container.Add(groupBox);\n\n            var csharpField1 = new RadioButton(\"C#
+    Field 1\");\n            csharpField1.SetEnabled(false);\n            csharpField1.AddToClassList(\"some-styled-field\");\n           
+    groupBox.Add(csharpField1);\n\n            var csharpField2 = new RadioButton(\"C#
+    Field 2\");\n            csharpField2.SetEnabled(false);\n            csharpField2.AddToClassList(\"some-styled-field\");\n           
+    groupBox.Add(csharpField2);\n\n            csharpField1.value = uxmlField1.value;\n\n           
+    // Mirror value of uxml field into the C# field.\n            uxmlField1.RegisterCallback<ChangeEvent<bool>>((evt)
+    =>\n            {\n                csharpField1.value = evt.newValue;\n           
+    });\n            uxmlField2.RegisterCallback<ChangeEvent<bool>>((evt) =>\n           
+    {\n                csharpField2.value = evt.newValue;\n            });\n           
+    /// </sample>\n        }\n    }\n}\n"

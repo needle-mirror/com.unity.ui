@@ -229,6 +229,13 @@ namespace UnityEngine.UIElements.UIR
                 RenderChainStaticIndexAllocator.FreeIndex(m_StaticIndex);
             m_StaticIndex = -1;
 
+            var ve = GetFirstElementInPanel(m_FirstCommand?.owner);
+            while (ve != null)
+            {
+                ResetTextures(ve);
+                ve = ve.renderChainData.next;
+            }
+
             UIRUtility.Destroy(m_DefaultMat);
             UIRUtility.Destroy(m_DefaultWorldSpaceMat);
             m_DefaultMat = m_DefaultWorldSpaceMat = null;
@@ -332,7 +339,7 @@ namespace UnityEngine.UIElements.UIR
 
             m_DirtyTracker.dirtyID++;
             dirtyClass = (int)RenderDataDirtyTypeClasses.Opacity;
-            dirtyFlags = RenderDataDirtyTypes.Opacity;
+            dirtyFlags = RenderDataDirtyTypes.Opacity | RenderDataDirtyTypes.OpacityHierarchy;
             clearDirty = ~dirtyFlags;
             s_MarkerOpacityProcessing.Begin();
             for (int depth = m_DirtyTracker.minDepths[dirtyClass]; depth <= m_DirtyTracker.maxDepths[dirtyClass]; depth++)
@@ -432,7 +439,7 @@ namespace UnityEngine.UIElements.UIR
             // Commit new requests for atlases if any
             atlas?.InvokeUpdateDynamicTextures(panel); // TODO: For a shared atlas + drawInCameras, postpone after all updates have occurred.
             vectorImageManager?.Commit();
-            shaderInfoAllocator.IssuePendingAtlasBlits();
+            shaderInfoAllocator.IssuePendingStorageChanges();
 
             device?.OnFrameRenderingBegin();
 
@@ -550,6 +557,7 @@ namespace UnityEngine.UIElements.UIR
                 Implementation.RenderEvents.DepthFirstOnChildAdded(this, ve, ve.hierarchy[i], i, false);
 
             UIEOnClippingChanged(ve, true);
+            UIEOnOpacityChanged(ve, true);
             UIEOnVisualsChanged(ve, true);
 
 #if UIR_DEBUG_CHAIN_BUILDER
@@ -586,14 +594,14 @@ namespace UnityEngine.UIElements.UIR
             }
         }
 
-        public void UIEOnOpacityChanged(VisualElement ve)
+        public void UIEOnOpacityChanged(VisualElement ve, bool hierarchical = false)
         {
             if (ve.renderChainData.isInChain)
             {
                 if (m_BlockDirtyRegistration)
                     throw new InvalidOperationException("VisualElements cannot change opacity under an active visual tree during generateVisualContent callback execution nor during visual tree rendering");
 
-                m_DirtyTracker.RegisterDirty(ve, RenderDataDirtyTypes.Opacity, (int)RenderDataDirtyTypeClasses.Opacity);
+                m_DirtyTracker.RegisterDirty(ve, RenderDataDirtyTypes.Opacity | (hierarchical ? RenderDataDirtyTypes.OpacityHierarchy : 0), (int)RenderDataDirtyTypeClasses.Opacity);
             }
         }
 
@@ -1066,7 +1074,8 @@ namespace UnityEngine.UIElements.UIR
         ClippingHierarchy = 1 << 3,  // Same as above, but applies to all descendants too.
         Visuals = 1 << 4,            // The visuals of the VE need to be repainted.
         VisualsHierarchy = 1 << 5,   // Same as above, but applies to all descendants too.
-        Opacity = 1 << 6             // The opacity of the VE needs to be updated.
+        Opacity = 1 << 6,            // The opacity of the VE needs to be updated.
+        OpacityHierarchy = 1 << 7    // Same as above, but applies to all descendants too.
     }
 
     internal enum RenderDataDirtyTypeClasses

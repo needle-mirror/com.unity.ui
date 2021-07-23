@@ -67,7 +67,7 @@
 .unity-snippet-code__code-line-numbers {
     min-width: 30px;
     -unity-text-align: upper-right;
-    -unity-font: resource("Consola");
+    -unity-font-definition: url("/Packages/com.unity.ui/PackageResources/Fonts/RobotoMono/RobotoMono-Regular SDF.asset");
     font-size: 13px;
     padding: 6px;
 }
@@ -83,7 +83,7 @@
 }
 
 .unity-base-text-field .unity-snippet-code__input {
-    -unity-font: resource("Consola");
+    -unity-font-definition: url("/Packages/com.unity.ui/PackageResources/Fonts/RobotoMono/RobotoMono-Regular SDF.asset");
     font-size: 13px;
     background-image: none;
 }

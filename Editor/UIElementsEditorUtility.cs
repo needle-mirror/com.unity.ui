@@ -23,20 +23,12 @@ namespace UnityEditor.UIElements
         internal static readonly string s_DefaultCommonLightStyleSheetPath =
             Path.Combine(UIElementsPackageUtility.EditorResourcesBasePath, "StyleSheets/Generated/DefaultCommonLight.uss.asset");
 
-        internal static StyleSheet s_DefaultCommonDarkStyleSheet;
-        internal static StyleSheet s_DefaultCommonLightStyleSheet;
+        private static StyleSheet s_DefaultCommonDarkStyleSheet;
+        private static StyleSheet s_DefaultCommonLightStyleSheet;
 
         internal static string GetStyleSheetPathForFont(string sheetPath, string fontName)
         {
-            // Load the stylesheet of the current font
-            if (LocalizationDatabase.currentEditorLanguage == SystemLanguage.English)
-            {
-                return sheetPath.Replace(".uss", "_" + fontName.ToLowerInvariant() + ".uss");
-            }
-            else
-            {
-                return sheetPath;
-            }
+            return sheetPath.Replace(".uss", "_" + fontName.ToLowerInvariant() + ".uss");
         }
 
         internal static string GetStyleSheetPathForCurrentFont(string sheetPath)
@@ -49,15 +41,26 @@ namespace UnityEditor.UIElements
             return EditorGUIUtility.Load(GetStyleSheetPathForFont(skin == EditorResources.darkSkinIndex ? s_DefaultCommonDarkStyleSheetPath : s_DefaultCommonLightStyleSheetPath, fontName)) as StyleSheet;
         }
 
+        internal static bool IsCommonDarkStyleSheetLoaded()
+        {
+            return s_DefaultCommonDarkStyleSheet != null;
+        }
+
         internal static StyleSheet GetCommonDarkStyleSheet()
         {
             if (s_DefaultCommonDarkStyleSheet == null)
             {
                 s_DefaultCommonDarkStyleSheet = LoadSKinnedStyleSheetForFont(EditorResources.darkSkinIndex, EditorResources.currentFontName);
-                s_DefaultCommonDarkStyleSheet.isUnityStyleSheet = true;
+                if (s_DefaultCommonDarkStyleSheet != null)
+                    s_DefaultCommonDarkStyleSheet.isDefaultStyleSheet = true;
             }
 
             return s_DefaultCommonDarkStyleSheet;
+        }
+
+        internal static bool IsCommonLightStyleSheetLoaded()
+        {
+            return s_DefaultCommonLightStyleSheet != null;
         }
 
         internal static StyleSheet GetCommonLightStyleSheet()
@@ -65,7 +68,8 @@ namespace UnityEditor.UIElements
             if (s_DefaultCommonLightStyleSheet == null)
             {
                 s_DefaultCommonLightStyleSheet = LoadSKinnedStyleSheetForFont(EditorResources.normalSkinIndex, EditorResources.currentFontName);
-                s_DefaultCommonLightStyleSheet.isUnityStyleSheet = true;
+                if (s_DefaultCommonLightStyleSheet != null)
+                    s_DefaultCommonLightStyleSheet.isDefaultStyleSheet = true;
             }
 
             return s_DefaultCommonLightStyleSheet;
@@ -125,17 +129,13 @@ namespace UnityEditor.UIElements
         {
             if (ve.styleSheets.count == 0 || ve.GetProperty(k_DefaultStylesAppliedPropertyName) == null)
             {
-                //we make sure both are loaded in case the ui builder needs it
-                var lightStyle = GetCommonLightStyleSheet();
-                var darkStyle = GetCommonDarkStyleSheet();
-
                 if (EditorGUIUtility.isProSkin)
                 {
-                    ve.styleSheets.Add(darkStyle);
+                    ve.styleSheets.Add(GetCommonDarkStyleSheet());
                 }
                 else
                 {
-                    ve.styleSheets.Add(lightStyle);
+                    ve.styleSheets.Add(GetCommonLightStyleSheet());
                 }
 
                 ve.SetProperty(k_DefaultStylesAppliedPropertyName, true);

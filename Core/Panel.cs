@@ -33,19 +33,21 @@ namespace UnityEngine.UIElements
         Layout = 1 << 3,
         // changes to StyleSheet, USS class
         StyleSheet = 1 << 4,
+        // removal of inline style
+        InlineStyleRemove = 1 << 5,
         // changes to styles, colors and other render properties
-        Styles = 1 << 5,
-        Overflow = 1 << 6,
-        BorderRadius = 1 << 7,
-        BorderWidth = 1 << 8,
+        Styles = 1 << 6,
+        Overflow = 1 << 7,
+        BorderRadius = 1 << 8,
+        BorderWidth = 1 << 9,
         // changes that may impact the world transform (e.g. laid out position, local transform)
-        Transform = 1 << 9,
+        Transform = 1 << 10,
         // changes to the size of the element after layout has been performed, without taking the local transform into account
-        Size = 1 << 10,
+        Size = 1 << 11,
         // The visuals of the element have changed
-        Repaint = 1 << 11,
+        Repaint = 1 << 12,
         // The opacity of the element have changed
-        Opacity = 1 << 12,
+        Opacity = 1 << 13,
     }
 
     /// <summary>
@@ -309,24 +311,6 @@ namespace UnityEngine.UIElements
             get { return m_PixelsPerPoint * m_Scale; }
         }
 
-        private float m_SortingPriority = 0;
-        public float sortingPriority
-        {
-            get => m_SortingPriority;
-
-            set
-            {
-                if (!Mathf.Approximately(m_SortingPriority, value))
-                {
-                    m_SortingPriority = value;
-                    if (contextType == ContextType.Player)
-                    {
-                        UIElementsRuntimeUtility.SetPanelOrderingDirty();
-                    }
-                }
-            }
-        }
-
         // For backwards compatibility with debugger in 2020.1
         public PanelClearFlags clearFlags
         {
@@ -373,6 +357,7 @@ namespace UnityEngine.UIElements
 
         internal abstract uint version { get; }
         internal abstract uint repaintVersion { get; }
+        internal abstract uint hierarchyVersion { get; }
 
 #if UNITY_EDITOR
         // Updaters can request an panel invalidation when some callbacks aren't coming from UIElements internally
@@ -464,26 +449,28 @@ namespace UnityEngine.UIElements
             return m_TopElementUnderPointers.GetTopElementUnderPointer(pointerId);
         }
 
-        internal VisualElement RecomputeTopElementUnderPointer(Vector2 pointerPos, EventBase triggerEvent)
+        internal VisualElement RecomputeTopElementUnderPointer(int pointerId, Vector2 pointerPos, EventBase triggerEvent)
         {
-            VisualElement element = Pick(pointerPos);
-            m_TopElementUnderPointers.SetElementUnderPointer(element, triggerEvent);
+            VisualElement element = null;
+
+            if (PointerDeviceState.GetPanel(pointerId, contextType) == this &&
+                !PointerDeviceState.HasLocationFlag(pointerId, contextType, PointerDeviceState.LocationFlag.OutsidePanel))
+            {
+                element = Pick(pointerPos);
+            }
+
+            m_TopElementUnderPointers.SetElementUnderPointer(element, pointerId, triggerEvent);
             return element;
         }
 
-        internal void ClearCachedElementUnderPointer(EventBase triggerEvent)
+        internal void ClearCachedElementUnderPointer(int pointerId, EventBase triggerEvent)
         {
-            m_TopElementUnderPointers.SetTemporaryElementUnderPointer(null, triggerEvent);
-        }
-
-        void SetElementUnderPointer(VisualElement newElementUnderPointer, int pointerId, Vector2 pointerPos)
-        {
-            m_TopElementUnderPointers.SetElementUnderPointer(newElementUnderPointer, pointerId, pointerPos);
+            m_TopElementUnderPointers.SetTemporaryElementUnderPointer(null, pointerId, triggerEvent);
         }
 
         internal void CommitElementUnderPointers()
         {
-            m_TopElementUnderPointers.CommitElementUnderPointers(dispatcher);
+            m_TopElementUnderPointers.CommitElementUnderPointers(dispatcher, contextType);
         }
 
         internal abstract Shader standardShader { get; set; }
@@ -527,16 +514,18 @@ namespace UnityEngine.UIElements
         {
             foreach (var pointerId in PointerId.hoveringPointers)
             {
-                if (PointerDeviceState.GetPanel(pointerId) != this)
+                if (PointerDeviceState.GetPanel(pointerId, contextType) != this ||
+                    PointerDeviceState.HasLocationFlag(pointerId, contextType, PointerDeviceState.LocationFlag.OutsidePanel))
                 {
-                    SetElementUnderPointer(null, pointerId, new Vector2(float.MinValue, float.MinValue));
+                    m_TopElementUnderPointers.SetElementUnderPointer(null, pointerId, new Vector2(float.MinValue, float.MinValue));
                 }
                 else
                 {
-                    var pointerPos = PointerDeviceState.GetPointerPosition(pointerId);
+                    var pointerPos = PointerDeviceState.GetPointerPosition(pointerId, contextType);
+
                     // Here it's important to call PickAll instead of Pick to ensure we don't use the cached value.
                     VisualElement elementUnderPointer = PickAll(pointerPos, null);
-                    SetElementUnderPointer(elementUnderPointer, pointerId, pointerPos);
+                    m_TopElementUnderPointers.SetElementUnderPointer(elementUnderPointer, pointerId, pointerPos);
                 }
             }
 
@@ -584,6 +573,7 @@ namespace UnityEngine.UIElements
         private string m_PanelName;
         private uint m_Version = 0;
         private uint m_RepaintVersion = 0;
+        private uint m_HierarchyVersion = 0;
 
         ProfilerMarker m_MarkerBeforeUpdate;
         ProfilerMarker m_MarkerUpdate;
@@ -609,6 +599,11 @@ namespace UnityEngine.UIElements
         internal override IScheduler scheduler
         {
             get { return timerEventScheduler; }
+        }
+
+        internal VisualTreeUpdater visualTreeUpdater
+        {
+            get { return m_VisualTreeUpdater; }
         }
 
         public override ScriptableObject ownerObject { get; protected set; }
@@ -694,15 +689,9 @@ namespace UnityEngine.UIElements
 
         public override IMGUIContainer rootIMGUIContainer { get; set; }
 
-        internal override uint version
-        {
-            get { return m_Version; }
-        }
-
-        internal override uint repaintVersion
-        {
-            get { return m_RepaintVersion; }
-        }
+        internal override uint version => m_Version;
+        internal override uint repaintVersion => m_RepaintVersion;
+        internal override uint hierarchyVersion => m_HierarchyVersion;
 
         private Shader m_StandardShader;
 
@@ -967,10 +956,6 @@ namespace UnityEngine.UIElements
 
         public override void Repaint(Event e)
         {
-            if (contextType == ContextType.Editor)
-                Debug.Assert(GUIClip.Internal_GetCount() == 0,
-                    "UIElement is not compatible with IMGUI GUIClips, only GUIClip.ParentClipScope");
-
             m_RepaintVersion = version;
 
             // in an in-game context, pixelsPerPoint is user driven
@@ -1010,6 +995,9 @@ namespace UnityEngine.UIElements
         {
             ++m_Version;
             m_VisualTreeUpdater.OnVersionChanged(ve, versionChangeType);
+
+            if ((versionChangeType & VersionChangeType.Hierarchy) == VersionChangeType.Hierarchy)
+                ++m_HierarchyVersion;
 #if UNITY_EDITOR
             panelDebug?.OnVersionChanged(ve, versionChangeType);
 #endif
@@ -1043,11 +1031,35 @@ namespace UnityEngine.UIElements
             }
         }
 
+        // We count instances of Runtime panels to be able to insert panels that have the same sort order in a deterministic
+        // way throughout the same session (i.e. instances created before will be placed before in the visual tree).
+        private static int s_CurrentRuntimePanelCounter = 0;
+        internal readonly int m_RuntimePanelCreationIndex;
+
+        private float m_SortingPriority = 0;
+        public float sortingPriority
+        {
+            get => m_SortingPriority;
+
+            set
+            {
+                if (!Mathf.Approximately(m_SortingPriority, value))
+                {
+                    m_SortingPriority = value;
+                    if (contextType == ContextType.Player)
+                    {
+                        UIElementsRuntimeUtility.SetPanelOrderingDirty();
+                    }
+                }
+            }
+        }
+
         public event Action destroyed;
 
         protected BaseRuntimePanel(ScriptableObject ownerObject, EventDispatcher dispatcher = null)
             : base(ownerObject, ContextType.Player, dispatcher)
         {
+            m_RuntimePanelCreationIndex = s_CurrentRuntimePanelCounter++;
         }
 
         protected override void Dispose(bool disposing)
@@ -1141,22 +1153,33 @@ namespace UnityEngine.UIElements
         }
 
         internal bool ScreenToPanel(Vector2 screenPosition, Vector2 screenDelta,
-            out Vector2 panelPosition, out Vector2 panelDelta)
+            out Vector2 panelPosition, out Vector2 panelDelta, bool allowOutside = false)
         {
             panelPosition = ScreenToPanel(screenPosition);
 
-            var panelRect = visualTree.layout;
-            if (!panelRect.Contains(panelPosition))
-            {
-                panelDelta = screenDelta;
-                return false;
-            }
+            Vector2 panelPrevPosition;
 
-            var panelPrevPosition = ScreenToPanel(screenPosition - screenDelta);
-            if (!panelRect.Contains(panelPrevPosition))
+            // We don't allow pointer events outside of a panel to be considered
+            // unless it is capturing the mouse (see SendPositionBasedEvent).
+            if (!allowOutside)
             {
-                panelDelta = screenDelta;
-                return true;
+                var panelRect = visualTree.layout;
+                if (!panelRect.Contains(panelPosition))
+                {
+                    panelDelta = screenDelta;
+                    return false;
+                }
+
+                panelPrevPosition = ScreenToPanel(screenPosition - screenDelta);
+                if (!panelRect.Contains(panelPrevPosition))
+                {
+                    panelDelta = screenDelta;
+                    return true;
+                }
+            }
+            else
+            {
+                panelPrevPosition = ScreenToPanel(screenPosition - screenDelta);
             }
 
             panelDelta = panelPosition - panelPrevPosition;

@@ -24,6 +24,7 @@ namespace UnityEngine.UIElements
             return obj is Cursor && Equals((Cursor)obj);
         }
 
+        /// <undoc/>
         public bool Equals(Cursor other)
         {
             return EqualityComparer<Texture2D>.Default.Equals(texture, other.texture) &&
@@ -40,11 +41,13 @@ namespace UnityEngine.UIElements
             return hashCode;
         }
 
+        /// <undoc/>
         public static bool operator==(Cursor style1, Cursor style2)
         {
             return style1.Equals(style2);
         }
 
+        /// <undoc/>
         public static bool operator!=(Cursor style1, Cursor style2)
         {
             return !(style1 == style2);
@@ -64,11 +67,14 @@ namespace UnityEngine.UIElements
 
     internal class CursorManager : ICursorManager
     {
+        public bool isCursorOverriden { get; private set; }
+
         public void SetCursor(Cursor cursor)
         {
             if (cursor.texture != null)
             {
                 UnityEngine.Cursor.SetCursor(cursor.texture, cursor.hotspot, CursorMode.Auto);
+                isCursorOverriden = true;
             }
             else
             {
@@ -84,7 +90,9 @@ namespace UnityEngine.UIElements
 
         public void ResetCursor()
         {
-            UnityEngine.Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+            if (isCursorOverriden)
+                UnityEngine.Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+            isCursorOverriden = false;
         }
     }
 }

@@ -19,3 +19,28 @@ UI Toolkit is built into Unity as a core part of the Editor. It is also availabl
 The built-in version of UI Toolkit includes the features required to make user interfaces for Unity Editor extensions. The package version contains the exact same features, as well as the features required to make runtime user interfaces for games and applications. It may also contain other new features that are currently in preview.
 
 Both versions of UI Toolkit work exactly the same way, and use the same namespaces: `UnityEditor.UIElements` and `UnityEngine.UIElements`. When you install the package, you will not see many difference other than having access to the runtime features, and other preview features. You do not need to do any additional configuration.
+
+# Using package-only UI Toolkit features
+
+In a project, code that needs UI Toolkit features that are only present in the package MUST reference the assemblies explicitly. Otherwise, the compilation order is not guaranteed, and you might see errors in the Editor or at build time related to missing APIs. In a assembly definition file (.asmdef), you must add an explicit reference to `"UnityEngine.UIElementsModule"` to access new runtime APIs or `"UnityEditor.UIElementsModule"` for editor features.
+
+Here is a sample of an assembly definition file adding these references:
+
+```
+{
+  "name": "AssemblyConsumingNewAPI",
+  "references": [
+     "UnityEngine.UIElementsModule",
+     "UnityEditor.UIElementsModule"
+     ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": true,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
+```

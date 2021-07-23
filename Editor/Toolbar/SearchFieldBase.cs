@@ -29,7 +29,7 @@ namespace UnityEditor.UIElements
         /// The object currently being exposed by the field.
         /// </summary>
         /// <remarks>
-        /// If the new value is different from the current value, this method notifies registered callbacks with a ChangeEvent<T>.
+        /// If the new value is different from the current value, this method notifies registered callbacks with a <see cref="ChangeEvent{T}"/>.
         /// </remarks>
         public T value
         {
@@ -78,6 +78,7 @@ namespace UnityEditor.UIElements
 
             m_SearchButton = new Button(() => {}) { name = "unity-search" };
             m_SearchButton.AddToClassList(searchButtonUssClassName);
+            m_SearchButton.focusable = false;
             hierarchy.Add(m_SearchButton);
 
             m_TextField = new TextInputType();

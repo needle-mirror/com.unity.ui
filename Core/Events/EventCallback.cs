@@ -2,8 +2,21 @@ using System;
 
 namespace UnityEngine.UIElements
 {
+    /// <summary>
+    /// Defines the structure of a callback that can be registered onto an element for an event type
+    /// </summary>
+    /// <param name="evt">The event instance</param>
+    /// <typeparam name="TEventType">The type of event to register the callback for</typeparam>
     public delegate void EventCallback<in TEventType>(TEventType evt);
 
+    /// <summary>
+    /// Defines the structure of a callback that can be registered onto an element for an event type,
+    /// along with a custom user defined argument.
+    /// </summary>
+    /// <param name="evt">The event instance.</param>
+    /// <param name="userArgs">The user argument instance.</param>
+    /// <typeparam name="TEventType">The type of event registered for the callback.</typeparam>
+    /// <typeparam name="TCallbackArgs">The type of the user argument.</typeparam>
     public delegate void EventCallback<in TEventType, in TCallbackArgs>(TEventType evt, TCallbackArgs userArgs);
 
     internal abstract class EventCallbackFunctorBase
@@ -15,21 +28,21 @@ namespace UnityEngine.UIElements
             this.phase = phase;
         }
 
-        public abstract void Invoke(EventBase evt);
+        public abstract void Invoke(EventBase evt, PropagationPhase propagationPhase);
 
         public abstract bool IsEquivalentTo(long eventTypeId, Delegate callback, CallbackPhase phase);
 
-        protected bool PhaseMatches(EventBase evt)
+        protected bool PhaseMatches(PropagationPhase propagationPhase)
         {
             switch (phase)
             {
                 case CallbackPhase.TrickleDownAndTarget:
-                    if (evt.propagationPhase != PropagationPhase.TrickleDown && evt.propagationPhase != PropagationPhase.AtTarget)
+                    if (propagationPhase != PropagationPhase.TrickleDown && propagationPhase != PropagationPhase.AtTarget)
                         return false;
                     break;
 
                 case CallbackPhase.TargetAndBubbleUp:
-                    if (evt.propagationPhase != PropagationPhase.AtTarget && evt.propagationPhase != PropagationPhase.BubbleUp)
+                    if (propagationPhase != PropagationPhase.AtTarget && propagationPhase != PropagationPhase.BubbleUp)
                         return false;
                     break;
             }
@@ -49,7 +62,7 @@ namespace UnityEngine.UIElements
             m_EventTypeId = EventBase<TEventType>.TypeId();
         }
 
-        public override void Invoke(EventBase evt)
+        public override void Invoke(EventBase evt, PropagationPhase propagationPhase)
         {
             if (evt == null)
                 throw new ArgumentNullException(nameof(evt));
@@ -57,7 +70,7 @@ namespace UnityEngine.UIElements
             if (evt.eventTypeId != m_EventTypeId)
                 return;
 
-            if (PhaseMatches(evt))
+            if (PhaseMatches(propagationPhase))
             {
                 using (new EventDebuggerLogCall(m_Callback, evt))
                 {
@@ -86,7 +99,7 @@ namespace UnityEngine.UIElements
             m_EventTypeId = EventBase<TEventType>.TypeId();
         }
 
-        public override void Invoke(EventBase evt)
+        public override void Invoke(EventBase evt, PropagationPhase propagationPhase)
         {
             if (evt == null)
                 throw new ArgumentNullException(nameof(evt));
@@ -94,7 +107,7 @@ namespace UnityEngine.UIElements
             if (evt.eventTypeId != m_EventTypeId)
                 return;
 
-            if (PhaseMatches(evt))
+            if (PhaseMatches(propagationPhase))
             {
                 using (new EventDebuggerLogCall(m_Callback, evt))
                 {

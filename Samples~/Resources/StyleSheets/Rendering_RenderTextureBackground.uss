@@ -11,5 +11,5 @@
 
 #capsule-thumbnail
 {
-    background-image: url("/Packages/com.unity.ui/Samples/Resources/Textures/UIRenderTexture.renderTexture");
+    background-image: url("../Textures/UIRenderTexture.renderTexture");
 }

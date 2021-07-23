@@ -481,17 +481,28 @@ namespace UnityEngine.UIElements.UIR
                 m_UpdateRangesEnqueued++;
             }
 
+            bool HasMappedBufferRange()
+            {
+ #if !UIE_PACKAGE || UNITY_2021_1_OR_NEWER
+                return Utility.HasMappedBufferRange();
+#else
+#if UNITY_WEBGL
+                return false;
+#else
+                if (SystemInfo.graphicsDeviceType == Rendering.GraphicsDeviceType.OpenGLES2)
+                    return false;
+                return true;
+#endif
+#endif
+            }
+
             // This is expected to be called no more than once per frame
             public void SendUpdates()
             {
-                #if UNITY_WEBGL
-                // Send the whole range in WebGL since it has quirks around partial updates.
-                // If the partial update is thought to cause a stall, it will release the buffer
-                // and create a new one with the requested update size, basically destroying our buffer.
-                SendFullRange();
-                #else
-                SendPartialRanges();
-                #endif
+                if (HasMappedBufferRange())
+                    SendPartialRanges();
+                else
+                    SendFullRange();
             }
 
             public void SendFullRange()

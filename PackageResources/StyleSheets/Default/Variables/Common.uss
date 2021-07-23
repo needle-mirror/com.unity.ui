@@ -1,0 +1,39 @@
+/**********************************************************************************************************************/
+/* Variables
+/**********************************************************************************************************************/
+.unity-theme-env-variables {
+    --theme-default-border-radius: env(--unity-metrics-default-border_radius);
+    --enable-style-hovering: true;
+    --single-line-height: env(--unity-metrics-single_line-height);
+    --theme-default-control-margin: 3px 3px 2px 3px;
+    --theme-default-top-margin: 1px;
+    --theme-default-bottom-margin: 1px;
+    --theme-default-left-margin: 3px;
+    --theme-default-right-margin: 3px;
+    --theme-input-text-cursor: text;
+    --window-toolbar-height: 21px;
+
+    --unity-font-size: env(--unity-metrics-default-font_normal_size);
+    --unity-font-size-semi-small: env(--unity-metrics-default-font_semi_small_size);
+    --unity-font-size-tiny: env(--unity-metrics-default-font_tiny_size);
+    --unity-font-size-small: env(--unity-metrics-default-font_small_size);
+    --unity-font-size-big: env(--unity-metrics-default-font_big_size);
+    --unity-font-size-very-big: env(--unity-metrics-default-font_very_big_size);
+
+    --unity-font-standard-padding-top: 2px;
+    --unity-font-standard-padding-top-with-border: 1px;
+    --unity-font-standard-padding-bottom: 3px;
+    --unity-font-standard-padding-bottom-with-border: 2px;
+
+    --unity-font-popup-padding-top: 0px;
+    --unity-font-popup-padding-bottom: 2px;
+
+    --unity-font-button-padding-top: 1px;
+    --unity-font-button-padding-bottom: 3px;
+
+    /* Window toolbars (not app toolbar) */
+    --unity-toolbar-padding-top: 1;
+    --unity-toolbar-padding-bottom: 0;
+
+    --current-font: resource("Fonts/System/System Normal.ttf"); /*It is this font that is replaced by the system font when loading the stylesheets*/
+}

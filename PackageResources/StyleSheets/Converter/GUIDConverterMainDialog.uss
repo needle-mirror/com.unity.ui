@@ -1,0 +1,71 @@
+.unity-guid-converter__main-area {
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.unity-guid-converter__top-text-area {
+    margin-bottom: 10px;
+    flex-grow: 1;
+    margin-top: 10px;
+    flex-shrink: 0;
+}
+
+.unity-guid-converter__text {
+    flex-grow: 1;
+    white-space: normal;
+    flex-shrink: 0;
+}
+
+.unity-guid-converter__button-area {
+    flex-direction: row;
+    justify-content: space-around;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    flex-wrap: nowrap;
+}
+
+.unity-guid-converter__package-assets-area {
+    padding: 2px;
+    border-width: 3px;
+    border-color: var(--unity-colors-default-border);
+    background-color: var(--unity-colors-box-background);
+    margin-right: 5px;
+    justify-content: space-around;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    flex-grow: 1;
+    flex-shrink: 0;
+    flex-basis: 0;
+}
+
+.unity-guid-converter__trunk-assets-area {
+    padding: 2px;
+    border-width: 3px;
+    border-color: var(--unity-colors-default-border);
+    background-color: var(--unity-colors-box-background);
+    margin-left: 5px;
+    justify-content: space-around;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    flex-grow: 1;
+    flex-shrink: 0;
+    flex-basis: 0;
+}
+
+.unity-guid-converter__button {
+}
+
+.unity-guid-converter__button-area-text {
+    white-space: normal;
+    -unity-text-align: upper-center;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}

@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 13807, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: Vector4FieldSnippet_uss
+  m_EditorClassIdentifier: 
+  m_Text: ".some-styled-field {\n    -unity-font-style: bold;\n}\n\n.some-styled-field
+    .unity-base-field__input {\n    -unity-font-style: italic;\n}\n"

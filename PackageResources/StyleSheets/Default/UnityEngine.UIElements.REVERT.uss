@@ -1,0 +1,90 @@
+/******************************************************************************************************/
+/* These rules aim to revert styling properties applied by the active Editor theme when previewing ui */
+/* using the runtime theme in the UI Builder                                                          */
+/******************************************************************************************************/
+
+/* Button */
+
+.unity-button,
+.unity-enum-field__input,
+.unity-base-popup-field__input {
+    border-radius: 0;
+}
+
+/* Dropdown Menu */
+.unity-base-dropdown__container-outer {
+    border-radius: 0;
+}
+
+/* Slider */
+
+.unity-base-slider--vertical .unity-base-slider__dragger,
+.unity-base-slider--horizontal .unity-base-slider__dragger {
+    border-radius: 0;
+}
+
+/* MinMaxSlider */
+
+.unity-min-max-slider__dragger {
+    background-image: none;
+}
+
+.unity-min-max-slider__input:active > .unity-min-max-slider__dragger:hover {
+    background-image: none;
+}
+
+.unity-min-max-slider__input:focus > .unity-min-max-slider__dragger {
+    background-image: none;
+}
+
+/* TextField */
+
+.unity-base-text-field__input {
+    border-radius: 0;
+}
+
+/* Toggle */
+
+.unity-toggle {
+    margin-top: env(--theme-default-top-margin);
+    margin-bottom: 3px;
+}
+.unity-toggle__label {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+.unity-toggle__input {
+    flex-direction: row;
+    flex-basis: auto;
+}
+
+.unity-toggle__checkmark,
+.unity-toggle > .unity-toggle__input:active > .unity-toggle__checkmark,
+.unity-toggle > .unity-toggle__input:hover > .unity-toggle__checkmark,
+.unity-toggle > .unity-toggle__input:hover:active > .unity-toggle__checkmark,
+.unity-toggle > .unity-toggle__input:focus > .unity-toggle__checkmark {
+    background-image: none;
+}
+
+.unity-toggle > .unity-toggle__input:checked > .unity-toggle__checkmark,
+.unity-toggle > .unity-toggle__input:hover:checked > .unity-toggle__checkmark,
+.unity-toggle > .unity-toggle__input:focus:checked > .unity-toggle__checkmark {
+    background-image: env(--theme-image-toggle-checkmark);
+}
+
+/* Foldout */
+
+.unity-foldout__toggle > .unity-toggle__input:hover > .unity-toggle__checkmark,
+.unity-foldout__toggle > .unity-toggle__input:focus > .unity-toggle__checkmark {
+    background-image: env(--theme-image-foldout);
+}
+
+.unity-foldout__toggle > .unity-toggle__input:checked:hover > .unity-toggle__checkmark,
+.unity-foldout__toggle > .unity-toggle__input:checked:focus > .unity-toggle__checkmark {
+    background-image: env(--theme-image-foldout-on);
+}
+
+/* Progress Bar */
+.unity-progress-bar__progress {
+    background-image: none;
+}

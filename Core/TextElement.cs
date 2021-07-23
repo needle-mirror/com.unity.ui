@@ -10,7 +10,10 @@ namespace UnityEngine.UIElements
     }
 
     /// <summary>
-    /// Abstract base class for <see cref="VisualElement"/> containing text.
+    /// Base class for a <see cref="VisualElement"/> that displays text.
+    /// </summary>
+    /// <summary>
+    /// Use this as the super class if you are declaring a custom VisualElement that displays text. For example, <see cref="Button"/> or <see cref="Label"/> use this as their base class.
     /// </summary>
     public class TextElement : BindableElement, ITextElement, INotifyValueChanged<string>
     {
@@ -58,6 +61,9 @@ namespace UnityEngine.UIElements
         /// </summary>
         public static readonly string ussClassName = "unity-text-element";
 
+        /// <summary>
+        /// Initializes and returns an instance of TextElement.
+        /// </summary>
         public TextElement()
         {
             requireMeasureFunction = true;
@@ -81,9 +87,7 @@ namespace UnityEngine.UIElements
         {
             if (evt.eventTypeId == AttachToPanelEvent.TypeId() && evt is AttachToPanelEvent attachEvent)
             {
-                textHandle = attachEvent.destinationPanel.contextType == ContextType.Editor
-                    ? TextHandleFactory.GetEditorHandle()
-                    : TextHandleFactory.GetRuntimeHandle();
+                textHandle = TextCoreHandle.New();
 #if UNITY_EDITOR
                 (attachEvent.destinationPanel as BaseVisualElementPanel)?.OnTextElementAdded(this);
 #endif
@@ -104,6 +108,13 @@ namespace UnityEngine.UIElements
 
         [SerializeField]
         private string m_Text = String.Empty;
+
+        /// <summary>
+        /// The text to be displayed.
+        /// </summary>
+        /// <remarks>
+        /// Changing this value will implicitly invoke the <see cref="INotifyValueChanged{T}.value"/> setter, which will raise a <see cref="ChangeEvent{T}"/> of type string.
+        /// </remarks>
         public virtual string text
         {
             get { return ((INotifyValueChanged<string>) this).value; }
@@ -158,7 +169,6 @@ namespace UnityEngine.UIElements
         /// overflow: Overflow.Hidden
         /// whiteSpace: WhiteSpace.NoWrap
         /// textOverflow: TextOverflow.Ellipsis
-        /// textOverflowPosition: TextOverflowPosition.<End | Start | Middle>
         ///
         /// The text Element hides elided text, and displays an ellipsis ('...') to indicate that there is hidden overflow content.
         /// </remarks>
@@ -182,14 +192,17 @@ namespace UnityEngine.UIElements
 
         internal string ElideText(string drawText, string ellipsisText, float width, TextOverflowPosition textOverflowPosition)
         {
-            // The pixelOffset represent the maximum value that could be removed from the measured with by the layout when scaling is not 100%.
-            // the offset is caused by alining the borders+spacing+padding on the grid.
-            // We still want the text to render without being elided even when there is a small gap missing.  https://fogbugz.unity3d.com/f/cases/1268016/
-            float pixelOffset = 1 / scaledPixelsPerPoint;
+            // Allow the text to partially overlap the right-padding area before showing ellipses for no good reason.
+            // This is required as the content rect may be different than the measured text rect after pixel alignment.
+            // See cases 1268016 and 1291452.
+            float paddingRight = resolvedStyle.paddingRight;
+            if (float.IsNaN(paddingRight))
+                paddingRight = 0.0f; // Just in case the style isn't fully resolved yet
+            float extraWidth = Mathf.Clamp(paddingRight, 1.0f / scaledPixelsPerPoint, 1.0f);
 
             // Try full size first
             var size = MeasureTextSize(drawText, 0, MeasureMode.Undefined, 0, MeasureMode.Undefined);
-            if (size.x - pixelOffset <= width || string.IsNullOrEmpty(ellipsisText))
+            if (size.x <= (width + extraWidth) || string.IsNullOrEmpty(ellipsisText))
                 return drawText;
 
             var minText = drawText.Length > 1 ? ellipsisText : drawText;
@@ -291,8 +304,7 @@ namespace UnityEngine.UIElements
                 m_TextParams = textParams;
                 var shouldElide = ShouldElide();
                 if (shouldElide)
-                    m_TextParams.text = ElideText(m_TextParams.text, k_EllipsisText, m_TextParams.rect.width,
-                        m_TextParams.textOverflowPosition);
+                    m_TextParams.text = ElideText(m_TextParams.text, k_EllipsisText, m_TextParams.rect.width, m_TextParams.textOverflowPosition);
 
                 isElided = shouldElide && m_TextParams.text != text;
                 m_PreviousTextParamsHashCode = textParamsHashCode;

@@ -34,7 +34,7 @@ namespace UnityEngine.UIElements
 
         static UIElementsRuntimeUtility()
         {
-#if UNITY_2021_1_OR_NEWER
+#if (!UIE_PACKAGE) || UNITY_2021_1_OR_NEWER
             // We no longer need it
             UIElementsRuntimeUtilityNative.RepaintOverlayPanelsCallback = () => {};  //RepaintOverlayPanels;
 
@@ -90,7 +90,7 @@ namespace UnityEngine.UIElements
             {
                 s_RegisteredPlayerloopCallback = true;
                 RegisterPlayerloopCallback();
-#if UNITY_2021_1_OR_NEWER
+#if UNITY_2021_1_OR_NEWER || !UIE_PACKAGE
                 Canvas.SetExternalCanvasEnabled(true);
 #endif
             }
@@ -112,7 +112,7 @@ namespace UnityEngine.UIElements
             {
                 s_RegisteredPlayerloopCallback = false;
                 UnregisterPlayerloopCallback();
-#if UNITY_2021_1_OR_NEWER
+#if UNITY_2021_1_OR_NEWER || !UIE_PACKAGE
                 Canvas.SetExternalCanvasEnabled(false);
 #endif
             }
@@ -187,7 +187,7 @@ namespace UnityEngine.UIElements
 
         public static void RegisterEventSystem(Object eventSystem)
         {
-            if (activeEventSystem != null && activeEventSystem != eventSystem)
+            if (activeEventSystem != null && activeEventSystem != eventSystem && eventSystem.GetType().Name == "EventSystem")
                 Debug.LogWarning("There can be only one active Event System.");
             activeEventSystem = eventSystem;
         }
@@ -211,7 +211,7 @@ namespace UnityEngine.UIElements
 
             if (Application.isPlaying && useDefaultEventSystem)
             {
-                defaultEventSystem.Update();
+                defaultEventSystem.Update(DefaultEventSystem.UpdateMode.IgnoreIfAppNotFocused);
             }
         }
 
@@ -246,17 +246,62 @@ namespace UnityEngine.UIElements
 
             s_SortedRuntimePanels.Sort((a, b) =>
             {
-                var diff = a.sortingPriority - b.sortingPriority;
+                var runtimePanelA = a as BaseRuntimePanel;
+                var runtimePanelB = b as BaseRuntimePanel;
+
+                if (runtimePanelA == null || runtimePanelB == null)
+                {
+                    // Should never happen, so just being safe (after all there's a cast happening).
+                    return 0;
+                }
+
+                var diff = runtimePanelA.sortingPriority - runtimePanelB.sortingPriority;
 
                 if (Mathf.Approximately(0, diff))
                 {
-                    return 0;
+                    // They're the same value, compare their count (panels created first show up first).
+                    return runtimePanelA.m_RuntimePanelCreationIndex.CompareTo(runtimePanelB.m_RuntimePanelCreationIndex);
                 }
 
                 return (diff < 0) ? -1 : 1;
             });
 
             s_PanelOrderingDirty = false;
+        }
+
+        internal static Vector2 MultiDisplayBottomLeftToPanelPosition(Vector2 position, out int? targetDisplay)
+        {
+            var screenPosition = MultiDisplayToLocalScreenPosition(position, out targetDisplay);
+            return ScreenBottomLeftToPanelPosition(screenPosition, targetDisplay ?? 0);
+        }
+
+        internal static Vector2 MultiDisplayToLocalScreenPosition(Vector2 position, out int? targetDisplay)
+        {
+            var relativePosition = Display.RelativeMouseAt(position);
+            if (relativePosition != Vector3.zero)
+            {
+                targetDisplay = (int)relativePosition.z;
+                return relativePosition;
+            }
+            targetDisplay = null;
+            return position;
+        }
+
+        internal static Vector2 ScreenBottomLeftToPanelPosition(Vector2 position, int targetDisplay)
+        {
+            // Flip positions Y axis between input and UITK
+            var screenHeight = Screen.height;
+            if (targetDisplay > 0 && targetDisplay < Display.displays.Length)
+                screenHeight = Display.displays[targetDisplay].systemHeight;
+            position.y = screenHeight - position.y;
+            return position;
+        }
+
+        internal static Vector2 ScreenBottomLeftToPanelDelta(Vector2 delta)
+        {
+            // Flip deltas Y axis between input and UITK
+            delta.y = -delta.y;
+            return delta;
         }
     }
 }

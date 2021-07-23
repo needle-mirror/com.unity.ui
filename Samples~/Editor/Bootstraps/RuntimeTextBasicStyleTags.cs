@@ -21,7 +21,6 @@ namespace Samples.Utils
 
         static void InitializeTextBasicStyleTagsScene()
         {
-            TextDelegates.OnTextSettingsImported -= InitializeTextBasicStyleTagsScene;
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects);
             var go = new GameObject("Sample Object");
             var component = go.AddComponent<BasicStyleTags>();

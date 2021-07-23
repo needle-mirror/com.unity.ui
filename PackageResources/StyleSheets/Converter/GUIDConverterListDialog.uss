@@ -1,0 +1,50 @@
+.unity-guid-converter__display-hidden {
+    display: none;
+}
+
+.unity-guid-converter__list-container {
+    flex-grow: 1;
+    min-height: 50px;
+    align-items: flex-start;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-width: 1px;
+    border-color: var(--unity-colors-box-border);
+    background-color: var(--unity-colors-box-background);
+}
+
+.unity-guid-converter__main-area {
+    flex-grow: 1;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.unity-guid-converter__top-message {
+    white-space: normal;
+}
+
+.unity-guid-converter__list-area {
+    flex-grow: 1;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.unity-guid-converter__button-area {
+    flex-direction: row;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    justify-content: center;
+}
+
+.unity-guid-converter__button {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}

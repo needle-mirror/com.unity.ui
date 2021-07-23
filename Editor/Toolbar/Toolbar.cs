@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine.UIElements;
 
 namespace UnityEditor.UIElements
@@ -7,8 +8,8 @@ namespace UnityEditor.UIElements
     /// </summary>
     public class Toolbar : VisualElement
     {
-        private static readonly string s_ToolbarDarkStyleSheetPath = "StyleSheets/Generated/ToolbarDark.uss.asset";
-        private static readonly string s_ToolbarLightStyleSheetPath = "StyleSheets/Generated/ToolbarLight.uss.asset";
+        private static readonly string s_ToolbarDarkStyleSheetPath = Path.Combine(UIElementsPackageUtility.EditorResourcesBasePath, "StyleSheets/Generated/ToolbarDark.uss.asset");
+        private static readonly string s_ToolbarLightStyleSheetPath = Path.Combine(UIElementsPackageUtility.EditorResourcesBasePath, "StyleSheets/Generated/ToolbarLight.uss.asset");
 
         private static readonly StyleSheet s_ToolbarDarkStyleSheet;
         private static readonly StyleSheet s_ToolbarLightStyleSheet;
@@ -21,10 +22,10 @@ namespace UnityEditor.UIElements
         static Toolbar()
         {
             s_ToolbarDarkStyleSheet = EditorGUIUtility.Load(UIElementsEditorUtility.GetStyleSheetPathForCurrentFont(s_ToolbarDarkStyleSheetPath)) as StyleSheet;
-            s_ToolbarDarkStyleSheet.isUnityStyleSheet = true;
+            s_ToolbarDarkStyleSheet.isDefaultStyleSheet = true;
 
             s_ToolbarLightStyleSheet = EditorGUIUtility.Load(UIElementsEditorUtility.GetStyleSheetPathForCurrentFont(s_ToolbarLightStyleSheetPath)) as StyleSheet;
-            s_ToolbarLightStyleSheet.isUnityStyleSheet = true;
+            s_ToolbarLightStyleSheet.isDefaultStyleSheet = true;
         }
 
         internal static void SetToolbarStyleSheet(VisualElement ve)

@@ -1,0 +1,6 @@
+.unity-theme-env-variables {
+    --current-font: url("/Packages/com.unity.ui/PackageResources/Fonts/Lucida Grande SDF.asset");
+
+    --unity-font-standard-padding-bottom: 1px;
+    --unity-font-standard-padding-bottom-with-border: 0;
+}

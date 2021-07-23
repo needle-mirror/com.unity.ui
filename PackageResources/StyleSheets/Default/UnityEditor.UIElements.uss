@@ -1,0 +1,480 @@
+/**********************************************************************************************************************/
+/* Bindings                                                                                                           */
+/**********************************************************************************************************************/
+
+.unity-binding--prefab-override,
+.unity-binding--prefab-override > .unity-base-field__label,
+.unity-binding--prefab-override > .unity-base-field__input {
+    -unity-font-style: bold;
+}
+
+.unity-binding__prefab-override-bar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+}
+
+/**********************************************************************************************************************/
+/* ColorInput                                                                                                         */
+/**********************************************************************************************************************/
+
+.unity-color-field__input {
+    min-height: 16px;
+}
+
+/**********************************************************************************************************************/
+/* PropertyControl                                                                                                    */
+/**********************************************************************************************************************/
+
+.unity-property-control {
+    flex: 1 0 0;
+    flex-direction: row;
+}
+
+.unity-property-control__dragger {
+    cursor: slide-arrow;
+}
+
+.unity-property-control__label {
+    flex: 0 0 auto;
+    height: 16px;
+}
+
+.unity-property-control__control {
+    flex: 1 0 0;
+    height: 16px;
+}
+
+/**********************************************************************************************************************/
+/* ObjectInput                                                                                                        */
+/**********************************************************************************************************************/
+
+/* different behavior for borders (in IMGUI border goes inside the element while in UIElements border goes outside)
+to handle this difference we need to add padding and remove them when using the border.
+*/
+.unity-object-field__input {
+    flex-direction: row;
+    background-color: env(--theme-object-field-background-color);
+
+    border-radius: env(--theme-default-border-radius);
+    border-color: env(--theme-object-field-border-color);
+    border-top-width: env(--theme-object-field-border-width);
+    border-right-width: env(--theme-object-field-border-width);
+    border-bottom-width: env(--theme-object-field-border-width);
+    border-left-width: env(--theme-object-field-border-width);
+}
+
+.unity-object-field:hover > .unity-object-field__input {
+    border-width: env(--theme-object-field-border-hover-width);
+    border-color: env(--theme-object-field-border-hover-color);
+}
+.unity-object-field:checked > .unity-object-field__input {
+    border-width: env(--theme-object-field-border-checked-width);
+    border-color: env(--theme-object-field-border-checked-color);
+}
+
+.unity-object-field:focus > .unity-object-field__input {
+    border-width: env(--theme-object-field-border-focus-width);
+    border-color: env(--theme-object-field-border-focus-color);
+}
+
+.unity-object-field__object:focus > .unity-object-field-display__label {
+    color: env(--unity-text-color);
+}
+
+.unity-object-field__object {
+    flex-direction: row;
+    flex: 1 0 0;
+    -unity-slice-left: 4;
+    -unity-slice-top: 4;
+    -unity-slice-right: 4;
+    -unity-slice-bottom: 4;
+}
+
+.unity-object-field-display__icon {
+    margin-left: 0;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 2px;
+    padding-right: 0;
+    max-width: 14px;
+    max-height: 12px;
+    align-self:center;
+}
+
+.unity-object-field-display__label {
+    flex: 1 0 0;
+    margin-left: 2px;
+    padding-left: 0;
+    padding-right: 2px;
+    padding-top: 1px;/*--unity-font-standard-padding-top;*//*1 less pading than standard because of the border (it is on the parent).*/
+    padding-bottom: env(--unity-font-standard-padding-bottom-with-border);
+    overflow: hidden;
+    color: env(--theme-input-text-color);
+}
+
+.unity-object-field__selector {
+    width: 18px;
+    height: 16px;
+    align-self: center;
+    background-color: env(--theme-object-field-button-background-color);
+    background-image: env(--theme-image-pick);
+    -unity-slice-left: 1;
+    -unity-slice-top: 1;
+    -unity-slice-right: 1;
+    -unity-slice-bottom: 1;
+    /*
+        border-width: 1px;
+        border-color: env(--theme-object-field-button-background-color); */
+    /* flex-shrink: 1; */
+    /* background-size: 12px 12px;
+    background-position: right 3px top 0.5; */
+}
+.unity-object-field__selector:hover {
+    background-color: env(--theme-object-field-button-background-color-hover);
+}
+
+/**********************************************************************************************************************/
+/* CurveInput                                                                                                         */
+/**********************************************************************************************************************/
+.unity-curve-field__input {
+    background-color:rgb(86,86,86);
+    --unity-curve-color: #00ff00;
+    margin-top: 1px;
+    min-height: 15px;
+    border-color: env(--theme-input-border-color);
+    border-width: 1px;
+}
+
+.unity-curve-field__content {
+    position:absolute;
+    left:1px;
+    right:1px;
+    bottom:1px;
+    top:1px;
+}
+
+.unity-curve-field:focus > .unity-curve-field__input {
+    border-color: env(--theme-input-border-focus-color);
+}
+
+
+/**********************************************************************************************************************/
+/* GradientInput                                                                                                      */
+/**********************************************************************************************************************/
+
+.unity-gradient-field__input {
+    min-height: 16px;
+    border-color: env(--theme-input-border-color);
+    border-width: 1px;
+}
+
+.unity-gradient-field__content {
+    position:absolute;
+    left: 1px;
+    right: 1px;
+    bottom: 1px;
+    top: 1px;
+}
+
+.unity-gradient-field:focus > .unity-gradient-field__input {
+    border-color: env(--theme-input-border-focus-color);
+}
+
+/**********************************************************************************************************************/
+/* All Composite Inputs (Vector{2,3,4}, Rect)                                                                         */
+/**********************************************************************************************************************/
+.unity-composite-field .unity-base-field__input {
+    margin-right: 1px;
+}
+.unity-composite-field > .unity-composite-field__input {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    flex: 1 0 auto;
+    margin-right: 0;
+}
+
+.unity-composite-field--multi-line > .unity-base-field__input {
+    flex-direction: column;
+}
+
+.unity-composite-field--multi-line {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.unity-composite-field__field {
+    min-width: 0;
+    flex-direction: row;
+    flex: 1 0 0;
+    flex-wrap: nowrap;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.unity-composite-field__field-group {
+    flex: 1 0 auto;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin-top: env(--theme-default-top-margin);
+    margin-bottom: env(--theme-default-bottom-margin);
+}
+
+.unity-composite-field__field-group > .unity-composite-field__field {
+    flex: 1 0 0;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.unity-composite-field__field > .unity-base-field__label {
+    min-width: 15px;
+    margin-left: 3px;
+    margin-right: 0;
+    flex: 0 0 15px;
+}
+
+.unity-base-field__input > .unity-base-field__label--mixed-value,
+.unity-object-field__object > .unity-base-field__label--mixed-value,
+.unity-composite-field__field > .unity-base-field__label--mixed-value {
+    color: env(--theme-base-field-label-mixed-values-color);
+}
+
+.unity-object-field__object > .unity-base-field__label--mixed-value {
+    margin-left: 0;
+}
+
+.unity-composite-field__field--first > .unity-base-field__label {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 1px;
+}
+
+.unity-base-field--no-label .unity-composite-field__field-spacer {
+    position:absolute;
+}
+
+.unity-composite-field__field-spacer {
+    flex: 1 0 auto;
+    flex-direction: row;
+    overflow: hidden;
+    flex-wrap:nowrap;
+}
+
+/**********************************************************************************************************************/
+/* InspectorElement                                                                                                   */
+/**********************************************************************************************************************/
+
+.unity-inspector-element--uie {
+    padding-top: 2px;
+    padding-left: 15px;
+    padding-right: 6px;
+}
+
+.unity-inspector-element > .unity-base-field > .unity-base-field__label {
+    padding-left: 16px;
+}
+.unity-inspector-element .unity-property-field__label,
+.unity-inspector-element > .unity-property-field > .unity-base-field > .unity-base-field__label {
+    padding-left: 0;
+}
+
+/**********************************************************************************************************************/
+/* BoundsInput                                                                                                        */
+/**********************************************************************************************************************/
+
+.unity-bounds-field > .unity-base-field__input {
+    margin-right: 0;
+}
+
+.unity-bounds-field .unity-composite-field {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: env(--theme-default-top-margin);
+    margin-bottom: env(--theme-default-bottom-margin);
+}
+
+.unity-bounds-field,
+.unity-bounds-int-field {
+    flex-direction: column;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.unity-bounds-field__input,
+.unity-bounds-int-field__input {
+    flex:1 0 auto;
+}
+
+.unity-bounds-field__label,
+.unity-bounds-int-field__label {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.unity-bounds-field__center-field,
+.unity-bounds-field__extents-field,
+.unity-bounds-int-field__position-field,
+.unity-bounds-int-field__size-field {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.unity-bounds-field__center-field > .unity-base-field__label,
+.unity-bounds-field__extents-field > .unity-base-field__label,
+.unity-bounds-int-field__position-field > .unity-base-field__label,
+.unity-bounds-int-field__size-field > .unity-base-field__label {
+    padding-left: 98px;
+}
+
+.unity-bounds-field.unity-base-field--no-label > .unity-base-field__input > .unity-vector3-field > .unity-base-field__label,
+.unity-bounds-int-field.unity-base-field--no-label > .unity-base-field__input > .unity-vector3-int-field > .unity-base-field__label {
+    padding-left: 2px;
+    min-width: 54px;
+}
+
+/**********************************************************************************************************************/
+/* SearchField                                                                                                       */
+/**********************************************************************************************************************/
+
+.unity-search-field-base {
+    width: 295px;
+    min-width: 32px;
+    background-image: none;
+    padding-top: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    min-height: 16px;
+    margin-top: 2px;
+    margin-left: 4px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    align-items: center;
+    flex: none;
+    flex-direction: row;
+    background-color: env(--theme-input-background-color);
+    border-width: env(--theme-input-border-width);
+    border-left-color: env(--theme-input-border-color);
+    border-top-color: env(--theme-input-accent-border-color);
+    border-right-color: env(--theme-input-border-color);
+    border-bottom-color: env(--theme-input-border-color);
+    border-radius: 3px;
+}
+
+.unity-search-field-base:hover {
+    border-width: env(--theme-input-border-hover-width);
+    border-color: env(--theme-input-border-hover-color);
+    padding-top: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+}
+.unity-search-field-base:focus {
+    border-width: env(--theme-input-border-focus-width);
+    border-color: env(--theme-input-border-focus-color);
+    padding-top: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+}
+
+.unity-search-field-base__search-button {
+    width: 8px;
+    height: 8px;
+    background-image: env(--theme-image-search);
+    background-color: transparent;
+    margin-left: 2px;
+    /* override to default behavior */
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-top: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: 0;
+}
+.unity-search-field-base--popup > .unity-search-field-base__search-button {
+    width: 11px;
+    height: 8px;
+    background-image: env(--theme-image-popup-search);
+}
+.unity-search-field-base__search-button:hover {
+    /* override to default behavior */
+    background-color: transparent;
+}
+
+
+.unity-search-field-base__text-field {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-left: 2px;
+    /* override to default behavior */
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.unity-search-field-base__text-field:focus {
+    background-image: none;
+}
+
+.unity-search-field-base__text-field__input {
+    min-height: 11px;
+    margin-top: 0;
+    margin-left: 0;
+    margin-bottom: 0;
+    margin-right: 0;
+    font-size: env(--unity-font-size-semi-small);
+    height: 14px;
+    border-width: 0;
+    padding-left: 0;
+    padding-right: 14px;
+    padding-top: 0;
+    padding-bottom: env(--unity-font-standard-padding-bottom);
+    flex-grow: 1;
+}
+
+.unity-search-field-base__text-field:hover > .unity-search-field-base__text-field__input,
+.unity-search-field-base__text-field > .unity-search-field-base__text-field__input:hover,
+.unity-search-field-base__text-field:focus > .unity-search-field-base__text-field__input,
+.unity-search-field-base__text-field > .unity-search-field-base__text-field__input:focus {
+    border-width: 0;
+    padding-left: 0;
+    padding-right: 14px;
+    padding-top: 0;
+    padding-bottom: env(--unity-font-standard-padding-bottom);
+}
+
+.unity-search-field-base__cancel-button {
+    width: 14px; height: 13px;
+    background-image: env(--theme-image-clear);
+    background-color: transparent;
+    /* override to default behavior */
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: 0;
+}
+.unity-search-field-base__cancel-button:hover {
+    /* override to default behavior */
+    background-color: transparent;
+}
+.unity-search-field-base__cancel-button--off {
+    background-image: none;
+}
+
+/**********************************************************************************************************************/
+/* UIDocument Component                                                                                                            */
+/**********************************************************************************************************************/
+
+.unity-ui-document__root {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+}

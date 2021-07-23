@@ -1,0 +1,6 @@
+<UXML xmlns="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <GroupBox>
+        <RadioButton label="UXML Field 1" name="the-uxml-field1" />
+        <RadioButton label="UXML Field 2" name="the-uxml-field2" />
+    </GroupBox>
+</UXML>

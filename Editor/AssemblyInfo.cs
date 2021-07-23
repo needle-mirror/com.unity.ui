@@ -1,3 +1,4 @@
+#if UIE_PACKAGE
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
@@ -100,7 +101,8 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("UnityEditor.AR")]
 [assembly: InternalsVisibleTo("UnityEditor.SpatialTracking")]
 [assembly: InternalsVisibleTo("Unity.WindowsMRAutomation")]
-[assembly: InternalsVisibleTo("Unity.InternalAPIEngineBridgeDev.003")] // for Graph Tools Foundation
+[assembly: InternalsVisibleTo("Unity.InternalAPIEngineBridgeDev.003")]  // for Graph Tools Foundation
+[assembly: InternalsVisibleTo("Unity.InternalAPIEngineBridge.015")]     // for Graph Tools Foundation
 [assembly: InternalsVisibleTo("Unity.InternalAPIEditorBridge.001")]
 [assembly: InternalsVisibleTo("Unity.InternalAPIEditorBridge.002")]
 [assembly: InternalsVisibleTo("Unity.InternalAPIEditorBridge.003")]
@@ -132,13 +134,9 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("Unity.InternalAPIEditorBridgeDev.005")]
 [assembly: InternalsVisibleTo("Unity.XR.Remoting.Editor")]
 [assembly: InternalsVisibleTo("UnityEngine.Common")]
-
-// UI Builder
 [assembly: InternalsVisibleTo("Unity.UI.Builder.Editor")]
-[assembly: InternalsVisibleTo("Unity.UI.Builder.EditorTests")]
 [assembly: InternalsVisibleTo("UnityEditor.UIBuilderModule")]
-[assembly: InternalsVisibleTo("Unity.UI.Builder")]
-
+[assembly: InternalsVisibleTo("Unity.UI.Builder.EditorTests")]
 [assembly: InternalsVisibleTo("Unity.GraphViewTestUtilities.Editor")]
 [assembly: InternalsVisibleTo("Unity.ProBuilder.Editor")]
 [assembly: InternalsVisibleTo("Unity.2D.Sprite.Editor")]
@@ -158,4 +156,6 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("com.unity.purchasing.udp.Editor")]
 #if ENABLE_LINQPAD
 [assembly: InternalsVisibleTo("LINQPadQuery")] // required in order for LINQPad to hook up to this dll and call into internals
+#endif
+
 #endif

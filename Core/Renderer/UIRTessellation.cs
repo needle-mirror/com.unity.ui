@@ -47,6 +47,35 @@ namespace UnityEngine.UIElements.UIR
             s_MarkerTessellateRect.End();
         }
 
+        /// <summary>
+        /// Specialized, faster method than <see cref="TessellateRect"> for a rectangular quad when
+        /// the rectangle does not have borders or rounded corners.
+        /// </summary>
+        public static void TessellateQuad(MeshGenerationContextUtils.RectangleParams rectParams, float posZ, MeshBuilder.AllocMeshData meshAlloc, bool computeUVs)
+        {
+            if (rectParams.rect.width < kEpsilon || rectParams.rect.height < kEpsilon)
+                return;
+
+            s_MarkerTessellateRect.Begin();
+
+            // Count the required triangles by calling the tessellation method with a "countOnly=true" flag, which skips
+            // tessellation and only update the vertex and index counts.
+            UInt16 vertexCount = 0, indexCount = 0;
+            TessellateQuad(rectParams.rect, 0.0f, 0.0f, 0.0f, TessellationType.Content, rectParams.color, posZ, null, ref vertexCount, ref indexCount, true);
+
+            var mesh = meshAlloc.Allocate(vertexCount, indexCount);
+
+            vertexCount = 0;
+            indexCount = 0;
+            TessellateQuad(rectParams.rect, 0.0f, 0.0f, 0.0f, TessellationType.Content, rectParams.color, posZ, mesh, ref vertexCount, ref indexCount, false);
+            if (computeUVs)
+                ComputeUVs(rectParams.rect, rectParams.uv, mesh.uvRegion, mesh.m_Vertices);
+            Debug.Assert(vertexCount == mesh.vertexCount);
+            Debug.Assert(indexCount == mesh.indexCount);
+
+            s_MarkerTessellateRect.End();
+        }
+
         public static void TessellateBorder(MeshGenerationContextUtils.BorderParams borderParams, float posZ, MeshBuilder.AllocMeshData meshAlloc)
         {
             if (borderParams.rect.width < kEpsilon || borderParams.rect.height < kEpsilon)

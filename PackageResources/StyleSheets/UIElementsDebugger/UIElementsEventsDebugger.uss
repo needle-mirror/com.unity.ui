@@ -2,45 +2,67 @@
     flex-direction: row;
 }
 
-#eventsDebugger #verticalSplitter {
-    flex-direction: row;
-    flex: 1;
+#eventsDebugger #mainHorizontalSplitView {
+    min-width: 650px;
 }
 
-#eventsDebugger #horizontalSplitter {
-    flex-direction: column;
-    flex: 1;
+#eventsDebugger .splitViewMin {
+    min-width: 300px;
+    min-height: 200px;
+}
+
+#eventsDebugger .verticalSplitViewMin {
+    min-height: 50px;
+}
+
+#eventsDebugger .containerMin {
+    min-width: 160px;
+    min-height: 50px;
 }
 
 #eventsDebugger #toolbar {
     flex-direction: row;
     height: 22px;
-    background-color: #444444;
-
-}
-
-#eventsDebugger #toolbar * {
-    font-size: 11px;
-}
-
-#eventsDebugger #toolbar #filter-event-type,
-#eventsDebugger #toolbar #panels,
-#eventsDebugger #toolbar #refresh,
-#eventsDebugger #toolbar #clear-logs,
-#eventsDebugger #toolbar #replay-selected-events {
-    flex: 1;
-    max-width: 160px;
-    min-width: 100px;
-}
-
-#eventsDebugger #toolbar {
     margin-top: 0;
     margin-bottom: 1px;
+    font-size: 11px;
+    -unity-text-align: middle-center;
+}
+
+#eventsDebugger #toolbar #suspend .unity-toggle__input {
+    justify-content: center;
+}
+
+#eventsDebugger #toolbar #panelSelectPopup {
+    min-width: 110px;
+    flex-grow: 0;
+}
+
+#eventsDebugger #toolbar #filter-event-type {
+    flex: 1;
+    max-width: 220px;
+    min-width: 250px;
+}
+
+#eventsDebugger #toolbar #panels,
+#eventsDebugger #toolbar #suspend,
+#eventsDebugger #toolbar #refresh,
+#eventsDebugger #toolbar #clear-logs,
+#eventsDebugger #eventsLogContainer #eventInfoContainer #eventReplayToolbar #replay-selected-events {
+    flex: 1;
+    max-width: 100px;
+    min-width: 80px;
+}
+
+#eventsDebugger #toolbar #suspend,
+#eventsDebugger #toolbar #refresh,
+#eventsDebugger #toolbar #clear-logs {
+    background-color: #676767;
+    color: #CCCCCC;
 }
 
 #eventsDebugger #eventsLogContainer {
     flex-direction: column;
-    flex: 3;
     background-color: #222222;
 }
 
@@ -48,6 +70,130 @@
     flex-direction: row;
     background-color: #444444;
     padding: 5px;
+    justify-content: space-between;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer .eventLogCountContainer,
+#eventsDebugger #eventsLogContainer #eventInfoContainer .eventReplayToolbarContainer,
+#eventsDebugger #eventsLogContainer #eventInfoContainer .maxLogLinesContainer {
+    flex: 1;
+    flex-direction: row;
+    align-self: center;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer .eventLogCountContainer {
+    min-width: 160px;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer .eventReplayToolbarContainer {
+    min-width: 400px;
+    justify-content: center;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer .maxLogLinesContainer {
+    min-width: 100px;
+    justify-content: flex-end;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer #eventReplayToolbar {
+    flex: 1;
+    background-color: #444444;
+    border-width: 0;
+    justify-content: center;
+    min-width: 400px;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer #eventReplayToolbar #pause-resume-playback {
+    font-size: 8px;
+    -unity-font-style: bold;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer #eventReplayToolbar #start-playback {
+    padding-left: 5px;
+    padding-top: 2px;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer #eventReplayToolbar #stop-playback {
+    padding-bottom: 1px;
+    justify-content: center;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer #eventReplayToolbar #stop-playback #stop-playback-image {
+    background-color: #C4C4C4;
+    border-width: 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    width: 8px;
+    height: 8px;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer #eventReplayToolbar #replay-selected-events {
+    font-size: 10px;
+    -unity-font-style: italic;
+    align-self: center;
+    padding-left: 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer #eventReplayToolbar .unity-toolbar-button,
+#eventsDebugger #eventsLogContainer #eventInfoContainer #eventReplayToolbar .unity-toolbar-toggle {
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer .unity-base-field__label {
+    min-width: initial;
+    margin-right: 5px;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer .maxLogLinesContainer .toolbar-setting-menu {
+    background-color: initial;
+    border-width: 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    -unity-slice-top: 0;
+    -unity-slice-right: 0;
+    background-image: resource("d__Menu.png");
+}
+
+.code-line-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.open-source-file-button {
+    background-image: resource("GoToDashboard");
+    width: 12px;
+    height: 12px;
+}
+
+.open-source-file-button:hover {
+    background-image: resource("GoToDashboard");
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer .toolbar-setting-menu:hover {
+    background-color: #4E4E4E;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer .toolbar-setting-menu > .unity-toolbar-menu__arrow {
+    background-image: none;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer .unity-toggle {
+    margin-left: 30px;
+    margin-right: 5px;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer .unity-toggle > .unity-label {
+    min-width: auto;
+    margin-right: 5px;
+}
+
+#eventsDebugger #eventsLogContainer #eventInfoContainer #maxLogLinesField #unity-text-input {
+    min-width: 30px;
+    max-width: 100px;
 }
 
 #eventsDebugger #eventsLogContainer #eventsLog {
@@ -55,15 +201,19 @@
 }
 
 #eventsDebugger #eventsLogContainer #eventCallbacksContainer {
-    min-height: 100px;
-    max-height:200px;
     background-color: #444444;
 }
 
+#eventsDebugger #eventsTitle,
 #eventsDebugger #eventsLogContainer #eventCallbacksContainer #eventCallbacksTitle {
     -unity-font-style: bold;
     background-color: #676767;
     color: #CCCCCC;
+}
+
+#eventsDebugger #eventsTitle {
+    flex-grow: 1;
+    -unity-text-align: middle-left;
 }
 
 #eventCallbacksScrollView {
@@ -80,7 +230,6 @@
 }
 
 #eventCallbacksScrollView .log-line-item {
-    flex: 1 1 auto;
     font-size: 11px;
     margin-top: 0;
     margin-bottom: 0;
@@ -90,37 +239,15 @@
     padding-bottom: 1px;
 }
 
-#phaseDurationContainer {
-    flex-direction: row;
-    flex: 1 1 auto;
-}
-
-#phaseDurationContainer #phase {
-    color: #ff6666;
-    flex: 1 1 auto;
-}
-
-#phaseDurationContainer #duration {
-    color: #CCCC66;
-    flex: 1 1 auto;
-}
-
 #eventsDebugger #eventsLogContainer #eventPropagationPathsContainer {
-    min-height: 120px;
-    max-height:200px;
     background-color: #444444;
+    flex: 1 1 auto;
 }
 
 #eventsDebugger #eventsLogContainer #eventPropagationPathsContainer #eventPropagationPathsTitle {
     -unity-font-style: bold;
     background-color: #676767;
     color: #CCCCCC;
-}
-
-#eventsDebugger #eventsLogContainer #eventPropagationPathsContainer {
-    min-height: 120px;
-    max-height:200px;
-    background-color: #444444;
 }
 
 #eventsDebugger #eventsLogContainer #eventbaseInfoContainer #eventbaseInfoTitle {
@@ -141,29 +268,37 @@
 }
 
 #eventsDebugger #eventsRightSideContainer {
-    flex: 1 0 0;
     background-color: #222222;
+    min-width: 100px;
 }
 
-#eventsDebugger #eventsRegistrationsContainer {
-    flex: 1;
+#eventsDebugger #eventsRegistrationsContainer,
+#eventsDebugger #eventsHistogramContainer {
     background-color: #333333;
 }
 
-#eventsDebugger #eventsRegistrationsContainer #eventsRegistrationTitle {
-    -unity-font-style: bold;
+#eventsRegistrationTitleContainer,
+#eventsHistogramTitleContainer {
+    background-color: #222222;
+    justify-content: space-between;
 }
 
-#eventsDebugger #eventsHistogramContainer #scrollViewContainer {
-    flex: 1 0 0;
+#eventsRegistrationTitleContainer #eventsFilteringContainer,
+#eventsHistogramTitleContainer #eventsHistogramTotal {
+    background-color: #333333;
+    font-size: 11px;
 }
-#eventsDebugger #eventsHistogramContainer #eventsHistogramScrollView {
-   min-height: 300px;
+
+#eventsFilteringContainer {
+    flex-direction: row;
+}
+
+#eventsRegistrationTotals {
+    margin-left: 10px;
+    -unity-text-align: middle-center;
 }
 
 #eventTimeline {
-    min-height: 120px;
-    max-height:200px;
     background-color: #444444;
 }
 
@@ -177,14 +312,8 @@
     flex-direction: row;
 }
 
-#eventsDebugger #eventsLogContainer #eventPropagationPathsContainer {
-    flex: 3;
-}
-
 #eventsDebugger #eventsLogContainer #eventbaseInfoContainer {
     flex: 1;
-    min-height: 120px;
-    max-height:200px;
     background-color: #444444;
 }
 
@@ -197,38 +326,14 @@
     justify-content: space-between;
 }
 
-#eventTimelineTitle #eventTimelineTitleLegend {
-    flex-direction: row;
-}
-
-#eventTimelineLegendContainer {
-    position: absolute;
-    background-color: #393939;
-}
-#eventTimelineLegendTitle {
-    -unity-font-style: bold;
-    color: #FFFFFF;
-}
-#eventTimelineLegendEntry {
-    flex-direction: row;
-}
-#eventTimelineLegendEntryColor {
-    width: 10px;
-    height: 10px;
-    margin-left: 5px;
-    margin-top: 5px;
-}
-#eventTimelineLegendEntryName {
-    color: #FFFFFF;
-}
-
+#eventsDebugger #eventsRegistrationsContainer #eventsRegistrationTitle,
 #eventsDebugger #eventsHistogramContainer #eventsHistogramTitle {
     -unity-font-style: bold;
     background-color:#393939;
 }
 
 #eventsDebugger #scrollViewContainer {
-    flex: 1;
+    flex: 1 1 auto;
 }
 
 #eventsDebugger #eventsRegistrationsContainer #eventsRegistrationMessage {
@@ -236,6 +341,9 @@
 }
 
 #eventsDebugger #eventsRegistrationsContainer .callback-list-element {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
     margin-top: 0;
     margin-bottom: 0;
     padding-left: 5px;
@@ -265,44 +373,97 @@
 
 #eventsDebugger #eventsRegistrationsContainer .callback-list-element.callback.highlighted {
     margin-left: 40px;
-    background-color: #FF4444;
+    background-color: #8C0D0D;
     color: #cccccc;
     border-bottom-width: 1px;
     border-color: #999999;
+}
+
+#eventsDebugger .eventCallbacksHeader {
+    flex-direction: row;
+}
+
+#eventsDebugger {
+    flex-direction: column;
 }
 
 #log-line {
     flex-direction: row;
 }
 
-.log-line-item {
-    flex: 1;
+.log-line-header {
+    background-color: #444444;
 }
 
-#timestamp.log-line-item {
-    min-width: 120px;
-    max-width: 120px;
+.log-line-item,
+.log-line-item-header {
+    font-size: 11px;
+}
+
+.log-line-item-header {
+    -unity-font-style: bold;
+}
+
+.target.log-line-item,
+.target.log-line-item-header,
+.handler.log-line-item,
+.handler.log-line-item-header,
+.event.log-line-item,
+.event.log-line-item-header {
+    width: 350px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.timestamp.log-line-item,
+.timestamp.log-line-item-header {
+    width: 160px;
+}
+
+.timestamp.log-line-item {
     color: #66ff66;
 }
 
-#eventsLog #timestamp.log-line-item {
-    min-width: 220px;
-    max-width: 220px;
+#phaseDurationContainer {
+    flex-direction: row;
+    flex: 1 1 auto;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+#phaseDurationContainer .phase,
+.phase.log-line-item-header {
+    min-width: 90px;
+}
+
+#phaseDurationContainer .phase {
+    color: #ff6666;
+}
+
+#phaseDurationContainer .duration,
+.duration.log-line-item-header,
+.target.log-line-item-header {
+    flex: 1 1 auto;
+}
+
+#phaseDurationContainer .duration {
+    color: #CCCC66;
 }
 
 #eventsHistogramContainer {
     height: 20px;
     flex: 1 0 auto;
 }
+
 #eventsHistogramEntry {
     flex-direction: row;
     width: 200px;
 }
+
 #eventsHistogramDuration {
     flex-direction: row;
-    flex : 1 0 0;
-    width: 300px;
 }
+
 #eventsHistogramDurationLabel {
     color: #FFFFFF;
 }
@@ -312,4 +473,69 @@
     margin-top: 1px;
     margin-bottom: 1px;
     margin-right: 5px;
+}
+
+.event-debugger-filter {
+    position: absolute;
+    flex-shrink: 0;
+}
+
+.event-debugger-filter__container {
+    position: absolute;
+    border-width: 1px;
+    flex-shrink: 0;
+    border-color: #939393;
+    background-color: #939393;
+    border-radius: 3px;
+}
+
+.event-debugger-filter__list-view {
+    position: relative;
+    background-color: #383838;
+    flex-direction: column;
+    overflow: visible;
+    padding: 4px 0;
+    width: 300px;
+    flex-grow: 1;
+    border-width: 1px;
+    border-color: #656565;
+    border-radius: 3px;
+}
+
+.event-debugger-filter__item-container {
+    flex-grow: 1;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 2px;
+}
+
+.event-debugger-filter__item-label {
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+    font-size: 11px;
+    padding-left: 5px;
+}
+
+.event-debugger-filter__group-label {
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+    font-size: 16px;
+}
+
+.event-debugger-filter__item-toggle {
+    flex-grow: 0;
+    flex-shrink: 1;
+    padding: 0 5px 0 5px;
+}
+
+.event-debugger-filter__item-count {
+    -unity-text-align: middle-center;
+    position: absolute;
+    font-size: 11px;
+    left: 77%;
+    width: 12%;
+    border-width: 1px;
+    border-color: #5f9EA0;
+    margin-top: 3px;
+    margin-bottom: 3px;
 }

@@ -1,0 +1,312 @@
+.unity-internal-vars {
+    --unity-theme-colors-base-1: #BCBCBC;
+    --unity-theme-colors-base-2: #F0F0F0;
+    --unity-theme-colors-base-3: #959595;
+    --unity-theme-colors-base-4: #646464;
+    --unity-theme-colors-base-5: #808080;
+    --unity-theme-colors-base-6: #323232;
+    --unity-theme-colors-base-7: #959595;
+    --unity-theme-colors-base-8: #D1D1D1;
+    --unity-theme-colors-base-9: #7E7E7E;
+    --unity-theme-colors-base-12: #E7E7E7;
+    --unity-theme-colors-focus: #006AA6;
+    --unity-theme-colors-text: #1B1B1B;
+    --unity-theme-colors-focus-text: #00526A;
+    --unity-theme-colors-foreground-disabled-1: #2D2D2D;
+    --unity-theme-colors-foreground-disabled-2: #585858;
+
+    /* LEAVE IT: Used to debug the style
+    --unity-theme-colors-base-1: #BCBCBC;
+    --unity-theme-colors-base-2: #F0F054;
+    --unity-theme-colors-base-3: #00a05f;
+    --unity-theme-colors-base-4: #BC0000;
+    --unity-theme-colors-base-5: #0000FF;
+    --unity-theme-colors-base-6: #008800;
+    --unity-theme-colors-base-7: #801883;
+    --unity-theme-colors-base-8: #D5D1D1;
+    --unity-theme-colors-base-9: #02CCB0;
+    --unity-theme-colors-base-12: #EEE7E7;
+    --unity-theme-colors-focus: #FFFF00;
+    --unity-theme-colors-text: #00B0B0;
+    --unity-theme-colors-focus-text: #AAAA00;
+    --unity-theme-colors-foreground-disabled-1: #000000;
+    --unity-theme-colors-foreground-disabled-2: #0B003B;
+    */
+}
+
+:root {
+    /* Default */
+
+    --unity-metrics-default-font_normal_size: 14px;
+    --unity-metrics-default-font_semi_small_size: 13px;
+    --unity-metrics-default-font_tiny_size: 11px;
+    --unity-metrics-default-font_small_size: 12px;
+    --unity-metrics-default-font_big_size: 15px;
+    --unity-metrics-default-font_very_big_size: 21px;
+
+    /* The default color used for text */
+    --unity-colors-default-text: env(--unity-theme-colors-text);
+
+    /* The default border radius of controls */
+    --unity-metrics-default-border_radius: 0px;
+
+    /* CONTROLS */
+
+    /* Box */
+
+    /* The background color used for a box control */
+    --unity-colors-box-background: #DEDEDE;
+
+    /* The border color used for a box */
+    --unity-colors-box-border: #555555;
+
+    /* Button */
+
+    /* The background color used for a button control */
+    --unity-colors-button-background: env(--unity-theme-colors-base-1);
+
+    /* The background color used for a button control when pressed */
+    --unity-colors-button-background-pressed: env(--unity-theme-colors-base-3);
+
+    /* The background color used for a button control when hovered over */
+    --unity-colors-button-background-hover:  env(--unity-theme-colors-base-8);
+
+    /* The background color used for a button control when disabled */
+    --unity-colors-button-background-disabled: env(--unity-theme-colors-base-3);
+
+    /* The border color used for a button control when pressed */
+    --unity-colors-button-border: env(--unity-theme-colors-base-3);
+
+    /* The border color used for a button control when hovered */
+    --unity-colors-button-border-hover: env(--unity-theme-colors-base-5);
+
+    /* The border color used for a button control when focused */
+    --unity-colors-button-border-focus: env(--unity-theme-colors-focus);
+
+    /* The border color used for a button control when disabled */
+    --unity-colors-button-border-disabled: env(--unity-theme-colors-base-9);
+
+    /* The text color used for a button control */
+    --unity-colors-button-text: env(--unity-colors-default-text);
+
+    /* The text color used for a button control when disabled s*/
+    --unity-colors-button-text-disabled: env(--unity-theme-colors-foreground-disabled-1);
+
+    /* The border color used for a button control when pressed */
+    --unity-colors-button-border-pressed: env(--unity-theme-colors-base-4);
+
+    /* Dropdown */
+
+    /* The background color used for a dropdown control */
+    --unity-colors-dropdown-background: #DFDFDF;
+
+    /* The background color used for a dropdown control when hovered over */
+    --unity-colors-dropdown-background-hover: #E8E8E8;
+
+    /* The border color used for a dropdown control */
+    --unity-colors-dropdown-border: #999999;
+
+    /* The text color used for a dropdown control */
+    --unity-colors-dropdown-text: env(--unity-colors-default-text);
+
+    /* The border accent color used for a dropdown control */
+    --unity-colors-dropdown-border_accent: #939393;
+
+    /* Input field */
+
+    /* The background color used for an input field control */
+    --unity-colors-input_field-background: env(--unity-theme-colors-base-2);
+
+    /* The background color used for an input field control when disabled */
+    --unity-colors-input_field-background-disabled: env(--unity-theme-colors-base-8);
+
+    /* The border color used for an input field control */
+    --unity-colors-input_field-border: env(--unity-theme-colors-base-4);
+
+    /* The border color used for an input field control when focused */
+    --unity-colors-input_field-border-focus: env(--unity-theme-colors-focus);
+
+    /* The border color used for an input field control when hovered over */
+    --unity-colors-input_field-border-hover: env(--unity-theme-colors-base-6);
+
+    /* The text color used for an input field control when disabled */
+    --unity-colors-input_field-text-disabled: env(--unity-theme-colors-foreground-disabled-2);
+
+    /* The text color used for an input field control when disabled */
+    --unity-colors-input_field-text-disabled: env(--unity-theme-colors-foreground-disabled-2);
+
+    /* Label */
+
+    /* The text color used for a label control */
+    --unity-colors-label-text: env(--unity-theme-colors-text);
+
+    /* The text color used for a label when focused */
+    --unity-colors-label-text-focus: env(--unity-theme-colors-focus-text);
+
+    /* The text color used for a label when disabled */
+    --unity-colors-label-text-disabled: env(--unity-theme-colors-foreground-disabled-2);
+
+    /* Min Max slider */
+
+    --unity-colors-minmax_slider_thumb-background: env(--unity-theme-colors-base-1);
+
+    /* Progress Bar */
+
+    /* The background color used for a progress bar */
+    --unity-colors-progress_bar-background: env(--unity-theme-colors-base-1);
+
+    /* The border color used for a progress bar */
+    --unity-colors-progress_bar-border: env(--unity-theme-colors-base-5);
+
+    /* The text color used for a progress bar */
+    --unity-colors-progress_bar-text: env(--unity-theme-colors-text);
+
+    /* Progress Bar */
+
+    /* The background color used for a progress bar */
+    --unity-colors-progress_bar-background: env(--unity-theme-colors-base-1);
+
+    /* The border color used for a progress bar */
+    --unity-colors-progress_bar-border: env(--unity-theme-colors-base-5);
+
+    /* The text color used for a progress bar */
+    --unity-colors-progress_bar-text: env(--unity-theme-colors-text);
+
+    /* The background color used for a progress bar's progress element */
+    --unity-colors-progress_bar_progress-background: env(--unity-theme-colors-base-12);
+
+    /* Scrollbar */
+
+    /* The background color used for a scrollbar's thumb/handle */
+    --unity-colors-scrollbar_thumb-background: env(--unity-theme-colors-base-12);
+
+    /* The background color used for a scrollbar's thumb/handle when hovered over */
+    --unity-colors-scrollbar_thumb-background-hover: env(--unity-theme-colors-base-2);
+
+    /* The background color used for a scrollbar's thumb/handle when pressed */
+    --unity-colors-scrollbar_thumb-background-pressed: env(--unity-theme-colors-base-2);
+
+    /* The border color used for a scrollbar's thumb/handle */
+    --unity-colors-scrollbar_thumb-border: transparent;
+
+    /* The border color used for a scrollbar's thumb/handle when hovered */
+    --unity-colors-scrollbar_thumb-border-hover: transparent;
+
+    /* The border color used for a scrollbar's thumb/handle when pressed */
+    --unity-colors-scrollbar_thumb-border-pressed: transparent;
+
+    /* The border color used for a scrollbar's thumb/handle when focus */
+    --unity-colors-scrollbar_thumb-border-focus: rgb(0, 81, 106);
+
+
+    /* The background color used for a scrollbar's groove (background part) */
+    --unity-colors-scrollbar_groove-background: env(--unity-theme-colors-base-1);
+
+    /* The border color used for a scrollbar's groove */
+    --unity-colors-scrollbar_groove-border: env(--unity-theme-colors-base-7);
+
+    /* The background color used for the scroll buttons of a scrollbar */
+    --unity-colors-scrollbar_button-background: env(--unity-theme-colors-base-2);
+
+    --unity-colors-scrollbar_button-border: env(--unity-theme-colors-base-7);
+    --unity-colors-scrollbar_button-border-hover: env(--unity-theme-colors-base-7);
+    --unity-colors-scrollbar_button-border-focus: env(--unity-theme-colors-focus);
+
+    /* The background color used for the scroll buttons of a scrollbar when hovered over*/
+    --unity-colors-scrollbar_button-background-hover: env(--unity-theme-colors-base-12);
+
+    /* Slider */
+
+    /* The background color used for a slider's groove (background part) */
+    --unity-colors-slider_groove-background: env(--unity-theme-colors-base-9);
+
+    --unity-colors-slider_groove-background-hover: env(--unity-theme-colors-base-9);
+
+    --unity-colors-slider_groove-background-focus: env(--unity-theme-colors-base-9);
+
+    /* The background color used for a slider's groove when disabled */
+    --unity-colors-slider_groove-background-disabled: env(--unity-theme-colors-base-9);
+
+    --unity-colors-slider_groove-border: env(--unity-theme-colors-base-4);
+
+    /* The background color used for a slider's thumb/handle */
+    --unity-colors-slider_thumb-background: env(--unity-theme-colors-base-2);
+
+    /* The background color used for a slider's thumb/handle when disabled */
+    --unity-colors-slider_thumb-background-disabled: env(--unity-theme-colors-base-5);
+
+    /* The background color used for a slider's thumb/handle when hovered over*/
+    --unity-colors-slider_thumb-background-hover: env(--unity-theme-colors-base-2);
+
+    --unity-colors-slider_thumb-background-focus: env(--unity-theme-colors-base-2);
+
+    /* The border color used for a slider's thumb */
+    --unity-colors-slider_thumb-border: env(--unity-theme-colors-base-4);
+
+    --unity-colors-slider_thumb-border-hover: env(--unity-theme-colors-base-6);
+
+    --unity-colors-slider_thumb-border-focus: env(--unity-theme-colors-focus);
+
+    /* The border color used for a slider's thumb when disabled */
+    --unity-colors-slider_thumb-border-disabled: env(--unity-theme-colors-base-9);
+
+    /* The background color used for a slider's thumb halo */
+    --unity-colors-slider_thumb_halo-background: rgba(12, 108, 203, 0.5);
+
+    /* Toggle */
+
+    /* The background color used for a toggle's checkmark */
+    --unity-colors-toggle_checkmark-background: env(--unity-theme-colors-base-2);
+
+    /* The background color used for a toggle's checkmark when disabled*/
+    --unity-colors-toggle_checkmark-background-disabled: env(--unity-theme-colors-base-3);
+
+    /* The border color used for a toggle's checkmark */
+    --unity-colors-toggle_checkmark-border: env(--unity-theme-colors-base-4);
+
+    /* The border color used for a toggle's checkmark when hovered*/
+    --unity-colors-toggle_checkmark-border-hover: env(--unity-theme-colors-base-6);
+
+    /* The border color used for a toggle's checkmark when pressed*/
+    --unity-colors-toggle_checkmark-border-pressed: env(--unity-theme-colors-base-6);
+
+    /* The border color used for a toggle's when focused */
+    --unity-colors-toggle_checkmark-border-focus: env(--unity-theme-colors-focus);
+
+    /* The border color used for a toggle's checkmark when disabled*/
+    --unity-colors-toggle_checkmark-border-disabled: env(--unity-theme-colors-base-9);
+
+    /* The text color used for a toggle when disabled */
+    --unity-colors-toggle-text-disabled: env(--unity-theme-colors-foreground-disabled-2));
+
+    /* Toolbar */
+
+    /* The background color used for a toggle's checkmark */
+    --unity-colors-toggle_checkmark-background: env(--unity-theme-colors-base-2);
+
+    /* The background color used for a toggle's checkmark when disabled*/
+    --unity-colors-toggle_checkmark-background-disabled: env(--unity-theme-colors-base-3);
+
+    /* The border color used for a toggle's checkmark */
+    --unity-colors-toggle_checkmark-border: env(--unity-theme-colors-base-4);
+
+    /* The border color used for a toggle's checkmark when hovered*/
+    --unity-colors-toggle_checkmark-border-hover: env(--unity-theme-colors-base-6);
+
+    /* The border color used for a toggle's checkmark when pressed*/
+    --unity-colors-toggle_checkmark-border-pressed: env(--unity-theme-colors-base-6);
+
+    /* The border color used for a toggle's when focused */
+    --unity-colors-toggle_checkmark-border-focus: env(--unity-theme-colors-focus);
+
+    /* The border color used for a toggle's checkmark when disabled*/
+    --unity-colors-toggle_checkmark-border-disabled: env(--unity-theme-colors-base-9);
+
+    /* The text color used for a toggle when disabled */
+    --unity-colors-toggle-text-disabled: env(--unity-theme-colors-foreground-disabled-2));
+
+    /* Window */
+
+    /* The text color used for a window */
+    --unity-colors-window-text: env(--unity-colors-default-text);
+}

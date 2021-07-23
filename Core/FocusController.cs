@@ -103,6 +103,11 @@ namespace UnityEngine.UIElements
             focusController?.Blur(this);
         }
 
+        internal void BlurImmediately()
+        {
+            focusController?.Blur(this, dispatchMode: DispatchMode.Immediate);
+        }
+
         // Use the tree to find the first focusable child.
         // FIXME: we should use the focus ring; however, it may happens that the
         // children are focusable but not part of the ring.
@@ -185,6 +190,7 @@ namespace UnityEngine.UIElements
             m_Value = value;
         }
 
+        /// <undoc/>
         public static implicit operator int(FocusChangeDirection fcd)
         {
             return fcd?.m_Value ?? 0;
@@ -377,53 +383,60 @@ namespace UnityEngine.UIElements
                 m_LastPendingFocusedElement = null;
         }
 
-        void AboutToReleaseFocus(Focusable focusable, Focusable willGiveFocusTo, FocusChangeDirection direction)
+        internal Focusable FocusNextInDirection(FocusChangeDirection direction)
+        {
+            Focusable f = focusRing.GetNextFocusable(GetLeafFocusedElement(), direction);
+            direction.ApplyTo(this, f);
+            return f;
+        }
+
+        void AboutToReleaseFocus(Focusable focusable, Focusable willGiveFocusTo, FocusChangeDirection direction, DispatchMode dispatchMode)
         {
             using (FocusOutEvent e = FocusOutEvent.GetPooled(focusable, willGiveFocusTo, direction, this))
             {
-                focusable.SendEvent(e);
+                focusable.SendEvent(e, dispatchMode);
             }
         }
 
-        void ReleaseFocus(Focusable focusable, Focusable willGiveFocusTo, FocusChangeDirection direction)
+        void ReleaseFocus(Focusable focusable, Focusable willGiveFocusTo, FocusChangeDirection direction, DispatchMode dispatchMode)
         {
             using (BlurEvent e = BlurEvent.GetPooled(focusable, willGiveFocusTo, direction, this))
             {
-                focusable.SendEvent(e);
+                focusable.SendEvent(e, dispatchMode);
             }
         }
 
-        void AboutToGrabFocus(Focusable focusable, Focusable willTakeFocusFrom, FocusChangeDirection direction)
+        void AboutToGrabFocus(Focusable focusable, Focusable willTakeFocusFrom, FocusChangeDirection direction, DispatchMode dispatchMode)
         {
             using (FocusInEvent e = FocusInEvent.GetPooled(focusable, willTakeFocusFrom, direction, this))
             {
-                focusable.SendEvent(e);
+                focusable.SendEvent(e, dispatchMode);
             }
         }
 
-        void GrabFocus(Focusable focusable, Focusable willTakeFocusFrom, FocusChangeDirection direction, bool bIsFocusDelegated = false)
+        void GrabFocus(Focusable focusable, Focusable willTakeFocusFrom, FocusChangeDirection direction, bool bIsFocusDelegated, DispatchMode dispatchMode)
         {
             using (FocusEvent e = FocusEvent.GetPooled(focusable, willTakeFocusFrom, direction, this, bIsFocusDelegated))
             {
-                focusable.SendEvent(e);
+                focusable.SendEvent(e, dispatchMode);
             }
         }
 
-        internal void Blur(Focusable focusable, bool bIsFocusDelegated = false)
+        internal void Blur(Focusable focusable, bool bIsFocusDelegated = false, DispatchMode dispatchMode = DispatchMode.Default)
         {
             var ownsFocus = m_PendingFocusCount > 0 ? IsPendingFocus(focusable) : IsFocused(focusable);
             if (ownsFocus)
             {
-                SwitchFocus(null, bIsFocusDelegated);
+                SwitchFocus(null, bIsFocusDelegated, dispatchMode);
             }
         }
 
-        internal void SwitchFocus(Focusable newFocusedElement, bool bIsFocusDelegated = false)
+        internal void SwitchFocus(Focusable newFocusedElement, bool bIsFocusDelegated = false, DispatchMode dispatchMode = DispatchMode.Default)
         {
-            SwitchFocus(newFocusedElement, FocusChangeDirection.unspecified, bIsFocusDelegated);
+            SwitchFocus(newFocusedElement, FocusChangeDirection.unspecified, bIsFocusDelegated, dispatchMode);
         }
 
-        internal void SwitchFocus(Focusable newFocusedElement, FocusChangeDirection direction, bool bIsFocusDelegated = false)
+        internal void SwitchFocus(Focusable newFocusedElement, FocusChangeDirection direction, bool bIsFocusDelegated = false, DispatchMode dispatchMode = DispatchMode.Default)
         {
             m_LastFocusedElement = newFocusedElement;
 
@@ -441,8 +454,8 @@ namespace UnityEngine.UIElements
                     m_LastPendingFocusedElement = null;
                     m_PendingFocusCount++; // ReleaseFocus will always trigger DoFocusChange
 
-                    AboutToReleaseFocus(oldFocusedElement, null, direction);
-                    ReleaseFocus(oldFocusedElement, null, direction);
+                    AboutToReleaseFocus(oldFocusedElement, null, direction, dispatchMode);
+                    ReleaseFocus(oldFocusedElement, null, direction, dispatchMode);
                 }
             }
             else if (newFocusedElement != oldFocusedElement)
@@ -456,18 +469,18 @@ namespace UnityEngine.UIElements
 
                 if (oldFocusedElement != null)
                 {
-                    AboutToReleaseFocus(oldFocusedElement, retargetedNewFocusedElement, direction);
+                    AboutToReleaseFocus(oldFocusedElement, retargetedNewFocusedElement, direction, dispatchMode);
                 }
 
-                AboutToGrabFocus(newFocusedElement, retargetedOldFocusedElement, direction);
+                AboutToGrabFocus(newFocusedElement, retargetedOldFocusedElement, direction, dispatchMode);
 
                 if (oldFocusedElement != null)
                 {
                     // Since retargetedNewFocusedElement != null, so ReleaseFocus will not trigger DoFocusChange
-                    ReleaseFocus(oldFocusedElement, retargetedNewFocusedElement, direction);
+                    ReleaseFocus(oldFocusedElement, retargetedNewFocusedElement, direction, dispatchMode);
                 }
 
-                GrabFocus(newFocusedElement, retargetedOldFocusedElement, direction, bIsFocusDelegated);
+                GrabFocus(newFocusedElement, retargetedOldFocusedElement, direction, bIsFocusDelegated, dispatchMode);
             }
         }
 
@@ -480,8 +493,7 @@ namespace UnityEngine.UIElements
             {
                 if (direction != FocusChangeDirection.none)
                 {
-                    Focusable f = focusRing.GetNextFocusable(GetLeafFocusedElement(), direction);
-                    direction.ApplyTo(this, f);
+                    Focusable f = FocusNextInDirection(direction);
                     e.processedByFocusController = true;
                     // f does not have the focus yet. It will when the series of focus events will have been handled.
                     return f;
@@ -489,6 +501,16 @@ namespace UnityEngine.UIElements
             }
 
             return GetLeafFocusedElement();
+        }
+
+        internal void ReevaluateFocus()
+        {
+            if (focusedElement is VisualElement currentFocus)
+            {
+                // If the currently focused element is not displayed in the hierarchy or not visible, blur it.
+                if (!currentFocus.isHierarchyDisplayed || !currentFocus.visible)
+                    currentFocus.Blur();
+            }
         }
 
         /// <summary>

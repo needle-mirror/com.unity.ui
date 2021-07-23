@@ -1,72 +1,117 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uei="UnityEditor.Experimental.UIElements" xmlns:dbg="UnityEditor.Experimental.UIElements.Debugger">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:dbg="UnityEditor.Experimental.UIElements.Debugger">
     <ui:VisualElement name="eventsDebugger">
-        <uei:VisualSplitter name="verticalSplitter" splitter-size="8">
+        <!-- Toolbar -->
+        <uie:Toolbar name="toolbar">
+            <dbg:EventTypeSearchField name="filter-event-type" />
+        </uie:Toolbar>
+        <!-- Main Two Pane Split View -->
+        <ui:TwoPaneSplitView name="mainHorizontalSplitView" fixed-pane-index="0" fixed-pane-initial-dimension="750" orientation="Horizontal">
+            <!-- Left side container -->
             <ui:VisualElement name="eventsLogContainer">
-                <ui:VisualElement name="toolbar">
-                    <dbg:EventTypeSelectField name="filter-event-type" />
-                    <ui:Button name="refresh" text="Refresh" />
-                    <ui:Button name="clear-logs" text="Clear Logs" />
-                    <ui:Button name="replay-selected-events" text="Replay Selected Events" />
-                </ui:VisualElement>
-                <ui:VisualElement name="eventInfoContainer">
-                    <ui:Label name="log-count" text="0 event" />
-                    <ui:Label name="selection-count" text="(0 selected)" />
-                    <ui:Toggle name="autoscroll" label="Autoscroll" />
-                </ui:VisualElement>
-                <ui:ListView name="eventsLog"/>
-                <ui:VisualElement name="eventCallbacksContainer">
-                    <ui:Label name="eventCallbacksTitle" text="Event Callbacks"/>
-                    <ui:VisualElement name="scrollViewContainer">
-                        <ui:ScrollView name="eventCallbacksScrollView" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement name="eventPropagationPathsAndInfoContainer">
-                    <ui:VisualElement name="eventPropagationPathsContainer">
-                        <ui:Label name="eventPropagationPathsTitle" text="Event Propagation Paths"/>
-                        <ui:VisualElement name="scrollViewContainer">
-                            <ui:ScrollView name="eventPropagationPathsScrollView">
-                                <ui:Label name="eventPropagationPaths"/>
-                            </ui:ScrollView>
+                <!-- Split View: Top is Events Log, Bottom is another Split View -->
+                <ui:TwoPaneSplitView class="splitViewMin" fixed-pane-index="0" fixed-pane-initial-dimension="350" orientation="Vertical">
+                    <ui:VisualElement class="containerMin">
+                        <!-- Event info + log options -->
+                        <uie:Toolbar name="toolbar">
+                            <ui:Label name="eventsTitle" text="Events Log"/>
+                            <uie:ToolbarToggle name="suspend" text="Suspend" tooltip="Toggle to suspend event collection"/>
+                            <uie:ToolbarButton name="refresh" text="Refresh" tooltip="Click to refresh the event logs"/>
+                            <uie:ToolbarButton name="clear-logs" text="Clear Logs" tooltip="Click to clear event logs"/>
+                        </uie:Toolbar>
+                        <ui:VisualElement name="eventInfoContainer">
+                            <ui:VisualElement class="eventLogCountContainer">
+                                <ui:Label name="log-count" text="0 event" />
+                                <ui:Label name="selection-count" text="(0 selected)" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="eventReplayToolbarContainer">
+                                <uie:Toolbar name="eventReplayToolbar">
+                                    <uie:ToolbarButton name="start-playback" text="&#9658;" tooltip="Start playback" />
+                                    <uie:ToolbarToggle name="pause-resume-playback" text="||" tooltip="Pause / Resume playback" />
+                                    <uie:ToolbarButton name="stop-playback" text="" tooltip="Stop playback">
+                                        <ui:VisualElement name="stop-playback-image" />
+                                    </uie:ToolbarButton>
+                                    <uie:ToolbarButton name="decrease-playback-speed" text="&lt;&lt;" tooltip="Decrease event playback speed" />
+                                    <ui:TextField name="playback-speed" text="1.0" is-delayed="true" tooltip="Event playback speed" />
+                                    <uie:ToolbarButton name="increase-playback-speed" text=">>" tooltip="Increase event playback speed" />
+                                    <uie:ToolbarButton name="save-replay" text="Save" />
+                                    <uie:ToolbarButton name="load-replay" text="Load" />
+                                    <ui:Label name="replay-selected-events" text="Replaying" />
+                                </uie:Toolbar>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="maxLogLinesContainer">
+                                <uie:IntegerField name="maxLogLinesField" label="Max Log Lines" is-delayed="true" tooltip="Maximum event log lines (enable in the Settings menu)"/>
+                                <uie:ToolbarMenu name="settings-menu" class="toolbar-setting-menu" tooltip="Settings menu"/>
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement name="eventbaseInfoContainer">
-                        <ui:Label name="eventbaseInfoTitle" text="Event Information"/>
-                        <ui:VisualElement name="scrollViewContainer">
-                            <ui:ScrollView name="eventbaseInfoScrollView">
-                                <ui:Label name="eventbaseInfo"/>
-                            </ui:ScrollView>
+                        <ui:VisualElement name="log-line" class="log-line-header">
+                            <ui:Label text="Timestamp" class="timestamp log-line-item-header" />
+                            <ui:Label text="Event" class="event log-line-item-header" />
+                            <ui:Label text="Target" class="target log-line-item-header" />
                         </ui:VisualElement>
+                        <ui:ListView name="eventsLog" />
                     </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement name="eventTimeline">
-                    <ui:VisualElement name="eventTimelineTitle">
-                        <ui:Label name="eventTimelineTitleLabel" text="Timeline"/>
-                        <ui:Label name="eventTimelineTitleLegend" text="Legend"/>
-                    </ui:VisualElement>
-                    <ui:VisualElement name="scrollViewContainer">
-                        <ui:ScrollView name="eventTimelineScrollView">
-                            <ui:Label name="eventTimelineLabel"/>
-                        </ui:ScrollView>
-                    </ui:VisualElement>
-                </ui:VisualElement>
+                    <!-- Split View: Top is Event Callbacks, Bottom is another Split View -->
+                    <ui:TwoPaneSplitView class="splitViewMin" fixed-pane-index="0" fixed-pane-initial-dimension="100" orientation="Vertical">
+                        <ui:VisualElement name="eventCallbacksContainer" class="containerMin">
+                            <ui:Label name="eventCallbacksTitle" text="Event Callbacks"/>
+                            <ui:VisualElement name="log-line">
+                                <ui:Label text="Timestamp" class="timestamp log-line-item-header" />
+                                <ui:Label text="Handler" class="handler log-line-item-header" />
+                                <ui:Label text="Phase" class="phase log-line-item-header" />
+                                <ui:Label text="Duration" class="duration log-line-item-header" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="scrollViewContainer">
+                                <ui:ScrollView name="eventCallbacksScrollView" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <!-- Split View: Left is Event Propagation paths, Right is Event Information -->
+                        <ui:TwoPaneSplitView class="verticalSplitViewMin" fixed-pane-index="0" fixed-pane-initial-dimension="320" orientation="Horizontal">
+                            <ui:VisualElement name="eventPropagationPathsContainer" class="containerMin">
+                                <ui:Label name="eventPropagationPathsTitle" text="Event Propagation Paths"/>
+                                <ui:VisualElement name="scrollViewContainer">
+                                    <ui:ScrollView name="eventPropagationPathsScrollView">
+                                        <ui:Label name="eventPropagationPaths"/>
+                                    </ui:ScrollView>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="eventbaseInfoContainer" class="containerMin">
+                                <ui:Label name="eventbaseInfoTitle" text="Event Information"/>
+                                <ui:VisualElement name="scrollViewContainer">
+                                    <ui:ScrollView name="eventbaseInfoScrollView">
+                                        <ui:Label name="eventbaseInfo"/>
+                                    </ui:ScrollView>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:TwoPaneSplitView>
+                    </ui:TwoPaneSplitView>
+                </ui:TwoPaneSplitView>
             </ui:VisualElement>
             <ui:VisualElement name="eventsRightSideContainer">
-                <ui:VisualElement name="eventsRegistrationsContainer">
-                    <ui:Label name="eventsRegistrationTitle" text="Registered Event Callbacks"/>
-                    <ui:VisualElement name="scrollViewContainer">
-                        <ui:ScrollView name="eventsRegistrationsScrollView">
-                            <ui:Label name="eventsRegistrationMessage" text="Event Registrations"/>
-                        </ui:ScrollView>
+                <ui:TwoPaneSplitView class="splitViewMin" fixed-pane-index="0" fixed-pane-initial-dimension="350" orientation="Vertical">
+                    <ui:VisualElement name="eventsRegistrationsContainer">
+                        <ui:VisualElement name="eventsRegistrationTitleContainer">
+                            <ui:Toggle name="eventsRegistrationTitle" text="Registered Event Callbacks"/>
+                            <uie:Toolbar name="eventsRegistrationContainer">
+                                <uie:ToolbarSearchField name="filter-registered-callback" />
+                                <ui:Label name="eventsRegistrationTotals" />
+                            </uie:Toolbar>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="scrollViewContainer">
+                            <ui:ListView name="eventsRegistrationsListView"/>
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement name="eventsHistogramContainer">
-                    <ui:Label name="eventsHistogramTitle" text="Histogram"/>
-                    <ui:VisualElement name="scrollViewContainer">
-                        <ui:ScrollView name="eventsHistogramScrollView">
-                        </ui:ScrollView>
+                    <ui:VisualElement name="eventsHistogramContainer">
+                        <ui:VisualElement name="eventsHistogramTitleContainer">
+                            <ui:Toggle name="eventsHistogramTitle" text="Event Histogram"/>
+                            <ui:Label name="eventsHistogramTotal" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="scrollViewContainer" class="containerMin">
+                            <ui:ScrollView name="eventsHistogramScrollView">
+                            </ui:ScrollView>
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                </ui:VisualElement>
+                </ui:TwoPaneSplitView>
             </ui:VisualElement>
-        </uei:VisualSplitter>
+        </ui:TwoPaneSplitView>
     </ui:VisualElement>
 </ui:UXML>

@@ -8,6 +8,13 @@ namespace UnityEngine.UIElements
 
         internal static Func<bool> IsEditorRemoteConnected = () => false;
 
+        private IInput m_Input;
+        internal IInput input
+        {
+            get => m_Input ?? (m_Input = new Input());
+            set => m_Input = value;
+        }
+
         private bool ShouldIgnoreEventsOnAppNotFocused()
         {
             switch (SystemInfo.operatingSystemFamily)
@@ -32,8 +39,9 @@ namespace UnityEngine.UIElements
         private readonly float m_InputActionsPerSecond = 10;
         private readonly float m_RepeatDelay = 0.5f;
 
-        private Event m_Event = new Event();
+        private bool m_SendingTouchEvents;
 
+        private Event m_Event = new Event();
         private BaseRuntimePanel m_FocusedPanel;
 
         public BaseRuntimePanel focusedPanel
@@ -50,12 +58,22 @@ namespace UnityEngine.UIElements
             }
         }
 
-        public void Update()
+        public enum UpdateMode
         {
-            if (!isAppFocused && ShouldIgnoreEventsOnAppNotFocused())
+            Always,
+            IgnoreIfAppNotFocused
+        }
+
+        public void Update(UpdateMode updateMode = UpdateMode.Always)
+        {
+            if (!isAppFocused && ShouldIgnoreEventsOnAppNotFocused() && updateMode == UpdateMode.IgnoreIfAppNotFocused)
                 return;
 
+            // touch needs to take precedence because of the mouse emulation layer
+            m_SendingTouchEvents = ProcessTouchEvents();
+
             SendIMGUIEvents();
+
             SendInputEvents();
         }
 
@@ -70,22 +88,27 @@ namespace UnityEngine.UIElements
                 {
                     SendFocusBasedEvent(self => UIElementsRuntimeUtility.CreateEvent(self.m_Event), this);
                 }
-                else if (m_Event.type == EventType.ScrollWheel)
+                else if (!m_SendingTouchEvents && input.mousePresent)
                 {
-                    SendPositionBasedEvent(m_Event.mousePosition, m_Event.delta, (panelPosition, panelDelta, self) =>
+                    if (m_Event.type == EventType.ScrollWheel)
                     {
-                        self.m_Event.mousePosition = panelPosition;
-                        return UIElementsRuntimeUtility.CreateEvent(self.m_Event);
-                    }, this);
-                }
-                else
-                {
-                    SendPositionBasedEvent(m_Event.mousePosition, m_Event.delta, (panelPosition, panelDelta, self) =>
+                        var screenPosition = GetLocalScreenPosition(m_Event, out var targetDisplay);
+                        SendPositionBasedEvent(screenPosition, m_Event.delta, PointerId.mousePointerId, targetDisplay, (panelPosition, panelDelta, self) =>
+                        {
+                            self.m_Event.mousePosition = panelPosition;
+                            return UIElementsRuntimeUtility.CreateEvent(self.m_Event);
+                        }, this);
+                    }
+                    else
                     {
-                        self.m_Event.mousePosition = panelPosition;
-                        self.m_Event.delta = panelDelta;
-                        return UIElementsRuntimeUtility.CreateEvent(self.m_Event);
-                    }, this);
+                        var screenPosition = GetLocalScreenPosition(m_Event, out var targetDisplay);
+                        SendPositionBasedEvent(screenPosition, m_Event.delta, PointerId.mousePointerId, targetDisplay, (panelPosition, panelDelta, self) =>
+                        {
+                            self.m_Event.mousePosition = panelPosition;
+                            self.m_Event.delta = panelDelta;
+                            return UIElementsRuntimeUtility.CreateEvent(self.m_Event);
+                        }, this, deselectIfNoTarget: m_Event.type == EventType.MouseDown);
+                    }
                 }
             }
         }
@@ -99,17 +122,15 @@ namespace UnityEngine.UIElements
                 SendFocusBasedEvent(self => NavigationMoveEvent.GetPooled(self.GetRawMoveVector()), this);
             }
 
-            if (Input.GetButtonDown(m_SubmitButton))
+            if (input.GetButtonDown(m_SubmitButton))
             {
                 SendFocusBasedEvent(self => NavigationSubmitEvent.GetPooled(), this);
             }
 
-            if (Input.GetButtonDown(m_CancelButton))
+            if (input.GetButtonDown(m_CancelButton))
             {
                 SendFocusBasedEvent(self => NavigationCancelEvent.GetPooled(), this);
             }
-
-            ProcessTouchEvents();
         }
 
         internal void SendFocusBasedEvent<TArg>(Func<TArg, EventBase> evtFactory, TArg arg)
@@ -121,43 +142,12 @@ namespace UnityEngine.UIElements
                 {
                     focusedPanel.visualTree.SendEvent(evt);
                     UpdateFocusedPanel(focusedPanel);
+                    return;
                 }
             }
-            // Otherwise try all the panels, from closest to deepest
-            else
-            {
-                var panels = UIElementsRuntimeUtility.GetSortedPlayerPanels();
-                for (var i = panels.Count - 1; i >= 0; i--)
-                {
-                    var panel = panels[i];
-                    if (panel is BaseRuntimePanel runtimePanel)
-                    {
-                        using (EventBase evt = evtFactory(arg))
-                        {
-                            runtimePanel.visualTree.SendEvent(evt);
 
-                            if (evt.processedByFocusController)
-                            {
-                                UpdateFocusedPanel(runtimePanel);
-                            }
-
-                            if (evt.isPropagationStopped)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        internal void SendPositionBasedEvent<TArg>(Vector3 mousePosition, Vector3 delta, Func<Vector3, Vector3, TArg, EventBase> evtFactory, TArg arg)
-        {
-            // Allow focus to be lost before processing the event
-            if (focusedPanel != null)
-            {
-                UpdateFocusedPanel(focusedPanel);
-            }
+            // Send Keyboard events to all panels if none is focused.
+            // This is so that navigation with Tab can be started without clicking on an element.
 
             // Try all the panels, from closest to deepest
             var panels = UIElementsRuntimeUtility.GetSortedPlayerPanels();
@@ -166,8 +156,48 @@ namespace UnityEngine.UIElements
                 var panel = panels[i];
                 if (panel is BaseRuntimePanel runtimePanel)
                 {
-                    if (ScreenToPanel(runtimePanel, mousePosition, delta, out var panelPosition, out var panelDelta))
+                    using (EventBase evt = evtFactory(arg))
                     {
+                        runtimePanel.visualTree.SendEvent(evt);
+
+                        if (evt.processedByFocusController)
+                        {
+                            UpdateFocusedPanel(runtimePanel);
+                        }
+
+                        if (evt.isPropagationStopped)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // For Unit Tests
+        internal void SendPositionBasedEvent<TArg>(Vector3 mousePosition, Vector3 delta, int pointerId,
+            Func<Vector3, Vector3, TArg, EventBase> evtFactory, TArg arg, bool deselectIfNoTarget = false) =>
+            SendPositionBasedEvent(mousePosition, delta, pointerId, null, evtFactory, arg, deselectIfNoTarget);
+
+        void SendPositionBasedEvent<TArg>(Vector3 mousePosition, Vector3 delta, int pointerId, int? targetDisplay, Func<Vector3, Vector3, TArg, EventBase> evtFactory, TArg arg, bool deselectIfNoTarget = false)
+        {
+            // Allow focus to be lost before processing the event
+            if (focusedPanel != null)
+            {
+                UpdateFocusedPanel(focusedPanel);
+            }
+
+            // We first try to send the event to a runtime panel that might be capturing the pointer, regardless of targetDisplay.
+            var panels = UIElementsRuntimeUtility.GetSortedPlayerPanels();
+            for (var i = panels.Count - 1; i >= 0; i--)
+            {
+                var panel = panels[i];
+                if (panel is BaseRuntimePanel runtimePanel)
+                {
+                    if (panel.GetCapturingElement(pointerId) is VisualElement ve && ve.panel == panel)
+                    {
+                        runtimePanel.ScreenToPanel(mousePosition, delta, out var panelPosition, out var panelDelta, true);
+
                         using (EventBase evt = evtFactory(panelPosition, panelDelta, arg))
                         {
                             runtimePanel.visualTree.SendEvent(evt);
@@ -177,12 +207,66 @@ namespace UnityEngine.UIElements
                                 UpdateFocusedPanel(runtimePanel);
                             }
 
-                            if (evt.isPropagationStopped)
-                            {
-                                break;
-                            }
+                            // Only 1 panel receives the event.
+                            return;
                         }
                     }
+                }
+            }
+
+            // Find a candidate panel for the event
+            // Try all the panels, from closest to deepest
+            BaseRuntimePanel candidatePanel = null;
+            Vector2 candidateMousePosition = Vector2.zero;
+            Vector2 candidateDelta = Vector2.zero;
+            for (var i = panels.Count - 1; i >= 0; i--)
+            {
+                if (panels[i] is BaseRuntimePanel runtimePanel && (targetDisplay == null || runtimePanel.targetDisplay == targetDisplay))
+                {
+                    if (runtimePanel.ScreenToPanel(mousePosition, delta, out candidateMousePosition, out candidateDelta) &&
+                        runtimePanel.Pick(candidateMousePosition) != null)
+                    {
+                        candidatePanel = runtimePanel;
+                        break;
+                    }
+                }
+            }
+
+            BaseRuntimePanel lastActivePanel = PointerDeviceState.GetPanel(pointerId, ContextType.Player) as BaseRuntimePanel;
+            if (lastActivePanel != null && lastActivePanel != candidatePanel)
+            {
+                // Send an event to the last panel the pointer was in, so it can dispatch [Mouse|Pointer][Out|Leave] events.
+                lastActivePanel.ScreenToPanel(mousePosition, delta, out var panelPosition, out var panelDelta, true);
+                using (EventBase lastActivePanelEvent = evtFactory(panelPosition, panelDelta, arg))
+                {
+                    lastActivePanel.visualTree.SendEvent(lastActivePanelEvent);
+                }
+            }
+
+            if (candidatePanel != null)
+            {
+                using (EventBase evt = evtFactory(candidateMousePosition, candidateDelta, arg))
+                {
+                    candidatePanel.visualTree.SendEvent(evt);
+
+                    if (evt.processedByFocusController)
+                    {
+                        UpdateFocusedPanel(candidatePanel);
+                    }
+                }
+            }
+            else
+            {
+                if (lastActivePanel == null)
+                {
+                    // Mouse and pointer events calls PointerDeviceState.SavePointerPosition in their PreDispatch().
+                    // If we did not send any event, we need to manually update the pointer position.
+                    PointerDeviceState.SavePointerPosition(pointerId, mousePosition, null, ContextType.Player);
+                }
+
+                if (deselectIfNoTarget)
+                {
+                    focusedPanel = null;
                 }
             }
         }
@@ -201,11 +285,6 @@ namespace UnityEngine.UIElements
 
         private static EventBase MakeTouchEvent(Touch touch, EventModifiers modifiers)
         {
-            // Flip Y Coordinates.
-            touch.position = new Vector2(touch.position.x, Screen.height - touch.position.y);
-            touch.rawPosition = new Vector2(touch.rawPosition.x, Screen.height - touch.rawPosition.y);
-            touch.deltaPosition = new Vector2(touch.deltaPosition.x, Screen.height - touch.deltaPosition.y);
-
             switch (touch.phase)
             {
                 case TouchPhase.Began:
@@ -225,14 +304,19 @@ namespace UnityEngine.UIElements
 
         private bool ProcessTouchEvents()
         {
-            for (int i = 0; i < Input.touchCount; ++i)
+            for (int i = 0; i < input.touchCount; ++i)
             {
-                Touch touch = Input.GetTouch(i);
+                Touch touch = input.GetTouch(i);
 
                 if (touch.type == TouchType.Indirect)
                     continue;
 
-                SendPositionBasedEvent(touch.position, touch.deltaPosition, (panelPosition, panelDelta, _touch) =>
+                // Flip Y Coordinates.
+                touch.position = UIElementsRuntimeUtility.MultiDisplayBottomLeftToPanelPosition(touch.position, out var targetDisplay);
+                touch.rawPosition = UIElementsRuntimeUtility.MultiDisplayBottomLeftToPanelPosition(touch.rawPosition, out _);
+                touch.deltaPosition = UIElementsRuntimeUtility.ScreenBottomLeftToPanelDelta(touch.deltaPosition);
+
+                SendPositionBasedEvent(touch.position, touch.deltaPosition, PointerId.touchPointerIdBase + touch.fingerId, targetDisplay, (panelPosition, panelDelta, _touch) =>
                 {
                     _touch.position = panelPosition;
                     _touch.deltaPosition = panelDelta;
@@ -240,16 +324,16 @@ namespace UnityEngine.UIElements
                 }, touch);
             }
 
-            return Input.touchCount > 0;
+            return input.touchCount > 0;
         }
 
         private Vector2 GetRawMoveVector()
         {
             Vector2 move = Vector2.zero;
-            move.x = Input.GetAxisRaw(m_HorizontalAxis);
-            move.y = Input.GetAxisRaw(m_VerticalAxis);
+            move.x = input.GetAxisRaw(m_HorizontalAxis);
+            move.y = input.GetAxisRaw(m_VerticalAxis);
 
-            if (Input.GetButtonDown(m_HorizontalAxis))
+            if (input.GetButtonDown(m_HorizontalAxis))
             {
                 if (move.x < 0)
                     move.x = -1f;
@@ -257,7 +341,7 @@ namespace UnityEngine.UIElements
                     move.x = 1f;
             }
 
-            if (Input.GetButtonDown(m_VerticalAxis))
+            if (input.GetButtonDown(m_VerticalAxis))
             {
                 if (move.y < 0)
                     move.y = -1f;
@@ -284,7 +368,7 @@ namespace UnityEngine.UIElements
             }
 
             // If user pressed key again, always allow event
-            bool allow = Input.GetButtonDown(m_HorizontalAxis) || Input.GetButtonDown(m_VerticalAxis);
+            bool allow = input.GetButtonDown(m_HorizontalAxis) || input.GetButtonDown(m_VerticalAxis);
             bool similarDir = (Vector2.Dot(movement, m_LastMoveVector) > 0);
             if (!allow)
             {
@@ -319,24 +403,28 @@ namespace UnityEngine.UIElements
             return moveDirection != NavigationMoveEvent.Direction.None;
         }
 
-        static bool ScreenToPanel(BaseRuntimePanel panel, Vector2 screenPosition, Vector2 screenDelta,
-            out Vector2 panelPosition, out Vector2 panelDelta)
+        static Vector2 GetLocalScreenPosition(Event evt, out int? targetDisplay)
         {
-            panelPosition = Vector2.zero;
-            panelDelta = Vector2.zero;
+            targetDisplay = null; // TODO: find why evt.displayIndex doesn't work
+            return evt.mousePosition;
+        }
 
-            panelPosition = panel.ScreenToPanel(screenPosition);
+        internal interface IInput
+        {
+            bool GetButtonDown(string button);
+            float GetAxisRaw(string axis);
+            int touchCount { get; }
+            Touch GetTouch(int index);
+            bool mousePresent { get; }
+        }
 
-            if (!panel.visualTree.layout.Contains(panelPosition))
-            {
-                panelDelta = screenDelta;
-                return false;
-            }
-
-            var panelPrevPosition = panel.ScreenToPanel(screenPosition - screenDelta);
-            panelDelta = panelPosition - panelPrevPosition;
-
-            return true;
+        internal class Input : IInput
+        {
+            public bool GetButtonDown(string button) => UnityEngine.Input.GetButtonDown(button);
+            public float GetAxisRaw(string axis) => UnityEngine.Input.GetAxis(axis);
+            public int touchCount => UnityEngine.Input.touchCount;
+            public Touch GetTouch(int index) => UnityEngine.Input.GetTouch(index);
+            public bool mousePresent => UnityEngine.Input.mousePresent;
         }
     }
 }

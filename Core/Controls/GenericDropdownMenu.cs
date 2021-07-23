@@ -12,6 +12,9 @@ namespace UnityEngine.UIElements
         void DropDown(Rect position, VisualElement targetElement = null, bool anchored = false);
     }
 
+    /// <summary>
+    /// GenericDropdownMenu allows you to display contextual menus with default textual options or any <see cref="VisualElement"/>.
+    /// </summary>
     public class GenericDropdownMenu : IGenericMenu
     {
         class MenuItem
@@ -35,9 +38,12 @@ namespace UnityEngine.UIElements
         /// </summary>
         public static readonly string labelUssClassName = ussClassName + "__label";
         /// <summary>
-        /// USS class name of containers in elements of this type.
+        /// USS class name of inner containers in elements of this type.
         /// </summary>
         public static readonly string containerInnerUssClassName = ussClassName + "__container-inner";
+        /// <summary>
+        /// USS class name of outer containers in elements of this type.
+        /// </summary>
         public static readonly string containerOuterUssClassName = ussClassName + "__container-outer";
         /// <summary>
         /// USS class name of separators in elements of this type.
@@ -53,6 +59,7 @@ namespace UnityEngine.UIElements
         VisualElement m_OuterContainer;
         ScrollView m_ScrollView;
         VisualElement m_PanelRootVisualContainer;
+        VisualElement m_TargetElement;
         Rect m_DesiredRect;
         KeyboardNavigationManipulator m_NavigationManipulator;
 
@@ -62,6 +69,9 @@ namespace UnityEngine.UIElements
         /// </summary>
         public VisualElement contentContainer => m_ScrollView.contentContainer;
 
+        /// <summary>
+        ///  Initializes and returns an instance of GenericDropdownMenu.
+        /// </summary>
         public GenericDropdownMenu()
         {
             m_MenuContainer = new VisualElement();
@@ -88,11 +98,12 @@ namespace UnityEngine.UIElements
                 return;
 
             contentContainer.AddManipulator(m_NavigationManipulator = new KeyboardNavigationManipulator(Apply));
+            m_MenuContainer.RegisterCallback<PointerDownEvent>(OnPointerDown);
             m_MenuContainer.RegisterCallback<PointerMoveEvent>(OnPointerMove);
             m_MenuContainer.RegisterCallback<PointerUpEvent>(OnPointerUp);
 
             evt.destinationPanel.visualTree.RegisterCallback<GeometryChangedEvent>(OnParentResized);
-            m_ScrollView.RegisterCallback<GeometryChangedEvent>(EnsureVisibilityInParent);
+            m_ScrollView.RegisterCallback<GeometryChangedEvent>(OnContainerGeometryChanged);
             m_ScrollView.RegisterCallback<FocusOutEvent>(OnFocusOut);
         }
 
@@ -103,24 +114,24 @@ namespace UnityEngine.UIElements
 
             m_MenuContainer.UnregisterCallback<AttachToPanelEvent>(OnAttachToPanel);
             m_MenuContainer.UnregisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
-            m_MenuContainer.UnregisterCallback<PointerUpEvent>(OnPointerUp);
 
             contentContainer.RemoveManipulator(m_NavigationManipulator);
+            m_MenuContainer.UnregisterCallback<PointerDownEvent>(OnPointerDown);
             m_MenuContainer.UnregisterCallback<PointerMoveEvent>(OnPointerMove);
+            m_MenuContainer.UnregisterCallback<PointerUpEvent>(OnPointerUp);
 
             evt.originPanel.visualTree.UnregisterCallback<GeometryChangedEvent>(OnParentResized);
-            m_ScrollView.UnregisterCallback<GeometryChangedEvent>(EnsureVisibilityInParent);
+            m_ScrollView.UnregisterCallback<GeometryChangedEvent>(OnContainerGeometryChanged);
             m_ScrollView.UnregisterCallback<FocusOutEvent>(OnFocusOut);
         }
 
         void Hide()
         {
-            m_Items.Clear();
-            m_Items = null;
-            m_ScrollView.Clear();
-            m_ScrollView.RemoveFromHierarchy();
             m_MenuContainer.RemoveFromHierarchy();
-            m_ScrollView = null;
+
+            if (m_TargetElement != null)
+                m_TargetElement.pseudoStates ^= PseudoStates.Active;
+            m_TargetElement = null;
         }
 
         void Apply(KeyboardNavigationOperation op, EventBase sourceEvent)
@@ -200,27 +211,30 @@ namespace UnityEngine.UIElements
 
         Vector2 m_MousePosition;
 
+        void OnPointerDown(PointerDownEvent evt)
+        {
+            m_MousePosition = m_ScrollView.WorldToLocal(evt.position);
+            UpdateSelection(evt.target as VisualElement);
+
+            if (evt.pointerId != PointerId.mousePointerId)
+            {
+                m_MenuContainer.panel.PreventCompatibilityMouseEvents(evt.pointerId);
+            }
+
+            evt.StopPropagation();
+        }
+
         void OnPointerMove(PointerMoveEvent evt)
         {
             m_MousePosition = m_ScrollView.WorldToLocal(evt.position);
+            UpdateSelection(evt.target as VisualElement);
 
-            if (!m_ScrollView.ContainsPoint(m_MousePosition))
-                return;
-
-            var ve = evt.target as VisualElement;
-            if (ve == null)
-                return;
-
-            if ((ve.pseudoStates & PseudoStates.Hover) != PseudoStates.Hover)
+            if (evt.pointerId != PointerId.mousePointerId)
             {
-                var selectedIndex = GetSelectedIndex();
-                if (selectedIndex >= 0)
-                {
-                    m_Items[selectedIndex].element.pseudoStates &= ~PseudoStates.Hover;
-                }
-
-                ve.pseudoStates |= PseudoStates.Hover;
+                m_MenuContainer.panel.PreventCompatibilityMouseEvents(evt.pointerId);
             }
+
+            evt.StopPropagation();
         }
 
         void OnPointerUp(PointerUpEvent evt)
@@ -234,6 +248,13 @@ namespace UnityEngine.UIElements
 
                 Hide();
             }
+
+            if (evt.pointerId != PointerId.mousePointerId)
+            {
+                m_MenuContainer.panel.PreventCompatibilityMouseEvents(evt.pointerId);
+            }
+
+            evt.StopPropagation();
         }
 
         void OnFocusOut(FocusOutEvent evt)
@@ -252,6 +273,32 @@ namespace UnityEngine.UIElements
         void OnParentResized(GeometryChangedEvent evt)
         {
             Hide();
+        }
+
+        void UpdateSelection(VisualElement target)
+        {
+            if (!m_ScrollView.ContainsPoint(m_MousePosition))
+            {
+                var selectedIndex = GetSelectedIndex();
+                if (selectedIndex >= 0)
+                    m_Items[selectedIndex].element.pseudoStates &= ~PseudoStates.Hover;
+
+                return;
+            }
+
+            if (target == null)
+                return;
+
+            if ((target.pseudoStates & PseudoStates.Hover) != PseudoStates.Hover)
+            {
+                var selectedIndex = GetSelectedIndex();
+                if (selectedIndex >= 0)
+                {
+                    m_Items[selectedIndex].element.pseudoStates &= ~PseudoStates.Hover;
+                }
+
+                target.pseudoStates |= PseudoStates.Hover;
+            }
         }
 
         void ChangeSelectedIndex(int newIndex, int previousIndex)
@@ -281,6 +328,12 @@ namespace UnityEngine.UIElements
             return -1;
         }
 
+        /// <summary>
+        /// Adds an item to this menu using a default VisualElement.
+        /// </summary>
+        /// <param name="itemName">The text to display to the user.</param>
+        /// <param name="isChecked">Indicates whether a checkmark next to the item is displayed.</param>
+        /// <param name="action">The callback to invoke when the item is selected by the user.</param>
         public void AddItem(string itemName, bool isChecked, Action action)
         {
             var menuItem = AddItem(itemName, isChecked, true);
@@ -291,6 +344,16 @@ namespace UnityEngine.UIElements
             }
         }
 
+        /// <summary>
+        /// Adds an item to this menu using a default VisualElement.
+        /// </summary>
+        /// <remarks>
+        /// This overload of the method accepts an arbitrary object that's passed as a parameter to your callback.
+        /// </remarks>
+        /// <param name="itemName">The text to display to the user.</param>
+        /// <param name="isChecked">Indicates whether a checkmark next to the item is displayed.</param>
+        /// <param name="action">The callback to invoke when the item is selected by the user.</param>
+        /// <param name="data">The object to pass to the callback as a parameter.</param>
         public void AddItem(string itemName, bool isChecked, Action<object> action, object data)
         {
             var menuItem = AddItem(itemName, isChecked, true, data);
@@ -301,13 +364,26 @@ namespace UnityEngine.UIElements
             }
         }
 
+        /// <summary>
+        /// Adds a disabled item to this menu using a default VisualElement.
+        /// </summary>
+        /// <remarks>
+        /// Items added with this method cannot be selected by the user.
+        /// </remarks>
+        /// <param name="itemName">The text to display to the user.</param>
+        /// <param name="isChecked">Indicates whether a checkmark next to the item is displayed.</param>
         public void AddDisabledItem(string itemName, bool isChecked)
         {
             AddItem(itemName, isChecked, false);
         }
 
+        /// <summary>
+        /// Adds a visual separator after the previously added items in this menu.
+        /// </summary>
+        /// <param name="path">Not used.</param>
         public void AddSeparator(string path)
         {
+            // TODO path is not used. This is because IGenericMenu requires it, but this is not great.
             var separator = new VisualElement();
             separator.AddToClassList(separatorUssClassName);
             separator.pickingMode = PickingMode.Ignore;
@@ -360,15 +436,28 @@ namespace UnityEngine.UIElements
             return menuItem;
         }
 
+        /// <summary>
+        /// Displays the menu at the specified position.
+        /// </summary>
+        /// <remarks>
+        /// This method automatically finds the parent VisualElement that displays the menu.
+        /// For editor UI, <see cref="EditorWindow.rootVisualElement"/> is used as the parent.
+        /// For runtime UI,<see cref="UIDocument.rootVisualElement"/> is used as the parent.
+        /// </remarks>
+        /// <param name="position">The position in the coordinate space of the panel.</param>
+        /// <param name="targetElement">The element used to determine in which root to parent the menu.</param>
+        /// <param name="anchored">Whether the menu should use the width of the position argument instead of its normal width.</param>
         public void DropDown(Rect position, VisualElement targetElement = null, bool anchored = false)
         {
+            // TODO the argument should not optional. This is because IGenericMenu requires it, but this is not great.
             if (targetElement == null)
             {
                 Debug.LogError("VisualElement Generic Menu needs a target to find a root to attach to.");
                 return;
             }
 
-            m_PanelRootVisualContainer = targetElement.GetRootVisualContainer();
+            m_TargetElement = targetElement;
+            m_PanelRootVisualContainer = m_TargetElement.GetRootVisualContainer();
 
             if (m_PanelRootVisualContainer == null)
             {
@@ -387,15 +476,21 @@ namespace UnityEngine.UIElements
             m_OuterContainer.style.left = local.x - m_PanelRootVisualContainer.layout.x;
             m_OuterContainer.style.top = local.y + position.height - m_PanelRootVisualContainer.layout.y;
 
-            if (anchored)
-            {
-                m_DesiredRect = position;
-            }
+            m_DesiredRect = anchored ? position : Rect.zero;
 
             m_MenuContainer.schedule.Execute(contentContainer.Focus);
+            EnsureVisibilityInParent();
+
+            if (targetElement != null)
+                targetElement.pseudoStates |= PseudoStates.Active;
         }
 
-        void EnsureVisibilityInParent(GeometryChangedEvent evt)
+        void OnContainerGeometryChanged(GeometryChangedEvent evt)
+        {
+            EnsureVisibilityInParent();
+        }
+
+        void EnsureVisibilityInParent()
         {
             if (m_PanelRootVisualContainer != null && !float.IsNaN(m_OuterContainer.layout.width) && !float.IsNaN(m_OuterContainer.layout.height))
             {
@@ -412,7 +507,7 @@ namespace UnityEngine.UIElements
                     m_MenuContainer.layout.height - m_MenuContainer.layout.y - m_OuterContainer.layout.y,
                     m_ScrollView.layout.height + m_OuterContainer.resolvedStyle.borderBottomWidth + m_OuterContainer.resolvedStyle.borderTopWidth);
 
-                if (m_DesiredRect.width > m_OuterContainer.resolvedStyle.width)
+                if (m_DesiredRect != Rect.zero)
                 {
                     m_OuterContainer.style.width = m_DesiredRect.width;
                 }

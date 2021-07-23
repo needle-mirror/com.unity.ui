@@ -1,8 +1,0 @@
-[*.asmdef]
-scrape_api = true
-
-[**/Tests/**.asmdef]
-scrape_api = false
-
-[**/Samples/**.asmdef]
-scrape_api = false

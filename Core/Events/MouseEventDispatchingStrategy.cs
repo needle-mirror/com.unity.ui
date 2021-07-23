@@ -86,7 +86,7 @@ namespace UnityEngine.UIElements
             bool shouldRecomputeTopElementUnderMouse = (evt as IMouseEventInternal)?.recomputeTopElementUnderMouse ?? true;
 
             elementUnderMouse = shouldRecomputeTopElementUnderMouse
-                ? panel.RecomputeTopElementUnderPointer(((IMouseEvent)evt).mousePosition, evt)
+                ? panel.RecomputeTopElementUnderPointer(PointerId.mousePointerId, ((IMouseEvent)evt).mousePosition, evt)
                 : panel.GetTopElementUnderPointer(PointerId.mousePointerId);
 
             // If mouse leaves the window, make sure element under mouse is null.
@@ -97,7 +97,7 @@ namespace UnityEngine.UIElements
             if (evt.eventTypeId == MouseLeaveWindowEvent.TypeId() &&
                 (evt as MouseLeaveWindowEvent).pressedButtons == 0)
             {
-                panel.ClearCachedElementUnderPointer(evt);
+                panel.ClearCachedElementUnderPointer(PointerId.mousePointerId, evt);
             }
         }
 

@@ -122,6 +122,8 @@ namespace UnityEngine.UIElements.UIR
 
         internal uint maxVerticesPerPage  { get; } = 0xFFFF; // On DX11, 0xFFFF is an invalid index (associated to primitive restart). With size = 0xFFFF last index is 0xFFFE    cases:1259449
 
+        internal bool breakBatches { get; set; }
+
 #if RD_DIAGNOSTICS
         struct DiagnosticStats
         {
@@ -178,23 +180,6 @@ namespace UnityEngine.UIElements.UIR
 #endif
 
         #region Default system resources
-        static private Texture2D s_WhiteTexel;
-        static internal Texture2D whiteTexel
-        {
-            get
-            {
-                if (s_WhiteTexel == null)
-                {
-                    s_WhiteTexel = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-                    s_WhiteTexel.hideFlags = HideFlags.HideAndDontSave;
-                    s_WhiteTexel.filterMode = FilterMode.Bilinear; // Make sure it's bilinear so UIRAtlasManager accepts it on older HW targets
-                    s_WhiteTexel.SetPixel(0, 0, Color.white);
-                    s_WhiteTexel.Apply(false, true);
-                }
-                return s_WhiteTexel;
-            }
-        }
-
         static private Texture2D s_DefaultShaderInfoTexFloat, s_DefaultShaderInfoTexARGB8;
         static internal Texture2D defaultShaderInfoTexFloat
         {
@@ -819,6 +804,8 @@ namespace UnityEngine.UIElements.UIR
         {
             Utility.ProfileDrawChainBegin();
 
+            bool doBreakBatches = this.breakBatches; // Keeping this on the stack for better performance
+
             var drawParams = m_DrawParams;
             drawParams.Reset();
             drawParams.renderTexture.Add(RenderTexture.active);
@@ -919,12 +906,21 @@ namespace UnityEngine.UIElements.UIR
 
                     if (stashRange && isLastRange)
                     {
-                        // mechanism will need to be implemented to handle the "ranges-buffer-full" condition. For
-                        // the time being, calling KickRanges will make the whole buffer available.
+                        // The range we'll close is the last that we can store.
+                        // TODO: This only works since ranges are serialized and will break once the ranges are
+                        //       truly processed in a multi-threaded fashion without copies. When this happens, a new
+                        //       mechanism will need to be implemented to handle the "ranges-buffer-full" condition. For
+                        //       the time being, calling KickRanges will make the whole buffer available.
                         kickRanges = true;
                     }
                 }
                 else
+                {
+                    stashRange = true;
+                    kickRanges = true;
+                }
+
+                if (doBreakBatches)
                 {
                     stashRange = true;
                     kickRanges = true;
@@ -1096,6 +1092,23 @@ namespace UnityEngine.UIElements.UIR
             Utility.DrawRanges(ib.BufferPointer, vStream, 1, new IntPtr(ranges.GetUnsafePtr()), ranges.Length, m_VertexDecl);
         }
 
+        // Used for testing purposes only (e.g. performance test warmup)
+        internal void WaitOnAllCpuFences()
+        {
+            for (int i = 0; i < m_Fences.Length; ++i)
+                WaitOnCpuFence(m_Fences[i]);
+        }
+
+        void WaitOnCpuFence(uint fence)
+        {
+            if (fence != 0 && !Utility.CPUFencePassed(fence))
+            {
+                s_MarkerFence.Begin();
+                Utility.WaitForCPUFencePassed(fence);
+                s_MarkerFence.End();
+            }
+        }
+
         public void AdvanceFrame()
         {
             s_MarkerAdvanceFrame.Begin();
@@ -1108,12 +1121,7 @@ namespace UnityEngine.UIElements.UIR
             {
                 int fenceIndex = (int)(m_FrameIndex % m_Fences.Length);
                 uint fence = m_Fences[fenceIndex];
-                if (fence != 0 && !Utility.CPUFencePassed(fence))
-                {
-                    s_MarkerFence.Begin();
-                    Utility.WaitForCPUFencePassed(fence);
-                    s_MarkerFence.End();
-                }
+                WaitOnCpuFence(fence);
                 m_Fences[fenceIndex] = 0;
             }
 
@@ -1219,11 +1227,6 @@ namespace UnityEngine.UIElements.UIR
         internal static void PrepareForGfxDeviceRecreate()
         {
             m_ActiveDeviceCount += 1; // Don't let the count reach 0 and unsubscribe from GfxDeviceRecreate
-            if (s_WhiteTexel != null)
-            {
-                UIRUtility.Destroy(s_WhiteTexel);
-                s_WhiteTexel = null;
-            }
             if (s_DefaultShaderInfoTexFloat != null)
             {
                 UIRUtility.Destroy(s_DefaultShaderInfoTexFloat);
@@ -1315,11 +1318,6 @@ namespace UnityEngine.UIElements.UIR
 
             if (m_ActiveDeviceCount == 0 && m_SubscribedToNotifications)
             {
-                if (s_WhiteTexel != null)
-                {
-                    UIRUtility.Destroy(s_WhiteTexel);
-                    s_WhiteTexel = null;
-                }
                 if (s_DefaultShaderInfoTexFloat != null)
                 {
                     UIRUtility.Destroy(s_DefaultShaderInfoTexFloat);

@@ -118,10 +118,10 @@ namespace UnityEngine.UIElements
             { name = "vertical-scroller-visibility" };
 
             UxmlFloatAttributeDescription m_HorizontalPageSize = new UxmlFloatAttributeDescription
-            { name = "horizontal-page-size", defaultValue = Scroller.kDefaultPageSize };
+            { name = "horizontal-page-size", defaultValue = k_UnsetPageSizeValue };
 
             UxmlFloatAttributeDescription m_VerticalPageSize = new UxmlFloatAttributeDescription
-            { name = "vertical-page-size", defaultValue = Scroller.kDefaultPageSize };
+            { name = "vertical-page-size", defaultValue = k_UnsetPageSizeValue };
 
             UxmlEnumAttributeDescription<TouchScrollBehavior> m_TouchScrollBehavior = new UxmlEnumAttributeDescription<TouchScrollBehavior>
             { name = "touch-scroll-type", defaultValue = TouchScrollBehavior.Clamped };
@@ -219,11 +219,17 @@ namespace UnityEngine.UIElements
             set => m_VerticalScrollerVisibility = value ? ScrollerVisibility.AlwaysVisible : ScrollerVisibility.Auto;
         }
 
+        // Case 1297053: ScrollableWidth/Height may contain some numerical imprecisions.
+        const float k_SizeThreshold = 0.001f;
+
+        const float k_ScrollPageOverlapFactor = 0.1f;
+        internal const float k_UnsetPageSizeValue = -1.0f;
+
         internal bool needsHorizontal
         {
             get
             {
-                return horizontalScrollerVisibility == ScrollerVisibility.AlwaysVisible || (horizontalScrollerVisibility == ScrollerVisibility.Auto && scrollableWidth > 0);
+                return horizontalScrollerVisibility == ScrollerVisibility.AlwaysVisible || (horizontalScrollerVisibility == ScrollerVisibility.Auto && scrollableWidth > k_SizeThreshold);
             }
         }
 
@@ -231,7 +237,23 @@ namespace UnityEngine.UIElements
         {
             get
             {
-                return verticalScrollerVisibility == ScrollerVisibility.AlwaysVisible || (verticalScrollerVisibility == ScrollerVisibility.Auto && scrollableHeight > 0);
+                return verticalScrollerVisibility == ScrollerVisibility.AlwaysVisible || (verticalScrollerVisibility == ScrollerVisibility.Auto && scrollableHeight > k_SizeThreshold);
+            }
+        }
+
+        internal bool isVerticalScrollDisplayed
+        {
+            get
+            {
+                return verticalScroller.resolvedStyle.display == DisplayStyle.Flex;
+            }
+        }
+
+        internal bool isHorizontalScrollDisplayed
+        {
+            get
+            {
+                return horizontalScroller.resolvedStyle.display == DisplayStyle.Flex;
             }
         }
 
@@ -252,22 +274,34 @@ namespace UnityEngine.UIElements
             }
         }
 
+        private float m_HorizontalPageSize;
+
         /// <summary>
         /// This property is controlling the scrolling speed of the horizontal scroller.
         /// </summary>
         public float horizontalPageSize
         {
-            get { return horizontalScroller.slider.pageSize; }
-            set { horizontalScroller.slider.pageSize = value; }
+            get { return m_HorizontalPageSize; }
+            set
+            {
+                m_HorizontalPageSize = value;
+                UpdateHorizontalSliderPageSize();
+            }
         }
+
+        private float m_VerticalPageSize;
 
         /// <summary>
         /// This property is controlling the scrolling speed of the vertical scroller.
         /// </summary>
         public float verticalPageSize
         {
-            get { return verticalScroller.slider.pageSize; }
-            set { verticalScroller.slider.pageSize = value; }
+            get { return m_VerticalPageSize; }
+            set
+            {
+                m_VerticalPageSize = value;
+                UpdateVerticalSliderPageSize();
+            }
         }
 
         private float scrollableWidth
@@ -353,6 +387,66 @@ namespace UnityEngine.UIElements
             }
         }
 
+        void OnHorizontalScrollDragElementChanged(GeometryChangedEvent evt)
+        {
+            if (evt.oldRect.size == evt.newRect.size)
+            {
+                return;
+            }
+
+            UpdateHorizontalSliderPageSize();
+        }
+
+        void OnVerticalScrollDragElementChanged(GeometryChangedEvent evt)
+        {
+            if (evt.oldRect.size == evt.newRect.size)
+            {
+                return;
+            }
+
+            UpdateVerticalSliderPageSize();
+        }
+
+        void UpdateHorizontalSliderPageSize()
+        {
+            var containerWidth = horizontalScroller.resolvedStyle.width;
+            var horizontalSliderPageSize = m_HorizontalPageSize;
+
+            if (containerWidth > 0f)
+            {
+                if (Mathf.Approximately(m_HorizontalPageSize, k_UnsetPageSizeValue))
+                {
+                    var sliderDragElementWidth = horizontalScroller.slider.dragElement.resolvedStyle.width;
+                    horizontalSliderPageSize = sliderDragElementWidth * (1f - k_ScrollPageOverlapFactor);
+                }
+            }
+
+            if (horizontalSliderPageSize >= 0)
+            {
+                horizontalScroller.slider.pageSize = horizontalSliderPageSize;
+            }
+        }
+
+        void UpdateVerticalSliderPageSize()
+        {
+            var containerHeight = verticalScroller.resolvedStyle.height;
+            var verticalSliderPageSize = m_VerticalPageSize;
+
+            if (containerHeight > 0f)
+            {
+                if (Mathf.Approximately(m_VerticalPageSize, k_UnsetPageSizeValue))
+                {
+                    var sliderDragElementHeight = verticalScroller.slider.dragElement.resolvedStyle.height;
+                    verticalSliderPageSize = sliderDragElementHeight * (1f - k_ScrollPageOverlapFactor);
+                }
+            }
+
+            if (verticalSliderPageSize >= 0)
+            {
+                verticalScroller.slider.pageSize = verticalSliderPageSize;
+            }
+        }
+
         void UpdateContentViewTransform()
         {
             // Adjust contentContainer's position
@@ -380,7 +474,7 @@ namespace UnityEngine.UIElements
                 throw new ArgumentNullException(nameof(child));
 
             if (!contentContainer.Contains(child))
-                throw new ArgumentException("Cannot scroll to a VisualElement that is not a child of the ScrollView content-container.");
+                throw new ArgumentException("Cannot scroll to a VisualElement that's not a child of the ScrollView content-container.");
 
             float yDeltaOffset = 0, xDeltaOffset = 0;
 
@@ -477,6 +571,7 @@ namespace UnityEngine.UIElements
         public Scroller verticalScroller { get; private set; }
 
         private VisualElement m_ContentContainer;
+        private VisualElement m_ContentAndVerticalScrollContainer;
 
         /// <summary>
         /// Contains full content, potentially partially visible.
@@ -497,6 +592,10 @@ namespace UnityEngine.UIElements
         /// <summary>
         /// USS class name of content elements in elements of this type.
         /// </summary>
+        public static readonly string contentAndVerticalScrollUssClassName = ussClassName + "__content-and-vertical-scroll-container";
+        /// <summary>
+        /// USS class name of content elements in elements of this type.
+        /// </summary>
         public static readonly string contentUssClassName = ussClassName + "__content-container";
         /// <summary>
         /// USS class name of horizontal scrollers in elements of this type.
@@ -506,9 +605,23 @@ namespace UnityEngine.UIElements
         /// USS class name of vertical scrollers in elements of this type.
         /// </summary>
         public static readonly string vScrollerUssClassName = ussClassName + "__vertical-scroller";
+        /// <summary>
+        /// USS class name that's added when the ScrollView is in horizontal mode.
+        /// <seealso cref="ScrollViewMode.Horizontal"/>
+        /// </summary>
         public static readonly string horizontalVariantUssClassName = ussClassName + "--horizontal";
+        /// <summary>
+        /// USS class name that's added when the ScrollView is in vertical mode.
+        /// <seealso cref="ScrollViewMode.Vertical"/>
+        /// </summary>
         public static readonly string verticalVariantUssClassName = ussClassName + "--vertical";
+        /// <summary>
+        /// USS class name that's added when the ScrollView is in both horizontal and vertical mode.
+        /// <seealso cref="ScrollViewMode.VerticalAndHorizontal"/>
+        /// </summary>
         public static readonly string verticalHorizontalVariantUssClassName = ussClassName + "--vertical-horizontal";
+        /// <undoc/>
+        // TODO why does this exist? It is set in all cases...
         public static readonly string scrollVariantUssClassName = ussClassName + "--scroll";
 
         /// <summary>
@@ -523,12 +636,19 @@ namespace UnityEngine.UIElements
         {
             AddToClassList(ussClassName);
 
+            m_ContentAndVerticalScrollContainer = new VisualElement() { name = "unity-content-and-vertical-scroll-container" };
+            m_ContentAndVerticalScrollContainer.AddToClassList(contentAndVerticalScrollUssClassName);
+
+            hierarchy.Add(m_ContentAndVerticalScrollContainer);
+
             contentViewport = new VisualElement() {name = "unity-content-viewport"};
             contentViewport.AddToClassList(viewportUssClassName);
             contentViewport.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
-            contentViewport.RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
-            contentViewport.RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
-            hierarchy.Add(contentViewport);
+            contentViewport.pickingMode = PickingMode.Ignore;
+
+            m_ContentAndVerticalScrollContainer.RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
+            m_ContentAndVerticalScrollContainer.RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
+            m_ContentAndVerticalScrollContainer.Add(contentViewport);
 
             m_ContentContainer = new VisualElement() {name = "unity-content-container"};
             // Content container overflow is set to scroll which clip but we need to disable clipping in this case
@@ -551,8 +671,9 @@ namespace UnityEngine.UIElements
                     scrollOffset = new Vector2(value, scrollOffset.y);
                     UpdateContentViewTransform();
                 }, SliderDirection.Horizontal)
-            {viewDataKey = "HorizontalScroller", visible = false};
+            { viewDataKey = "HorizontalScroller" };
             horizontalScroller.AddToClassList(hScrollerUssClassName);
+            horizontalScroller.style.display = DisplayStyle.None;
             hierarchy.Add(horizontalScroller);
 
             verticalScroller = new Scroller(defaultMinScrollValue, defaultMaxScrollValue,
@@ -561,13 +682,23 @@ namespace UnityEngine.UIElements
                     scrollOffset = new Vector2(scrollOffset.x, value);
                     UpdateContentViewTransform();
                 }, SliderDirection.Vertical)
-            {viewDataKey = "VerticalScroller", visible = false};
+            { viewDataKey = "VerticalScroller" };
             verticalScroller.AddToClassList(vScrollerUssClassName);
-            hierarchy.Add(verticalScroller);
+            verticalScroller.style.display = DisplayStyle.None;
+            m_ContentAndVerticalScrollContainer.Add(verticalScroller);
 
             touchScrollBehavior = TouchScrollBehavior.Clamped;
 
             RegisterCallback<WheelEvent>(OnScrollWheel);
+            verticalScroller.RegisterCallback<GeometryChangedEvent>(OnScrollersGeometryChanged);
+            horizontalScroller.RegisterCallback<GeometryChangedEvent>(OnScrollersGeometryChanged);
+
+            horizontalPageSize = k_UnsetPageSizeValue;
+            verticalPageSize = k_UnsetPageSizeValue;
+
+            horizontalScroller.slider.dragElement.RegisterCallback<GeometryChangedEvent>(OnHorizontalScrollDragElementChanged);
+            verticalScroller.slider.dragElement.RegisterCallback<GeometryChangedEvent>(OnVerticalScrollDragElementChanged);
+
             m_CapturedTargetPointerMoveCallback = OnPointerMove;
             m_CapturedTargetPointerUpCallback = OnPointerUp;
             scrollOffset = Vector2.zero;
@@ -606,10 +737,10 @@ namespace UnityEngine.UIElements
 
             if (evt.destinationPanel.contextType == ContextType.Player)
             {
-                contentViewport.RegisterCallback<PointerDownEvent>(OnPointerDown, TrickleDown.TrickleDown);
-                contentViewport.RegisterCallback<PointerMoveEvent>(OnPointerMove);
-                contentViewport.RegisterCallback<PointerCancelEvent>(OnPointerCancel);
-                contentViewport.RegisterCallback<PointerUpEvent>(OnPointerUp, TrickleDown.TrickleDown);
+                m_ContentAndVerticalScrollContainer.RegisterCallback<PointerDownEvent>(OnPointerDown, TrickleDown.TrickleDown);
+                m_ContentAndVerticalScrollContainer.RegisterCallback<PointerMoveEvent>(OnPointerMove);
+                m_ContentAndVerticalScrollContainer.RegisterCallback<PointerCancelEvent>(OnPointerCancel);
+                m_ContentAndVerticalScrollContainer.RegisterCallback<PointerUpEvent>(OnPointerUp, TrickleDown.TrickleDown);
 
                 contentContainer.RegisterCallback<PointerCaptureEvent>(OnPointerCapture);
                 contentContainer.RegisterCallback<PointerCaptureOutEvent>(OnPointerCaptureOut);
@@ -625,10 +756,10 @@ namespace UnityEngine.UIElements
 
             if (evt.originPanel.contextType == ContextType.Player)
             {
-                contentViewport.UnregisterCallback<PointerDownEvent>(OnPointerDown, TrickleDown.TrickleDown);
-                contentViewport.UnregisterCallback<PointerMoveEvent>(OnPointerMove);
-                contentViewport.UnregisterCallback<PointerCancelEvent>(OnPointerCancel);
-                contentViewport.UnregisterCallback<PointerUpEvent>(OnPointerUp, TrickleDown.TrickleDown);
+                m_ContentAndVerticalScrollContainer.UnregisterCallback<PointerDownEvent>(OnPointerDown, TrickleDown.TrickleDown);
+                m_ContentAndVerticalScrollContainer.UnregisterCallback<PointerMoveEvent>(OnPointerMove);
+                m_ContentAndVerticalScrollContainer.UnregisterCallback<PointerCancelEvent>(OnPointerCancel);
+                m_ContentAndVerticalScrollContainer.UnregisterCallback<PointerUpEvent>(OnPointerUp, TrickleDown.TrickleDown);
 
                 contentContainer.UnregisterCallback<PointerCaptureEvent>(OnPointerCapture);
                 contentContainer.UnregisterCallback<PointerCaptureOutEvent>(OnPointerCaptureOut);
@@ -648,6 +779,11 @@ namespace UnityEngine.UIElements
 
         void OnPointerCaptureOut(PointerCaptureOutEvent evt)
         {
+            if (evt.target == contentContainer)
+            {
+                ReleaseScrolling(evt.pointerId);
+            }
+
             if (m_CapturedTarget == null)
                 return;
 
@@ -672,8 +808,8 @@ namespace UnityEngine.UIElements
             // Addition is always allowed.
             if (evt.layoutPass > 0)
             {
-                needsVerticalCached = needsVerticalCached || verticalScroller.visible;
-                needsHorizontalCached = needsHorizontalCached || horizontalScroller.visible;
+                needsVerticalCached = needsVerticalCached || isVerticalScrollDisplayed;
+                needsHorizontalCached = needsHorizontalCached || isHorizontalScrollDisplayed;
             }
 
             UpdateScrollers(needsHorizontalCached, needsVerticalCached);
@@ -918,12 +1054,7 @@ namespace UnityEngine.UIElements
 
         void OnPointerDown(PointerDownEvent evt)
         {
-            // We need to ignore temporarily mouse callback on mobile because they are sent with with the wrong type.
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-            if (evt.isPrimary && m_ScrollingPointerId == PointerId.invalidPointerId)
-#else
             if (evt.pointerType != PointerType.mouse && evt.isPrimary && m_ScrollingPointerId == PointerId.invalidPointerId)
-#endif
             {
                 m_PostPointerUpAnimation?.Pause();
 
@@ -945,7 +1076,9 @@ namespace UnityEngine.UIElements
 
                 if (touchStopsVelocityOnly)
                 {
-                    CancelTargetAndCapturePointer(evt);
+                    contentContainer.CapturePointer(evt.pointerId);
+                    contentContainer.panel.PreventCompatibilityMouseEvents(evt.pointerId);
+                    evt.StopPropagation();
                 }
             }
         }
@@ -955,7 +1088,7 @@ namespace UnityEngine.UIElements
             if (evt.pointerId != m_ScrollingPointerId)
                 return;
 
-            if (evt.isDefaultPrevented)
+            if (evt.isHandledByDraggable)
             {
                 m_PointerStartPosition = evt.position;
                 return;
@@ -1018,7 +1151,9 @@ namespace UnityEngine.UIElements
 
             if (scrollOffsetChanged)
             {
-                CancelTargetAndCapturePointer(evt);
+                evt.isHandledByDraggable = true;
+                contentContainer.CapturePointer(evt.pointerId);
+                evt.StopPropagation();
             }
             else
             {
@@ -1030,36 +1165,18 @@ namespace UnityEngine.UIElements
         {
             if (evt.target == contentContainer)
             {
-                ReleaseScrolling(evt);
+                ReleaseScrolling(evt.pointerId);
             }
         }
 
         void OnPointerUp(PointerUpEvent evt)
         {
-            ReleaseScrolling(evt);
+            ReleaseScrolling(evt.pointerId);
         }
 
-        void CancelTargetAndCapturePointer<T>(T evt) where T : PointerEventBase<T>, new()
+        void ReleaseScrolling(int pointerId)
         {
-            if (evt.target != contentContainer)
-            {
-                using (var cancelEvent = PointerCancelEvent.GetPooled(evt, evt.position, m_ScrollingPointerId))
-                {
-                    cancelEvent.target = evt.target;
-                    evt.target.SendEvent(cancelEvent);
-                }
-
-                evt.target.ReleasePointer(evt.pointerId);
-            }
-
-            contentContainer.CapturePointer(evt.pointerId);
-            evt.StopPropagation();
-            evt.PreventDefault();
-        }
-
-        void ReleaseScrolling<T>(T evt) where T : PointerEventBase<T>, new()
-        {
-            if (evt.pointerId != m_ScrollingPointerId)
+            if (pointerId != m_ScrollingPointerId)
                 return;
 
             if (touchScrollBehavior == TouchScrollBehavior.Elastic || hasInertia)
@@ -1076,61 +1193,86 @@ namespace UnityEngine.UIElements
                 }
             }
 
-            contentContainer.ReleasePointer(evt.pointerId);
+            contentContainer.ReleasePointer(pointerId);
             m_ScrollingPointerId = PointerId.invalidPointerId;
         }
 
-        void UpdateScrollers(bool displayHorizontal, bool displayVertical)
+        void AdjustScrollers()
         {
             float horizontalFactor = contentContainer.boundingBox.width > Mathf.Epsilon ? contentViewport.layout.width / contentContainer.boundingBox.width : 1f;
             float verticalFactor = contentContainer.boundingBox.height > Mathf.Epsilon ? contentViewport.layout.height / contentContainer.boundingBox.height : 1f;
 
             horizontalScroller.Adjust(horizontalFactor);
             verticalScroller.Adjust(verticalFactor);
+        }
+
+        void UpdateScrollers(bool displayHorizontal, bool displayVertical)
+        {
+            AdjustScrollers();
 
             // Set availability
             horizontalScroller.SetEnabled(contentContainer.boundingBox.width - contentViewport.layout.width > 0);
             verticalScroller.SetEnabled(contentContainer.boundingBox.height - contentViewport.layout.height > 0);
 
-            // Expand content if scrollbars are hidden
-            var newShowVertical = displayVertical && m_VerticalScrollerVisibility != ScrollerVisibility.Hidden;
             var newShowHorizontal = displayHorizontal && m_HorizontalScrollerVisibility != ScrollerVisibility.Hidden;
-            contentViewport.style.marginRight = newShowVertical ? verticalScroller.layout.width : 0;
-            horizontalScroller.style.right = newShowVertical ? verticalScroller.layout.width : 0;
-            contentViewport.style.marginBottom = newShowHorizontal ? horizontalScroller.layout.height : 0;
-            verticalScroller.style.bottom = newShowHorizontal ? horizontalScroller.layout.height : 0;
+            var newShowVertical = displayVertical && m_VerticalScrollerVisibility != ScrollerVisibility.Hidden;
+            var newHorizontalDisplay = newShowHorizontal ? DisplayStyle.Flex : DisplayStyle.None;
+            var newVerticalDisplay = newShowVertical ? DisplayStyle.Flex : DisplayStyle.None;
 
-            // Need to set always, for touch scrolling.
-            horizontalScroller.lowValue = 0f;
-            horizontalScroller.highValue = scrollableWidth;
-            verticalScroller.lowValue = 0f;
-            verticalScroller.highValue = scrollableHeight;
-
-            if (!displayHorizontal || !(scrollableWidth > 0f))
+            // Set display as necessary
+            if (newHorizontalDisplay != horizontalScroller.style.display)
             {
-                horizontalScroller.value = 0f;
+                horizontalScroller.style.display = newHorizontalDisplay;
+            }
+            if (newVerticalDisplay != verticalScroller.style.display)
+            {
+                verticalScroller.style.display = newVerticalDisplay;
             }
 
-            if (!displayVertical || !(scrollableHeight > 0f))
+            // Need to set always, for touch scrolling.
+            verticalScroller.lowValue = 0f;
+            verticalScroller.highValue = scrollableHeight;
+            horizontalScroller.lowValue = 0f;
+            horizontalScroller.highValue = scrollableWidth;
+
+            if (!needsVertical || !(scrollableHeight > 0f))
             {
                 verticalScroller.value = 0f;
             }
 
-            // Set visibility and remove/add content viewport margin as necessary
-            if (horizontalScroller.visible != newShowHorizontal)
+            if (!needsHorizontal || !(scrollableWidth > 0f))
             {
-                horizontalScroller.visible = newShowHorizontal;
+                horizontalScroller.value = 0f;
             }
-            if (verticalScroller.visible != newShowVertical)
+        }
+
+        private void OnScrollersGeometryChanged(GeometryChangedEvent evt)
+        {
+            if (evt.oldRect.size == evt.newRect.size)
             {
-                verticalScroller.visible = newShowVertical;
+                return;
             }
+
+            var newShowHorizontal = needsHorizontal && m_HorizontalScrollerVisibility != ScrollerVisibility.Hidden;
+
+            // Add some space if both scrollers are visible
+            if (newShowHorizontal)
+            {
+                horizontalScroller.style.marginRight = verticalScroller.layout.width;
+            }
+
+            AdjustScrollers();
         }
 
         // TODO: Same behaviour as IMGUI Scroll view
         void OnScrollWheel(WheelEvent evt)
         {
-            if (contentContainer.boundingBox.height - layout.height > 0)
+            var updateContentViewTransform = false;
+            var canUseVerticalScroll = contentContainer.boundingBox.height - layout.height > 0;
+            var canUseHorizontalScroll = contentContainer.boundingBox.width - layout.width > 0;
+            var horizontalScrollDelta = canUseHorizontalScroll && !canUseVerticalScroll ? evt.delta.y : evt.delta.x;
+
+            if (canUseVerticalScroll)
             {
                 var oldVerticalValue = verticalScroller.value;
 
@@ -1142,23 +1284,28 @@ namespace UnityEngine.UIElements
                 if (verticalScroller.value != oldVerticalValue)
                 {
                     evt.StopPropagation();
+                    updateContentViewTransform = true;
                 }
             }
 
-            if (contentContainer.boundingBox.width - layout.width > 0)
+            if (canUseHorizontalScroll)
             {
                 var oldHorizontalValue = horizontalScroller.value;
 
-                if (evt.delta.x < 0)
-                    horizontalScroller.ScrollPageUp(Mathf.Abs(evt.delta.x));
-                else if (evt.delta.x > 0)
-                    horizontalScroller.ScrollPageDown(Mathf.Abs(evt.delta.x));
+                if (horizontalScrollDelta < 0)
+                    horizontalScroller.ScrollPageUp(Mathf.Abs(horizontalScrollDelta));
+                else if (horizontalScrollDelta > 0)
+                    horizontalScroller.ScrollPageDown(Mathf.Abs(horizontalScrollDelta));
 
                 if (horizontalScroller.value != oldHorizontalValue)
                 {
                     evt.StopPropagation();
+                    updateContentViewTransform = true;
                 }
             }
+
+            if (updateContentViewTransform)
+                UpdateContentViewTransform();
         }
     }
 }

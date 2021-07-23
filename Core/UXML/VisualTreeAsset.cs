@@ -86,6 +86,9 @@ namespace UnityEngine.UIElements
         {
             get
             {
+                if (m_Usings == null || m_Usings.Count == 0)
+                    yield break;
+
                 HashSet<VisualTreeAsset> sent = new HashSet<VisualTreeAsset>();
 
                 foreach (var entry in m_Usings)
@@ -282,6 +285,13 @@ namespace UnityEngine.UIElements
                 (templateAssets == null || templateAssets.Count <= 0))
                 return;
 
+            if (target is TemplateContainer templateContainer)
+            {
+                // We keep track of VisualTreeAssets instantiated as Templates inside other VisualTreeAssets so that
+                // users can find the reference and re-clone them.
+                templateContainer.templateSource = this;
+            }
+
             Dictionary<int, List<VisualElementAsset>> idToChildren = new Dictionary<int, List<VisualElementAsset>>();
             int eltcount = visualElementAssets == null ? 0 : visualElementAssets.Count;
             int tplcount = templateAssets == null ? 0 : templateAssets.Count;
@@ -331,11 +341,10 @@ namespace UnityEngine.UIElements
 
                 if (rootVe != null)
                 {
-#if UNITY_EDITOR
                     // Save reference to the VisualTreeAsset itself on the containing VisualElement so it can be
-                    // tracked for live reloading on changes.
-                    rootVe.m_VisualTreeAssetSource = this;
-#endif
+                    // tracked for live reloading on changes, and also accessible for users that need to keep track
+                    // of their cloned VisualTreeAssets.
+                    rootVe.visualTreeAssetSource = this;
 
                     // if contentContainer == this, the shadow and the logical hierarchy are identical
                     // otherwise, if there is a CC, we want to insert in the shadow
@@ -639,13 +648,28 @@ namespace UnityEngine.UIElements
     }
 
     /// <summary>
-    /// This class is used during UXML template instantiation.
+    /// This structure holds information used during UXML template instantiation.
     /// </summary>
     public struct CreationContext : IEquatable<CreationContext>
     {
+        /// <undoc/>
+        // TODO why is this public? It's not used internally and could be obtained by default(CreationContext)
         public static readonly CreationContext Default = new CreationContext();
+
+        /// <summary>
+        /// The element into which the <see cref="visualTreeAsset"/> is being cloned or instantiated.
+        /// <see cref="VisualTreeAsset.CloneTree()"/>
+        /// <see cref="VisualTreeAsset.Instantiate()"/>
+        /// </summary>
         public VisualElement target { get; private set; }
+
+        /// <summary>
+        /// The target UXML file to clone or instantiate.
+        /// </summary>
         public VisualTreeAsset visualTreeAsset { get; private set; }
+
+        /// <undoc/>
+        // TODO This feature leaks in the API but isn't usable
         public Dictionary<string, VisualElement> slotInsertionPoints { get; private set; }
 
         internal List<TemplateAsset.AttributeOverride> attributeOverrides { get; private set; }
@@ -672,6 +696,7 @@ namespace UnityEngine.UIElements
             return obj is CreationContext && Equals((CreationContext)obj);
         }
 
+        /// <undoc/>
         public bool Equals(CreationContext other)
         {
             return EqualityComparer<VisualElement>.Default.Equals(target, other.target) &&
@@ -688,11 +713,13 @@ namespace UnityEngine.UIElements
             return hashCode;
         }
 
+        /// <undoc/>
         public static bool operator==(CreationContext context1, CreationContext context2)
         {
             return context1.Equals(context2);
         }
 
+        /// <undoc/>
         public static bool operator!=(CreationContext context1, CreationContext context2)
         {
             return !(context1 == context2);

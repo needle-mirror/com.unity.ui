@@ -1,0 +1,1267 @@
+.unity-theme-env-variables {
+    --enable-style-hovering: true;
+    --theme-default-top-margin: 2px;
+    --theme-default-bottom-margin: 2px;
+    --theme-default-left-margin: 4px;
+    --theme-default-right-margin: 4px;
+    --theme-input-text-cursor: text;
+    --window-toolbar-height: 21px;
+
+    --unity-font-size: env(--unity-metrics-default-font_normal_size);
+
+    --unity-font-standard-padding-top: 2px;
+    --unity-font-standard-padding-top-with-border: 1px;
+    --unity-font-standard-padding-bottom: 2px;
+    --unity-font-standard-padding-bottom-with-border: 1px;
+
+    --unity-font-popup-padding-top: 1px;
+    --unity-font-popup-padding-bottom: 1px;
+
+    --unity-font-button-padding-top: 1px;
+    --unity-font-button-padding-bottom: 3px;
+
+    --current-font: url("/Packages/com.unity.ui/PackageResources/Fonts/NotInter/NotInter-Regular.ttf");
+}
+
+:root {
+    font-size: env(--unity-font-size);
+    -unity-font-definition: env(--current-font);
+    color: env(--unity-text-color);
+
+    --unity-font-button-padding-top: 10px;
+    --unity-font-button-padding-bottom: 10px;
+}
+
+.unity-disabled {
+    opacity: 0.5;
+}
+
+/**********************************************************************************************************************/
+/* BaseField                                                                                                          */
+/**********************************************************************************************************************/
+
+.unity-base-field {
+    flex-direction: row;
+    margin-top: env(--theme-default-top-margin);
+    margin-bottom: env(--theme-default-bottom-margin);
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-left: env(--theme-default-left-margin);
+    margin-right: env(--theme-default-right-margin);
+}
+
+.unity-base-field__label {
+    min-width: 150px;
+    padding-left: 2px;
+    padding-top: env(--unity-font-standard-padding-top);
+    padding-bottom: env(--unity-font-standard-padding-bottom);
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-right: 2px;
+}
+
+.unity-base-field__input {
+    flex: 1 0 0;
+    overflow: hidden;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+}
+
+.unity-base-field__label--with-dragger {
+    cursor: slide-arrow;
+}
+
+.unity-property-field > .unity-imgui-container {
+    margin-top: env(--theme-default-top-margin);
+    margin-bottom: env(--theme-default-bottom-margin);
+    margin-left: env(--theme-default-left-margin);
+    margin-right: env(--theme-default-right-margin);
+}
+
+.unity-base-field__label--mixed-value > .unity-base-text-field__input,
+.unity-base-field__label--mixed-value > .unity-base-field__input {
+    color: env(--theme-base-field-label-mixed-values-color);
+}
+
+/**********************************************************************************************************************/
+/* - Button                                                                                                           */
+/* - Enumfield/BasePopupField                                                                                         */
+/**********************************************************************************************************************/
+
+.unity-button,
+.unity-enum-field__input,
+.unity-base-popup-field__input {
+    -unity-text-align: middle-center;
+    flex: 0 0 auto;
+    overflow: hidden;
+    white-space: nowrap;
+
+    background-color: env(--unity-colors-button-background);
+    border-color: env(--unity-colors-button-border);
+    border-width: 1px;
+
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: env(--unity-font-button-padding-top);
+    padding-bottom: env(--unity-font-button-padding-bottom);
+
+    margin-top: env(--theme-default-top-margin);
+    margin-bottom: env(--theme-default-bottom-margin);
+    margin-left: env(--theme-default-left-margin);
+    margin-right: env(--theme-default-right-margin);
+}
+
+.unity-button:hover,
+.unity-base-popup-field:hover > .unity-enum-field__input,
+.unity-base-popup-field:hover > .unity-base-popup-field__input {
+    background-color: env(--unity-colors-button-background-hover);
+    border-color: env(--unity-colors-button-border-hover);
+}
+
+.unity-button:active,
+.unity-base-popup-field:active > .unity-enum-field__input,
+.unity-base-popup-field:active > .unity-base-popup-field__input {
+    background-color: env(--unity-colors-button-background-pressed);
+    border-color: env(--unity-colors-button-border-pressed);
+}
+
+.unity-button:focus,
+.unity-base-popup-field:focus > .unity-enum-field__input,
+.unity-base-popup-field:focus > .unity-base-popup-field__input {
+    border-color: env(--unity-colors-button-border-focus);
+}
+
+.unity-button:disabled,
+.unity-enum-field__input:disabled,
+.unity-base-popup-field__input:disabled {
+    background-color: env(--unity-colors-button-background-disabled);
+    border-color: env(--unity-colors-button-border-disabled);
+}
+
+
+/**********************************************************************************************************************/
+/* Enumfield/BasePopupField                                                                                           */
+/**********************************************************************************************************************/
+
+.unity-enum-field__input,
+.unity-base-popup-field__input {
+    -unity-text-align: middle-left;
+    flex-direction: row;
+}
+
+.unity-base-popup-field__input  {
+    min-width: 55px;
+}
+
+.unity-enum-field__arrow,
+.unity-base-popup-field__arrow {
+    background-image: env(--theme-image-dropdown);
+    -unity-background-image-tint-color: env(--unity-theme-colors-base-6);
+    width: 10px;
+    height: 10px;
+    align-self: center;
+}
+
+.unity-enum-field__text,
+.unity-base-popup-field__text {
+    margin-right: 40px;
+    overflow: hidden;
+    -unity-text-align: middle-left;
+    white-space:nowrap;
+    flex-grow:1;
+}
+
+/**********************************************************************************************************************/
+/* Dropdown Menu                                                                                                      */
+/**********************************************************************************************************************/
+
+.unity-base-dropdown {
+    position: absolute;
+    flex-shrink: 0;
+}
+
+.unity-base-dropdown__container-outer {
+    position: absolute;
+    border-width: 1px;
+    border-color: env(--unity-theme-colors-base-6);
+    margin-top: 4px;
+}
+
+.unity-base-dropdown__container-inner {
+    position: relative;
+    background-color: env(--unity-theme-colors-base-2);
+    flex-direction: column;
+    overflow: visible;
+    padding: 4px 0;
+}
+
+.unity-base-dropdown__item {
+    flex-direction: row;
+    -unity-text-align: middle-left;
+    min-width: 20px;
+    min-height: 20px;
+    padding: 0 12px 0 28px;
+}
+
+.unity-base-dropdown__item:hover {
+    background-color: env(--unity-theme-colors-focus);
+}
+
+.unity-base-dropdown__item:checked {
+    padding: 0 20px 0 0;
+}
+
+.unity-base-dropdown__checkmark {
+    margin-left: 4px;
+    margin-right: 0;
+    width: 24px;
+    height: 24px;
+    align-self:center;
+    background-image: env(--theme-image-toggle-checkmark);
+    -unity-background-image-tint-color: env(--unity-theme-colors-base-6);
+}
+
+.unity-base-dropdown__item:hover > .unity-base-dropdown__checkmark {
+    -unity-background-image-tint-color: env(--theme-line-selection-text-color);
+}
+
+.unity-base-dropdown__item:hover > .unity-base-dropdown__label {
+    color: env(--theme-line-selection-text-color);
+}
+
+.unity-base-dropdown__separator {
+    height: 1px;
+    background-color: env(--unity-theme-colors-base-6);
+    margin: 4px 0;
+}
+
+/**********************************************************************************************************************/
+/* Label                                                                                                              */
+/**********************************************************************************************************************/
+
+.unity-label {
+    flex: 0 0 auto;
+    margin: 4px 4px 2px 2px;
+    padding-left: 1px;
+    padding-top: 4px;
+    padding-right: 2px;
+    padding-bottom: 4px;
+    white-space: nowrap;
+}
+
+.unity-label:focus {
+    color: env(--unity-colors-label-text-focus);
+}
+
+/**********************************************************************************************************************/
+/* Toggle                                                                                                             */
+/**********************************************************************************************************************/
+
+.unity-toggle {
+    margin: 4px 4px 2px 2px;
+}
+.unity-toggle__label {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+.unity-toggle__input {
+    flex-direction: row;
+    flex-basis: auto;
+}
+
+.unity-toggle__checkmark {
+    padding-top: 0;
+    width: 24px;
+    height: 24px;
+    flex:0 0 auto;
+    align-self:center;
+    background-color: env(--unity-colors-toggle_checkmark-background);
+    border-color: env(--unity-colors-toggle_checkmark-border);
+    -unity-background-image-tint-color: env(--unity-theme-colors-base-6);
+    border-width: 1px;
+}
+
+.unity-toggle > .unity-toggle__input:hover > .unity-toggle__checkmark,
+.unity-toggle > .unity-toggle__input:hover:checked > .unity-toggle__checkmark {
+    border-color: env(--unity-colors-toggle_checkmark-border-hover);
+}
+
+.unity-toggle > .unity-toggle__input:active > .unity-toggle__checkmark,
+.unity-toggle > .unity-toggle__input:active:checked > .unity-toggle__checkmark {
+    border-color: env(--unity-colors-toggle_checkmark-border-hover);
+}
+
+.unity-toggle > .unity-toggle__input:checked > .unity-toggle__checkmark {
+    background-image: env(--theme-image-toggle-checkmark);
+    border-color: env(--unity-colors-toggle_checkmark-border);
+}
+
+.unity-toggle:focus > .unity-toggle__input > .unity-toggle__checkmark,
+.unity-toggle:focus > .unity-toggle__input:checked > .unity-toggle__checkmark {
+    border-color: env(--unity-theme-colors-focus);
+}
+
+.unity-toggle > .unity-toggle__input:disabled > .unity-toggle__checkmark {
+    background-color: env(--unity-colors-toggle_checkmark-background-disabled);
+    border-color: env(--unity-colors-toggle_checkmark-border-disabled);
+}
+
+.unity-toggle__text {
+    margin-top: 0;
+    margin-left: 1px;
+    align-self:center;
+}
+
+
+/**********************************************************************************************************************/
+/* RadioButton                                                                                                        */
+/**********************************************************************************************************************/
+
+.unity-radio-button {
+    margin-top: env(--theme-default-top-margin);
+    margin-bottom: 3px;
+}
+
+.unity-radio-button__label {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.unity-radio-button__input {
+    flex-direction: row;
+    flex-basis: auto;
+}
+
+.unity-radio-button__checkmark-background {
+    padding-top: 5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: env(--unity-theme-colors-base-2);
+    border-width: 1px;
+    border-color: env(--unity-theme-colors-base-4);
+    flex: 0 0 auto;
+    align-self:center;
+}
+
+.unity-radio-button:disabled .unity-radio-button__checkmark-background {
+    background-color: env(--unity-theme-colors-base-3);
+    border-color: env(--unity-theme-colors-base-9);
+}
+
+.unity-radio-button__checkmark {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    background-color: env(--unity-theme-colors-base-6);
+    flex:0 0 auto;
+    align-self:center;
+}
+
+.unity-radio-button:disabled .unity-radio-button__checkmark {
+    background-color: black;
+}
+
+.unity-radio-button > .unity-radio-button__input:hover > .unity-radio-button__checkmark-background {
+    border-color: env(--unity-theme-colors-base-6);
+}
+.unity-radio-button > .unity-radio-button__input:focus > .unity-radio-button__checkmark-background {
+    border-color: env(--theme-input-border-focus-color);
+}
+
+.unity-radio-button__text {
+    margin-top: 0;
+    margin-left: 1px;
+    align-self:center;
+}
+
+.unity-base-field__input > .unity-radio-button {
+    margin-left: 0;
+}
+
+/**********************************************************************************************************************/
+/* GroupBox                                                                                                           */
+/**********************************************************************************************************************/
+
+.unity-group-box {
+    margin-left: env(--theme-default-left-margin);
+    margin-top: 6px;
+    margin-bottom: env(--theme-default-bottom-margin);
+    margin-right: env(--theme-default-right-margin);
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 3px;
+    flex-shrink: 0;
+}
+
+.unity-group-box__label {
+    margin-top: -5px;
+    margin-bottom: 5px;
+}
+
+/**********************************************************************************************************************/
+/* RadioButtonGroup                                                                                                   */
+/**********************************************************************************************************************/
+
+.unity-radio-button-group {
+    flex-shrink: 0;
+}
+
+
+/**********************************************************************************************************************/
+/* Slider                                                                                                             */
+/**********************************************************************************************************************/
+
+.unity-base-slider__input {
+    flex: 1 0 auto;
+    flex-wrap: nowrap;
+    overflow: visible;
+}
+
+.unity-base-slider--vertical .unity-base-slider__input {
+    flex-direction: column;
+}
+
+.unity-base-slider--horizontal .unity-base-slider__input {
+    flex-direction: row;
+}
+
+/* Vertical slider */
+.unity-base-slider--vertical {
+    min-width: env(--unity-metrics-slider_thumb-height);
+    width: env(--unity-metrics-slider-width);
+    flex-direction: column;
+    margin-left: 1px;
+    margin-right: 1px;
+    overflow: visible; /* need overflow to show the border at the extreme sides */
+}
+
+.unity-base-slider--horizontal {
+    /*margin-top: 1;  the UIElement slider doesn't have a TextField and thus is a little shorter. That margin is added to have the same height*/
+    overflow: visible; /* need overflow to show the border at the extreme sides */
+    min-height: env(--unity-metrics-slider_thumb-height);
+}
+
+.unity-base-slider .unity-base-slider__tracker {
+    background-color: env(--unity-colors-slider_groove-background);
+    border-color: env(--unity-colors-slider_groove-border);
+    border-width: 1px;
+}
+
+.unity-base-slider .unity-base-slider__tracker:hover {
+    background-color: env(--unity-colors-slider_groove-background);
+}
+
+.unity-base-slider--vertical .unity-base-slider__tracker {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    margin: 0;
+    margin-left: env(--unity-metrics-slider_groove-margin_top);
+    width: env(--unity-metrics-slider_groove-height);
+    position:absolute;
+}
+
+.unity-base-slider--horizontal .unity-base-slider__tracker {
+    top: 50%;
+    right: 0;
+    left: 0;
+    margin: 0;
+    margin-top: env(--unity-metrics-slider_groove-margin_top);
+    height: env(--unity-metrics-slider_groove-height);
+    position:absolute;
+}
+
+.unity-base-slider .unity-base-slider__dragger {
+    position: absolute;
+    border-width: 1px;
+    border-color: env(--unity-colors-slider_thumb-border);
+    background-color: env(--unity-colors-slider_thumb-background);
+}
+
+.unity-base-slider--horizontal .unity-base-slider__dragger {
+   top: 50%;
+   width: env(--unity-metrics-slider_thumb-width);
+   height: env(--unity-metrics-slider_thumb-height);
+   margin: 0;
+   margin-top: env(--unity-metrics-slider_thumb-offset);
+}
+
+.unity-base-slider--vertical .unity-base-slider__dragger {
+    left: 50%;
+    height: env(--unity-metrics-slider_thumb-width);
+    width: env(--unity-metrics-slider_thumb-height);
+    margin: 0;
+    margin-left: env(--unity-metrics-slider_thumb-offset);
+}
+
+.unity-base-slider__dragger:hover {
+    border-color: env(--unity-colors-slider_thumb-border-hover);
+    background-color: env(--unity-colors-slider_thumb-background-hover);
+}
+
+.unity-base-slider:focus .unity-base-slider__dragger {
+    border-color: env(--unity-colors-slider_thumb-border-focus);
+}
+
+.unity-base-slider__tracker:hover {
+    background-color: env(--unity-colors-slider_groove-background-hover);
+}
+
+.unity-base-slider__tracker:focus {
+    background-color: env(--unity-colors-slider_groove-background-focus);
+}
+
+.unity-base-slider__tracker:disabled {
+    opacity: 1;
+    background-color: env(--unity-colors-slider_groove-background-disabled);
+}
+
+.unity-base-slider__dragger:disabled {
+    opacity: 1;
+    border-color: env(--unity-colors-slider_thumb-border-disabled);
+    background-color: env(--unity-colors-slider_thumb-background-disabled);
+}
+
+.unity-base-slider__dragger:hover {
+    background-color: env(--unity-colors-slider_thumb-background-hover);
+}
+
+.unity-base-slider .unity-base-slider__dragger-border {
+    display: none;
+}
+
+.unity-base-slider__drag-container {
+    flex-grow: 1;
+}
+
+.unity-base-slider--horizontal .unity-base-slider__text-field {
+    width: 50px;
+    height: 20px;
+    margin: 0 0 0 4px;
+}
+
+.unity-base-slider--vertical .unity-base-slider__text-field {
+    min-width: 20px;
+    height: 20px;
+    margin: 4px 0 0 0;
+}
+/* MinMaxSlider */
+.unity-min-max-slider__input {
+    overflow: visible;
+    min-height: 16px;
+}
+
+.unity-min-max-slider {
+    margin-top: env(--unity-metrics-slider-margin_top);
+    margin-bottom: env(--unity-metrics-slider-margin_bottom);
+    overflow: visible;
+    min-height: env(--unity-metrics-slider_thumb-height);
+    padding: 0;
+}
+
+.unity-min-max-slider__tracker {
+    top: 50%;
+    left: 0;
+    right: 0;
+    margin: 0;
+    margin-top: env(--unity-metrics-slider_groove-margin_top);
+    height: env(--unity-metrics-slider_groove-height);
+    background-color: env(--unity-colors-slider_groove-background);
+    border-color: env(--unity-colors-slider_groove-border);
+    border-width: 1px;
+    position: absolute;
+}
+
+.unity-min-max-slider__tracker:hover {
+    background-color: env(--unity-colors-slider_groove-background-hover);
+}
+
+.unity-min-max-slider__tracker:focus {
+    background-color: env(--unity-colors-slider_groove-background-focus);
+}
+
+.unity-min-max-slider__tracker:disabled {
+    opacity: 1;
+    background-color: env(--unity-colors-slider_groove-background-disabled);
+}
+
+.unity-min-max-slider .unity-min-max-slider__tracker:hover {
+    background-color: env(--unity-colors-slider_groove-background);
+}
+
+.unity-min-max-slider__dragger {
+    top: 50%;
+    margin:0;
+    margin-top: env(--unity-metrics-minmax_slider_thumb-offset);
+    width: env(--unity-metrics-slider_thumb-width);
+    height: env(--unity-metrics-minmax_slider_thumb-height);
+    border-width: 1px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-color: env(--unity-colors-slider_thumb-border);
+    background-color: env(--unity-colors-minmax_slider_thumb-background);
+
+    -unity-slice-left: 10;
+    -unity-slice-top: 0;
+    -unity-slice-right: 10;
+    -unity-slice-bottom: 0;
+    position:absolute;
+}
+
+.unity-min-max-slider__dragger:hover {
+    border-color: env(--unity-colors-slider_thumb-border-hover);
+}
+
+.unity-min-max-slider__dragger:disabled {
+    opacity: 1;
+    border-color: env(--unity-colors-slider_thumb-border-disabled);
+    background-color: env(--unity-colors-slider_thumb-background-disabled);
+}
+
+.unity-min-max-slider__dragger:hover {
+    border-color: env(--unity-colors-slider_thumb-border-hover);
+}
+
+.unity-min-max-slider__min-thumb, .unity-min-max-slider__max-thumb {
+    cursor: resize-horizontal;
+    position:absolute;
+    border-width: 1px;
+    border-color: env(--unity-colors-slider_thumb-border);
+    background-color: env(--unity-colors-slider_thumb-background);
+    min-height: env(--unity-metrics-minmax_slider_minmax_thumb-height);
+    margin: 0;
+    margin-top: env(--unity-metrics-minmax_slider_minmax_thumb-offset);
+    min-width: env(--unity-metrics-slider_thumb-width);
+}
+
+.unity-min-max-slider:focus .unity-min-max-slider__min-thumb, .unity-min-max-slider:focus .unity-min-max-slider__max-thumb {
+    border-color: env(--unity-colors-slider_thumb-border-focus);
+}
+
+.unity-min-max-slider__min-thumb:disabled , .unity-min-max-slider__max-thumb:disabled  {
+    border-color: env(--unity-colors-slider_thumb-border-disabled);
+    background-color: env(--unity-colors-slider_thumb-background-disabled);
+}
+
+/**********************************************************************************************************************/
+/* Scroller                                                                                                           */
+/**********************************************************************************************************************/
+
+.unity-scroller {
+    border-color: env(--unity-colors-scrollbar_groove-border);
+    border-width: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.unity-scroller--horizontal
+{
+    height: 24px;
+}
+.unity-scroller--vertical
+{
+    width: 24px;
+}
+.unity-scroller > .unity-scroller__low-button, .unity-scroller > .unity-scroller__high-button {
+    position:absolute;
+    background-color: env(--unity-colors-scrollbar_button-background);
+    border-color: env(--unity-colors-scrollbar_button-border);
+    -unity-background-image-tint-color: env(--unity-theme-colors-base-6);
+    border-width: 1px;
+    height: 24px;
+    width: 24px;
+}
+.unity-scroller--horizontal > .unity-scroller__low-button
+{
+    left:0;
+    background-image: env(--theme-image-scroll-left);
+}
+.unity-scroller--horizontal > .unity-scroller__high-button
+{
+    right:0;
+    background-image: env(--theme-image-scroll-right);
+}
+.unity-scroller--vertical > .unity-scroller__low-button
+{
+    top:0;
+    background-image: env(--theme-image-scroll-up);
+}
+.unity-scroller--vertical > .unity-scroller__high-button
+{
+    bottom:0;
+    background-image: env(--theme-image-scroll-down);
+}
+.unity-scroller > .unity-scroller__low-button:hover, .unity-scroller > .unity-scroller__hogh-button:hover {
+    background-color: env(--unity-colors-scrollbar_button-background-hover);
+    border-color: env(--unity-colors-scrollbar_button-border-hover);
+}
+.unity-scroller > .unity-scroller__low-button:focus, .unity-scroller > .unity-scroller__hogh-button:focus {
+    border-color: env(--unity-colors-scrollbar_button-border-focus);
+}
+.unity-scroller .unity-base-slider__tracker {
+    right:0;
+    left: 0;
+    top:0;
+    bottom: 0;
+    margin: 0;
+    position: absolute;
+    background-color: env(--unity-colors-scrollbar_groove-background);
+    border-color: env(--unity-colors-scrollbar_groove-border);
+    width: 100%;
+    height: 100%;
+}
+.unity-scroller--horizontal .unity-base-slider__tracker {
+    border-left-width: 0;
+    border-top-width: 1px;
+    border-right-width: 0;
+    border-bottom-width: 1px;
+}
+.unity-scroller--vertical .unity-base-slider__tracker {
+    border-left-width: 1px;
+    border-top-width: 0;
+    border-right-width: 1px;
+    border-bottom-width: 0;
+}
+.unity-scroller--vertical .unity-base-slider__dragger,
+.unity-scroller--horizontal .unity-base-slider__dragger {
+    margin: 0;
+    border-color: env(--unity-colors-scrollbar_thumb-border);
+    background-color: env(--unity-colors-scrollbar_thumb-background);
+}
+
+.unity-scroller--horizontal .unity-base-slider__dragger {
+    top: 3px;
+    height: 18px;
+}
+.unity-scroller--vertical .unity-base-slider__dragger {
+    left: 3px;
+    width: 18px;
+}
+.unity-scroller .unity-base-slider__dragger:hover {
+    border-color: env(--unity-colors-scrollbar_thumb-border-hover);
+    background-color: env(--unity-colors-scrollbar_thumb-background-hover);
+}
+.unity-scroller .unity-base-slider__dragger:active {
+    border-color: env(--unity-colors-scrollbar_thumb-border-pressed);
+    background-color: env(--unity-colors-scrollbar_thumb-background-pressed);
+}
+.unity-scroller--horizontal > .unity-scroller__slider {
+    flex: 1 0 0;
+    height: 24px;
+    margin: 0 24px;
+    /* override overflow of slider */
+    overflow: hidden;
+}
+.unity-scroller--vertical > .unity-scroller__slider {
+    flex: 1 0 0;
+    width: 24px;
+    margin: 24px 0;
+    /* override overflow of slider */
+    overflow: hidden;
+}
+/**********************************************************************************************************************/
+/* ScrollView                                                                                                         */
+/**********************************************************************************************************************/
+
+.unity-scroll-view {
+    flex-shrink: 1;
+}
+
+.unity-scroll-view__content-container {
+    flex-shrink: 0;
+}
+
+.unity-scroll-view--vertical > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport,
+.unity-scroll-view--vertical > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
+    flex-direction: column;
+}
+
+.unity-scroll-view--horizontal > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport,
+.unity-scroll-view--horizontal > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport >.unity-scroll-view__content-container {
+    flex-direction: row;
+}
+
+.unity-scroll-view--vertical-horizontal > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport,
+.unity-scroll-view--vertical-horizontal > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
+    flex-direction: column;
+    align-self: flex-start;
+    flex-grow: 1;
+}
+
+.unity-scroll-view__content-viewport {
+    flex: auto;
+    overflow: hidden;
+}
+
+.unity-scroll-view--horizontal.unity-scroll-view--scroll > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container,
+.unity-scroll-view--vertical.unity-scroll-view--scroll > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container,
+.unity-scroll-view--vertical-horizontal.unity-scroll-view--scroll > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
+    overflow: scroll;
+}
+
+.unity-scroll-view--vertical-horizontal.unity-scroll-view--scroll > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport {
+    flex-direction: row;
+    overflow: scroll;
+}
+
+.unity-scroll-view__content-and-vertical-scroll-container {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.unity-scroll-view__horizontal-scroller {
+    flex-shrink: 0;
+}
+
+.unity-scroll-view__vertical-scroller {
+    flex-shrink: 0;
+}
+
+/**********************************************************************************************************************/
+/* Box                                                                                                                */
+/**********************************************************************************************************************/
+
+.unity-box {
+    background-color: env(--theme-box-background-color);
+    border-color: env(--theme-box-border-color);
+    border-width: 1px;
+}
+
+/**********************************************************************************************************************/
+/* PopupWindow                                                                                                        */
+/**********************************************************************************************************************/
+
+.unity-popup-window {
+    -unity-text-align: upper-center;
+    margin: 0;
+    padding: 0;
+    padding-top: 3px;
+    background-color: env(--theme-window-background-color);
+    border-width: 1px;
+    border-radius: 8px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-color: env(--theme-window-border-color);
+}
+
+.unity-popup-window__content-container {
+    -unity-text-align: upper-left;
+    padding: 24px 4px 4px 4px;
+    margin: 0;
+}
+
+/**********************************************************************************************************************/
+/* Foldout                                                                                                            */
+/**********************************************************************************************************************/
+
+.unity-foldout__toggle  > .unity-toggle__input > .unity-toggle__checkmark {
+    background-color: transparent;
+    border-color: transparent;
+    border-width: 0;
+    background-image: env(--theme-image-foldout);
+    -unity-background-image-tint-color: env(--unity-theme-colors-base-6);
+    width: 22px;
+    height: 22px;
+    margin: 0 4px 0 4px;
+}
+
+.unity-foldout__toggle .unity-text-element {
+}
+
+.unity-foldout__content {
+    margin-left: 30px;
+}
+
+.unity-foldout .unity-base-field__label {
+    min-width: 135px;
+}
+
+/* We use imgui container's indent mechanism to have the same layout than UIKT, so we need to remove the UITK foldout indent. */
+.unity-property-field > .unity-foldout__unity-imgui-container--depth-1 {
+    margin-left: -12px
+}
+.unity-property-field > .unity-foldout__unity-imgui-container--depth-2 {
+    margin-left: -27px
+}
+.unity-property-field > .unity-foldout__unity-imgui-container--depth-3 {
+    margin-left: -42px
+}
+.unity-property-field > .unity-foldout__unity-imgui-container--depth-4 {
+    margin-left: -57px
+}
+.unity-property-field > .unity-foldout__unity-imgui-container--depth-max {
+    margin-left: -72px;
+}
+
+.unity-foldout--depth-1 .unity-foldout__toggle,
+.unity-foldout--depth-2 .unity-foldout__toggle,
+.unity-foldout--depth-3 .unity-foldout__toggle,
+.unity-foldout--depth-4 .unity-foldout__toggle,
+.unity-foldout--depth-max .unity-foldout__toggle {
+    margin-left: -15px;
+}
+
+.unity-inspector-element .unity-foldout__toggle {
+    margin-left: -15px;
+}
+
+/* Should be multiples of .unity-foldout__content { margin-left: ?? } above, minus .unity-base-field__label { margin-right: ?? }. */
+/* The negative margin-right is there to adjust the beginning of the element right of the label to start all aligned */
+/* The padding-right will make sure the label content will stop 2 pixels before the next element (to the right of it) */
+/* Both margin-right and padding-right are needed */
+.unity-foldout--depth-1 > .unity-base-field > .unity-base-field__label,
+.unity-foldout--depth-1 > .unity-property-field > .unity-base-field > .unity-base-field__label {
+    margin-right: -13px;
+    padding-right: 15px;
+}
+
+.unity-foldout--depth-2 > .unity-base-field > .unity-base-field__label,
+.unity-foldout--depth-2 > .unity-property-field > .unity-base-field > .unity-base-field__label {
+    margin-right: -28px;
+    padding-right: 30px;
+}
+
+.unity-foldout--depth-3 > .unity-base-field > .unity-base-field__label,
+.unity-foldout--depth-3 > .unity-property-field > .unity-base-field > .unity-base-field__label {
+    margin-right: -43px;
+    padding-right: 45px;
+}
+
+.unity-foldout--depth-4 > .unity-base-field > .unity-base-field__label,
+.unity-foldout--depth-4 > .unity-property-field > .unity-base-field > .unity-base-field__label {
+    margin-right: -58px;
+    padding-right: 60px;
+}
+
+.unity-foldout--depth-max > .unity-base-field > .unity-base-field__label,
+.unity-foldout--depth-max > .unity-property-field > .unity-base-field > .unity-base-field__label {
+    margin-right: -73px;
+    padding-right: 75px;
+}
+
+.unity-foldout__toggle > .unity-toggle__input:checked > .unity-toggle__checkmark {
+    background-image: env(--theme-image-foldout-on);
+}
+
+.unity-foldout__toggle > .unity-toggle__input:focus > .unity-label {
+    color: env(--unity-colors-label-text-focus);
+}
+
+.unity-foldout__toggle > .unity-toggle__input:disabled > .unity-toggle__checkmark {
+    background-color: transparent;
+}
+
+/**********************************************************************************************************************/
+/* InputField, FloatInput, DoubleInput, IntegerInput, LongInput, TextInput                                            */
+/**********************************************************************************************************************/
+
+.unity-base-text-field {
+    white-space:nowrap;
+    --unity-selection-color: rgba(61,128,223,0.65);
+}
+
+/* different behavior for borders (in IMGUI border goes inside the element while in UIElements border goes outside)
+to handle this difference we need to add margin and remove them when using the border.
+It also means we need to remove from the existing padding the border width for top.
+*/
+.unity-base-text-field__input {
+    padding: 10px;
+    cursor:env(--theme-input-text-cursor);
+    -unity-overflow-clip-box: content-box;
+    flex : 1 1 auto;
+    background-color: env(--unity-colors-input_field-background);
+    border-color: env(--unity-colors-input_field-border);
+    border-width: 1px;
+    margin: 4px 4px 2px 2px;
+    /*This custom style is a workaround for TextField input that needs to sync GUIStyle text engine when style are computed.
+      Adding the custom style here will trigger are CustomStyleEvent which will do the sync.*/
+    --unity-sync-text-editor-engine: true;
+}
+
+.unity-base-text-field__input--single-line {
+    -unity-text-align: middle-left;
+}
+
+.unity-base-text-field__input--multiline {
+    -unity-text-align: upper-left;
+}
+
+.unity-base-field:focus > .unity-base-field__label {
+    color: env(--unity-active-text-color);
+}
+
+.unity-base-text-field:hover > .unity-base-text-field__input,
+.unity-base-text-field__input:hover {
+    border-color: env(--unity-colors-input_field-border-hover);
+}
+.unity-base-text-field:focus > .unity-base-text-field__input,
+.unity-base-text-field__input:focus {
+    border-color: env(--unity-colors-input_field-border-focus);
+}
+
+.unity-base-field__object:focus > .unity-base-field__label {
+    color: env(--unity-active-text-color);
+}
+
+.unity-base-text-field__input:disabled {
+    background-color: env(--unity-colors-input_field-background-disabled);
+}
+
+
+/**********************************************************************************************************************/
+/* TwoPaneSplitView                                                                                                   */
+/**********************************************************************************************************************/
+
+.unity-two-pane-split-view {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.unity-two-pane-split-view--vertical {
+    flex-direction: column;
+}
+
+.unity-two-pane-split-view--horizontal {
+    flex-direction: row;
+}
+
+.unity-two-pane-split-view__content-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.unity-two-pane-split-view__handle-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.unity-two-pane-split-view__dragline {
+    background-color: rgba(0, 0, 0, 0);
+    position: absolute;
+}
+
+.unity-two-pane-split-view__dragline--horizontal {
+    width: 10px;
+    left: -5px;
+    top: 0;
+    bottom: 0;
+    cursor: resize-horizontal;
+}
+
+.unity-two-pane-split-view__dragline--vertical {
+    height: 10px;
+    top: -5px;
+    left: 0;
+    right: 0;
+    cursor: resize-vertical;
+}
+
+.unity-two-pane-split-view__dragline-anchor {
+    position: absolute;
+    background-color: rgb(89, 89, 89);
+}
+
+.unity-two-pane-split-view__dragline-anchor:hover {
+    background-color: rgb(255, 255, 255);
+}
+
+.unity-two-pane-split-view__dragline-anchor--horizontal {
+    width: 1px;
+    top: 0;
+    bottom: 0;
+}
+
+.unity-two-pane-split-view__dragline-anchor--vertical {
+    height: 1px;
+    left: 0;
+    right: 0;
+}
+
+/**********************************************************************************************************************/
+/* TreeView                                                                                                           */
+/**********************************************************************************************************************/
+
+.unity-tree-view {
+    background-color: env(--theme-view-background-color);
+}
+
+.unity-tree-view__list-view {
+    flex: 1 0 0;
+}
+
+.unity-tree-view__item-toggle {
+    margin-left: 0;
+    margin-right: 0;
+    padding-right: 0;
+}
+
+.unity-tree-view__item-toggle > .unity-toggle__checkmark {
+    margin-top: 3px;
+    width: 14px;
+    height: 14px;
+}
+
+.unity-tree-view__item {
+    flex-shrink: 0;
+}
+
+.unity-tree-view__item-indents {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.unity-tree-view__item-indent {
+    width: 12px;
+    flex-shrink: 0;
+}
+
+.unity-tree-view__item-content {
+    flex: 1 0 auto;
+}
+
+/**********************************************************************************************************************/
+/* List View                                                                                                          */
+/**********************************************************************************************************************/
+
+/* Order matters! Alternative background style should be defined before hover and selection styles. */
+.unity-list-view__item--alternative-background {
+    background-color: env(--theme-background-color-alternate);
+}
+
+.unity-list-view__item:hover {
+    background-color: env(--theme-line-background-color-hover);
+}
+
+.unity-list-view__item--selected {
+    background-color: env(--theme-line-selection-background-color);
+}
+
+.unity-list-view__item--selected:hover,
+.unity-list-view:focus > .unity-list-view__item--selected {
+    background-color: env(--theme-line-selection-background-color-focus);
+    color: env(--theme-line-selection-text-color);
+}
+
+.unity-list-view__background-fill {
+    flex-grow: 1;
+}
+
+.unity-list-view--with-border {
+    border-width: 1px;
+    border-color: #A0A0A0;
+}
+
+.unity-list-view__item--drag-hover {
+    background-color: env(--theme-list-view-drag-hover-item-background-color);
+}
+
+.unity-list-view__drag-hover-bar {
+    position: absolute;
+    height: 2px;
+    background-color: env(--theme-list-view-drag-hover-bar-color);
+}
+
+/**********************************************************************************************************************/
+/* HelpBox                                                                                                            */
+/**********************************************************************************************************************/
+
+.unity-help-box {
+    align-items: center;
+    flex-direction: row;
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: env(--theme-help-box-border-color);
+    background-color: env(--theme-help-box-background-color);
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding: 2px;
+}
+
+.unity-help-box__label {
+    white-space: normal;
+    flex-shrink: 1;
+    padding-left: 0;
+    padding-right: 1px;
+}
+
+.unity-help-box__icon {
+    min-width: 34px;
+    max-width: 34px;
+    min-height: 32px;
+    max-height: 32px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.unity-help-box__icon--info {
+    background-image: env(--theme-help-box-icon-info);
+}
+
+.unity-help-box__icon--warning {
+    background-image: env(--theme-help-box-icon-warning);
+}
+
+.unity-help-box__icon--error {
+    background-image: env(--theme-help-box-icon-error);
+}
+
+/**********************************************************************************************************************/
+/* UIDocument Component                                                                                                            */
+/**********************************************************************************************************************/
+
+.unity-ui-document__root {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+}
+
+
+/**********************************************************************************************************************/
+/* Progress Bar                                                                                                       */
+/**********************************************************************************************************************/
+
+.unity-progress-bar {
+    flex-shrink: 0;
+    padding: 0;
+    margin: 4px;
+}
+
+.unity-progress-bar__container {
+    min-height: 24px;
+    max-height: 24px;
+}
+
+.unity-progress-bar__progress {
+    position: absolute;
+    margin: 2px;
+    top: 0;
+    bottom:0;
+    left:0;
+    background-color: env(--unity-colors-progress_bar_progress-background);
+}
+.unity-progress-bar__background {
+    border-width: 1px;
+    border-color: env(--unity-colors-progress_bar-border);
+    background-color: env(--unity-colors-progress_bar-background);
+    flex-grow: 1;
+}
+.unity-progress-bar__title-container {
+    flex-direction: row;
+    justify-content: center;
+    flex-grow: 1;
+}
+.unity-progress-bar__title {
+    margin: 0;
+    padding: 10px 12px;
+    -unity-text-align: middle-center;
+}

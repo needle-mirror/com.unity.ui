@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
+using Unity.Profiling;
+using UnityEngine.Assertions;
 
 namespace UnityEngine.UIElements.UIR.Implementation
 {
@@ -17,6 +19,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
     internal static class RenderEvents
     {
         private static readonly float VisibilityTreshold = Mathf.Epsilon;
+        static readonly ProfilerMarker k_NudgeVerticesMarker = new ProfilerMarker("UIR.NudgeVertices");
 
         internal static void ProcessOnClippingChanged(RenderChain renderChain, VisualElement ve, uint dirtyID, ref ChainBuilderStats stats)
         {
@@ -29,8 +32,9 @@ namespace UnityEngine.UIElements.UIR.Implementation
 
         internal static void ProcessOnOpacityChanged(RenderChain renderChain, VisualElement ve, uint dirtyID, ref ChainBuilderStats stats)
         {
+            bool hierarchical = (ve.renderChainData.dirtiedValues & RenderDataDirtyTypes.OpacityHierarchy) != 0;
             stats.recursiveOpacityUpdates++;
-            DepthFirstOnOpacityChanged(renderChain, ve.hierarchy.parent != null ? ve.hierarchy.parent.renderChainData.compositeOpacity : 1.0f, ve, dirtyID, ref stats);
+            DepthFirstOnOpacityChanged(renderChain, ve.hierarchy.parent != null ? ve.hierarchy.parent.renderChainData.compositeOpacity : 1.0f, ve, dirtyID, hierarchical, ref stats);
         }
 
         internal static void ProcessOnTransformOrSizeChanged(RenderChain renderChain, VisualElement ve, uint dirtyID, ref ChainBuilderStats stats)
@@ -387,7 +391,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
         }
 
         static void DepthFirstOnOpacityChanged(RenderChain renderChain, float parentCompositeOpacity, VisualElement ve,
-            uint dirtyID, ref ChainBuilderStats stats, bool isDoingFullVertexRegeneration = false)
+            uint dirtyID, bool hierarchical, ref ChainBuilderStats stats, bool isDoingFullVertexRegeneration = false)
         {
             if (dirtyID == ve.renderChainData.dirtyID)
                 return;
@@ -455,13 +459,13 @@ namespace UnityEngine.UIElements.UIR.Implementation
                 renderChain.UIEOnVisualsChanged(ve, false); // Changed opacity ID, must update vertices.. we don't do it hierarchical here since our children will go through this too
             }
 
-            if (compositeOpacityChanged || changedOpacityID)
+            if (compositeOpacityChanged || changedOpacityID || hierarchical)
             {
                 // Recurse on children
                 int childrenCount = ve.hierarchy.childCount;
                 for (int i = 0; i < childrenCount; i++)
                 {
-                    DepthFirstOnOpacityChanged(renderChain, newOpacity, ve.hierarchy[i], dirtyID, ref stats,
+                    DepthFirstOnOpacityChanged(renderChain, newOpacity, ve.hierarchy[i], dirtyID, hierarchical, ref stats,
                         isDoingFullVertexRegeneration);
                 }
             }
@@ -569,12 +573,12 @@ namespace UnityEngine.UIElements.UIR.Implementation
 
         static void UpdateTextCoreSettings(RenderChain renderChain, VisualElement ve, uint dirtyID, ref ChainBuilderStats stats)
         {
-            if (ve == null || ve.computedStyle.unityFontDefinition.IsEmpty())
+            if (ve == null || !TextUtilities.IsFontAssigned(ve))
                 return;
 
             bool allocatesID = RenderChainVEData.AllocatesID(ve.renderChainData.textCoreSettingsID);
 
-            var settings = TextDelegates.GetTextCoreSettingsForElementSafe(ve);
+            var settings = TextUtilities.GetTextCoreSettingsForElement(ve);
             if (settings.outlineWidth == 0.0f && settings.underlayOffset == Vector2.zero && settings.underlaySoftness == 0.0f && !allocatesID)
             {
                 // Use default TextCore settings
@@ -644,18 +648,19 @@ namespace UnityEngine.UIElements.UIR.Implementation
             if (!ve.ShouldClip())
                 return ClipMethod.NotClipped;
 
+            // Even though GroupTransform does not formally imply the use of scissors, we prefer to use them because
+            // this way, we can avoid updating nested clipping rects.
+            bool preferScissors = (ve.renderHints & (RenderHints.GroupTransform | RenderHints.ClipWithScissors)) != 0;
+            ClipMethod rectClipMethod = preferScissors ? ClipMethod.Scissor : ClipMethod.ShaderDiscard;
+
             if (!UIRUtility.IsRoundRect(ve) && !UIRUtility.IsVectorImageBackground(ve))
-            {
-                if ((ve.renderHints & (RenderHints.GroupTransform | RenderHints.ClipWithScissors)) != 0)
-                    return ClipMethod.Scissor;
-                return ClipMethod.ShaderDiscard;
-            }
+                return rectClipMethod;
 
             if (ve.hierarchy.parent?.renderChainData.isStencilClipped == true)
-                return ClipMethod.ShaderDiscard; // Prevent nested stenciling for now, even if inaccurate
+                return rectClipMethod; // Prevent nested stenciling for now, even if inaccurate
 
             // Stencil clipping is not yet supported in world-space rendering, fallback to a coarse shader discard for now
-            return renderChain.drawInCameras ? ClipMethod.ShaderDiscard : ClipMethod.Stencil;
+            return renderChain.drawInCameras ? rectClipMethod : ClipMethod.Stencil;
         }
 
         static bool NeedsTransformID(VisualElement ve)
@@ -680,7 +685,8 @@ namespace UnityEngine.UIElements.UIR.Implementation
         internal static UIRStylePainter.ClosingInfo PaintElement(RenderChain renderChain, VisualElement ve, ref ChainBuilderStats stats)
         {
             var isClippingWithStencil = ve.renderChainData.clipMethod == ClipMethod.Stencil;
-            if ((IsElementSelfHidden(ve) && !isClippingWithStencil) || ve.renderChainData.isHierarchyHidden)
+            var isClippingWithScissors = ve.renderChainData.clipMethod == ClipMethod.Scissor;
+            if ((UIRUtility.IsElementSelfHidden(ve) && !isClippingWithStencil && !isClippingWithScissors) || ve.renderChainData.isHierarchyHidden)
             {
                 if (ve.renderChainData.data != null)
                 {
@@ -730,8 +736,8 @@ namespace UnityEngine.UIElements.UIR.Implementation
             }
             else
             {
-                // Even though the element hidden, we still have to push the stencil shape in case any children are visible.
-                if (ve.renderChainData.clipMethod == ClipMethod.Stencil)
+                // Even though the element hidden, we still have to push the stencil shape or setup the scissors in case any children are visible.
+                if (isClippingWithScissors || isClippingWithStencil)
                     painter.ApplyVisualElementClipping();
             }
 
@@ -790,26 +796,26 @@ namespace UnityEngine.UIElements.UIR.Implementation
                             vertexDataComputed = true;
                             GetVerticesTransformInfo(ve, out transform);
                             ve.renderChainData.verticesSpace = transform; // This is the space for the generated vertices below
-
-                            Color32 transformData = renderChain.shaderInfoAllocator.TransformAllocToVertexData(ve.renderChainData.transformID);
-                            Color32 opacityData = renderChain.shaderInfoAllocator.OpacityAllocToVertexData(ve.renderChainData.opacityID);
-                            Color32 textCoreSettingsData = renderChain.shaderInfoAllocator.TextCoreSettingsToVertexData(ve.renderChainData.textCoreSettingsID);
-                            xformClipPages.r = transformData.r;
-                            xformClipPages.g = transformData.g;
-                            ids.r = transformData.b;
-                            opacityPage.r = opacityData.r;
-                            opacityPage.g = opacityData.g;
-                            ids.b = opacityData.b;
-                            if (entry.isTextEntry)
-                            {
-                                // It's important to avoid writing these values when the vertices aren't for text,
-                                // as these settings are shared with the vector graphics gradients.
-                                // The same applies to the CopyTransformVertsPos* methods below.
-                                textCoreSettingsPage.r = textCoreSettingsData.r;
-                                textCoreSettingsPage.g = textCoreSettingsData.g;
-                            }
-                            ids.a = textCoreSettingsData.b;
                         }
+
+                        Color32 transformData = renderChain.shaderInfoAllocator.TransformAllocToVertexData(ve.renderChainData.transformID);
+                        Color32 opacityData = renderChain.shaderInfoAllocator.OpacityAllocToVertexData(ve.renderChainData.opacityID);
+                        Color32 textCoreSettingsData = renderChain.shaderInfoAllocator.TextCoreSettingsToVertexData(ve.renderChainData.textCoreSettingsID);
+                        xformClipPages.r = transformData.r;
+                        xformClipPages.g = transformData.g;
+                        ids.r = transformData.b;
+                        opacityPage.r = opacityData.r;
+                        opacityPage.g = opacityData.g;
+                        ids.b = opacityData.b;
+                        if (entry.isTextEntry)
+                        {
+                            // It's important to avoid writing these values when the vertices aren't for text,
+                            // as these settings are shared with the vector graphics gradients.
+                            // The same applies to the CopyTransformVertsPos* methods below.
+                            textCoreSettingsPage.r = textCoreSettingsData.r;
+                            textCoreSettingsPage.g = textCoreSettingsData.g;
+                        }
+                        ids.a = textCoreSettingsData.b;
 
                         Color32 clipRectData = renderChain.shaderInfoAllocator.ClipRectAllocToVertexData(entry.clipRectID);
                         xformClipPages.b = clipRectData.r;
@@ -961,6 +967,10 @@ namespace UnityEngine.UIElements.UIR.Implementation
                     InjectClosingCommandInBetween(renderChain, cmd, ref cmdPrev, ref cmdNext);
                 }
             }
+
+            // When we have a closing mesh, we must have an opening mesh. At least we assumed where we decide
+            // whether we must nudge or not: we only test whether the opening mesh is non-null.
+            Debug.Assert(ve.renderChainData.closingData == null || ve.renderChainData.data != null);
 
             var closingInfo = painter.closingInfo;
             painter.Reset();
@@ -1147,6 +1157,8 @@ namespace UnityEngine.UIElements.UIR.Implementation
 
         static bool NudgeVerticesToNewSpace(VisualElement ve, UIRenderDevice device)
         {
+            k_NudgeVerticesMarker.Begin();
+
             Debug.Assert(!ve.renderChainData.disableNudging);
 
             Matrix4x4 newTransform;
@@ -1173,44 +1185,71 @@ namespace UnityEngine.UIElements.UIR.Implementation
             error += Mathf.Abs(newTransform.m22 - reconstructedNewTransform.m22);
             error += Mathf.Abs(newTransform.m23 - reconstructedNewTransform.m23);
             if (error > kMaxAllowedDeviation)
+            {
+                k_NudgeVerticesMarker.End();
                 return false;
+            }
 
             ve.renderChainData.verticesSpace = newTransform; // This is the new space of the vertices
 
-            int vertCount = (int)ve.renderChainData.data.allocVerts.size;
-            NativeSlice<Vertex> oldVerts = ve.renderChainData.data.allocPage.vertices.cpuData.Slice((int)ve.renderChainData.data.allocVerts.start, vertCount);
+            DoNudgeVertices(ve, device, ve.renderChainData.data, nudgeTransform, true);
+            if (ve.renderChainData.closingData != null)
+                DoNudgeVertices(ve, device, ve.renderChainData.closingData, nudgeTransform, false);
+
+            k_NudgeVerticesMarker.End();
+            return true;
+        }
+
+        static void DoNudgeVertices(VisualElement ve, UIRenderDevice device, MeshHandle mesh, Matrix4x4 nudgeTransform, bool supportsDisplacement)
+        {
+            int vertCount = (int)mesh.allocVerts.size;
+            NativeSlice<Vertex> oldVerts = mesh.allocPage.vertices.cpuData.Slice((int)mesh.allocVerts.start, vertCount);
             NativeSlice<Vertex> newVerts;
-            device.Update(ve.renderChainData.data, (uint)vertCount, out newVerts);
+            device.Update(mesh, (uint)vertCount, out newVerts);
 
             int vertsBeforeUVDisplacement = ve.renderChainData.displacementUVStart;
             int vertsAfterUVDisplacement = ve.renderChainData.displacementUVEnd;
 
-            // Position-only transform loop
-            for (int i = 0; i < vertsBeforeUVDisplacement; i++)
+            if (supportsDisplacement)
             {
-                var v = oldVerts[i];
-                v.position = nudgeTransform.MultiplyPoint3x4(v.position);
-                newVerts[i] = v;
-            }
+                // Position-only transform loop
+                for (int i = 0; i < vertsBeforeUVDisplacement; i++)
+                {
+                    var v = oldVerts[i];
+                    v.position = nudgeTransform.MultiplyPoint3x4(v.position);
+                    newVerts[i] = v;
+                }
 
-            // Position and UV transform loop
-            for (int i = vertsBeforeUVDisplacement; i < vertsAfterUVDisplacement; i++)
+                // Position and UV transform loop
+                for (int i = vertsBeforeUVDisplacement; i < vertsAfterUVDisplacement; i++)
+                {
+                    var v = oldVerts[i];
+                    v.position = nudgeTransform.MultiplyPoint3x4(v.position);
+                    v.uv = nudgeTransform.MultiplyVector(v.uv);
+                    newVerts[i] = v;
+                }
+
+                // Position-only transform loop
+                for (int i = vertsAfterUVDisplacement; i < vertCount; i++)
+                {
+                    var v = oldVerts[i];
+                    v.position = nudgeTransform.MultiplyPoint3x4(v.position);
+                    newVerts[i] = v;
+                }
+            }
+            else
             {
-                var v = oldVerts[i];
-                v.position = nudgeTransform.MultiplyPoint3x4(v.position);
-                v.uv = nudgeTransform.MultiplyVector(v.uv);
-                newVerts[i] = v;
-            }
+                // Either the displacement is an empty range, or it's outside the range to be nudged
+                Debug.Assert(vertsBeforeUVDisplacement == vertsAfterUVDisplacement || vertCount == vertsBeforeUVDisplacement);
 
-            // Position-only transform loop
-            for (int i = vertsAfterUVDisplacement; i < vertCount; i++)
-            {
-                var v = oldVerts[i];
-                v.position = nudgeTransform.MultiplyPoint3x4(v.position);
-                newVerts[i] = v;
+                // Position-only transform loop
+                for (int i = 0; i < vertCount; i++)
+                {
+                    var v = oldVerts[i];
+                    v.position = nudgeTransform.MultiplyPoint3x4(v.position);
+                    newVerts[i] = v;
+                }
             }
-
-            return true;
         }
 
         static RenderChainCommand InjectMeshDrawCommand(RenderChain renderChain, VisualElement ve, ref RenderChainCommand cmdPrev, ref RenderChainCommand cmdNext, MeshHandle mesh, int indexCount, int indexOffset, Material material, TextureId texture, Texture font)

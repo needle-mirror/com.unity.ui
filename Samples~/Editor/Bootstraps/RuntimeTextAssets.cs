@@ -21,7 +21,6 @@ namespace Samples.Utils
 
         static void InitializeTextAssetsScene()
         {
-            TextDelegates.OnTextSettingsImported -= InitializeTextAssetsScene;
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects);
             var go = new GameObject("Sample Object");
             var component = go.AddComponent<TextAssets>();

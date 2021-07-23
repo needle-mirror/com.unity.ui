@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <ui:VisualElement name="main-area" class="unity-guid-converter__main-area">
+        <ui:Label text="Some explanatory message" display-tooltip-when-elided="true" name="top-message" class="unity-guid-converter__top-message" />
+        <ui:VisualElement class="unity-guid-converter__list-area">
+            <ui:ListView focusable="true" name="assets-list" class="unity-guid-converter__list-container" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="button-area" class="unity-guid-converter__button-area">
+        <ui:Button text="OK" display-tooltip-when-elided="true" name="ok-button" class="unity-guid-converter__button" />
+        <ui:Button text="Cancel" display-tooltip-when-elided="true" name="cancel-button" class="unity-guid-converter__button" />
+    </ui:VisualElement>
+</ui:UXML>

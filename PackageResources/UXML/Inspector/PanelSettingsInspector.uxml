@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:HelpBox name="missing-theme-warning" message-type="Warning" text="No theme is assigned. UI might not display or function properly."/>
     <uie:ObjectField label="Theme Style Sheet" allow-scene-objects="false" name="themeStyleSheet" binding-path="themeUss" tooltip="The main style sheet file to give styles to Unity provided elements (buttons, etc.)."></uie:ObjectField>
     <uie:ObjectField label="Text Settings" allow-scene-objects="false" name="textSettings" binding-path="textSettings" tooltip="The TextSettings used by all elements contained by this panel."></uie:ObjectField>
     <uie:ObjectField label="Target Texture" allow-scene-objects="false" name="targetTexture" binding-path="m_TargetTexture" tooltip="An optional texture onto which the panel should be rendered.">

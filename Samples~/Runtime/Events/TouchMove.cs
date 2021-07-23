@@ -19,7 +19,7 @@ namespace Samples.Runtime.Events
         // We support 4 simultaneous dragging, but we need to support
         // up to 8 fingers because when there is a rapid up/down sequence
         // the lifted finger id is not reused.
-        private static readonly int s_MaxFingers = PointerId.touchPointerCount;
+        private static readonly int s_MaxPointers = PointerId.maxPointers;
 
         void Awake()
         {
@@ -32,7 +32,7 @@ namespace Samples.Runtime.Events
         {
             m_StartPosition = new List<Vector2>();
             m_PointerStartPosition = new List<Vector2>();
-            for (var i = 0; i < s_MaxFingers; i++)
+            for (var i = 0; i < s_MaxPointers; i++)
             {
                 m_StartPosition.Add(Vector2.zero);
                 m_PointerStartPosition.Add(Vector2.zero);
@@ -54,11 +54,6 @@ namespace Samples.Runtime.Events
 
         private void OnPointerDown(PointerDownEvent evt)
         {
-            if (evt.pointerType != PointerType.touch)
-            {
-                return;
-            }
-
             if (evt.currentTarget == evt.target)
             {
                 evt.target.CapturePointer(evt.pointerId);
@@ -66,9 +61,9 @@ namespace Samples.Runtime.Events
                 VisualElement ve = (VisualElement)evt.target;
                 ve.AddToClassList("active");
 
-                var fingerIndex = evt.pointerId - PointerId.touchPointerIdBase;
-                m_StartPosition[fingerIndex] = new Vector2(ve.resolvedStyle.left, ve.resolvedStyle.top);
-                m_PointerStartPosition[fingerIndex] = evt.position;
+                var pointerIndex = evt.pointerId;
+                m_StartPosition[pointerIndex] = new Vector2(ve.resolvedStyle.left, ve.resolvedStyle.top);
+                m_PointerStartPosition[pointerIndex] = evt.position;
             }
         }
 
@@ -83,8 +78,8 @@ namespace Samples.Runtime.Events
                 Vector2 size = new Vector2(m_Container.resolvedStyle.width, m_Container.resolvedStyle.height);
                 size -= new Vector2(ve.resolvedStyle.width, ve.resolvedStyle.height);
 
-                var fingerIndex = evt.pointerId - PointerId.touchPointerIdBase;
-                Vector2 p = m_StartPosition[fingerIndex] + new Vector2(evt.position.x, evt.position.y) - m_PointerStartPosition[fingerIndex];
+                var pointerIndex = evt.pointerId;
+                Vector2 p = m_StartPosition[pointerIndex] + new Vector2(evt.position.x, evt.position.y) - m_PointerStartPosition[pointerIndex];
                 p = Vector2.Max(p, Vector2.zero);
                 p = Vector2.Min(p, size);
                 ve.style.left = p.x;

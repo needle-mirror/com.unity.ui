@@ -13,3 +13,8 @@
 .unity-panel-settings-inspector--empty-space--left-width {
     width: 140px;
 }
+
+.unity-panel-settings-inspector--theme-warning--hidden
+{
+    display: none;
+}

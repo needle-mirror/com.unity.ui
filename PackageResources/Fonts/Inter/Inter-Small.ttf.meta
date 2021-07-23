@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 7a066cc6ac67325479a605cd9672e4fa
+guid: ec426cf69920748b9bf269824d40d941
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -12,12 +12,12 @@ TrueTypeFontImporter:
   fontNames:
   - Inter Small
   fallbackFontReferences:
-  - {fileID: 12800000, guid: 823747998f851ab4b9db609b7bade414, type: 3}
-  customCharacters: 
+  - {fileID: 12800000, guid: f5c9418a75e344d52a0adefdf954cd32, type: 3}
+  customCharacters:
   fontRenderingMode: 1
   ascentCalculationMode: 1
   useLegacyBoundsCalculation: 0
   shouldRoundAdvanceValue: 1
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
+  userData:
+  assetBundleName:
+  assetBundleVariant:

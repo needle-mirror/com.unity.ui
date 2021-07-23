@@ -1,0 +1,218 @@
+/**********************************************************************************************************************/
+/* Variables
+/**********************************************************************************************************************/
+.unity-theme-env-variables {
+    --unity-text-color: env(--unity-colors-default-text);
+    --unity-active-text-color: env(--unity-colors-label-text-focus);
+
+    --theme-window-text-color: env(--unity-colors-window-text);
+    --theme-window-border-color: #666666;
+    --theme-window-background-color: rgba(179, 179, 179, 0.95);
+
+    --theme-label-text-color: env(--unity-colors-label-text);
+
+    --theme-input-text-color: env(--unity-colors-default-text);
+    --theme-input-text-color-selected: env(--unity-colors-highlight-text);
+    --theme-input-text-color-hover: env(--unity-colors-default-text-hover);
+    --theme-input-background-color: env(--unity-colors-input_field-background);
+    /*border not compatible, replacing "--theme-input-border: 1px solid #0D0D0D;"*/
+    --theme-input-border-width: 1px;
+    --theme-input-border-color: env(--unity-colors-input_field-border);
+    --theme-input-accent-border-color: env(--unity-colors-input_field-border_accent);
+    /*border not compatible, replacing "--theme-input-border-focus: 1px solid #3A79BB;"*/
+    --theme-input-border-focus-width: 1px;
+    --theme-input-border-focus-color: env(--unity-colors-input_field-border-focus);
+    /*border not compatible, replacing "--theme-input-border-hover: 1px solid #545454;"*/
+    --theme-input-border-hover-width: 1px;
+    --theme-input-border-hover-color: env(--unity-colors-input_field-border-hover);
+    --theme-input-border-checked-width: 1px;
+    --theme-input-border-checked-width: env(--theme-input-border-hover-width);
+    --theme-input-border-checked-color: env(--theme-input-border-hover-color);
+
+    --theme-object-field-background-color: env(--unity-colors-object_field-background);
+    --theme-object-field-border-width: 1px;
+    --theme-object-field-border-color: env(--unity-colors-object_field-border);
+    --theme-object-field-border-hover-width: env(--theme-input-border-hover-width);
+    --theme-object-field-border-hover-color: env(--unity-colors-object_field-border-hover);
+    --theme-object-field-border-focus-width: env(--theme-input-border-focus-width);
+    --theme-object-field-border-focus-color: env(--unity-colors-object_field-border-focus);
+    --theme-object-field-border-checked-width: env(--theme-input-border-checked-width);
+    --theme-object-field-border-checked-color: env(--theme-input-border-checked-color);
+
+    --theme-object-field-button-background-color: env(--unity-colors-object_field_button-background);
+    --theme-object-field-button-background-color-hover: env(--unity-colors-object_field_button-background-hover);
+
+    --theme-button-text-color: env(--unity-colors-button-text);
+    --theme-button-background-color: env(--unity-colors-button-background);
+    --theme-button-background-color-hover: env(--unity-colors-button-background-hover);
+    --theme-button-background-color-checked: env(--unity-colors-button-background-pressed);
+    --theme-button-border-width: 1px;
+    --theme-button-border-color: env(--unity-colors-button-border);
+    --theme-button-accent-border-color: env(--unity-colors-button-border_accent);
+
+    --theme-toolbar-background-color: env(--unity-colors-toolbar-background);
+
+    --theme-toolbar-button-text-color: env(--unity-colors-toolbar_button-text);
+    --theme-toolbar-button-text-color-hover: env(--unity-colors-toolbar_button-text-hover);
+    --theme-toolbar-button-text-color-checked: env(--unity-colors-toolbar_button-text-checked);
+    --theme-toolbar-button-border-width: 1px;
+    --theme-toolbar-button-border-color: #999999;
+    --theme-toolbar-button-border-2-width: 1px;
+    --theme-toolbar-button-border-2-color: env(--unity-colors-toolbar_button-border);
+
+    --theme-toolbar-button-background-color: env(--unity-colors-toolbar_button-background);
+    --theme-toolbar-button-background-color-hover: env(--unity-colors-toolbar_button-background-hover);
+    --theme-toolbar-button-background-color-checked: env(--unity-colors-toolbar_button-background-checked);
+    --theme-toolbar-button-background-color-focus: env(--unity-colors-toolbar_button-background-focus);
+
+    --theme-app-toolbar-button-border-width: 1px;/* difference with IMGUI */
+    --theme-app-toolbar-button-border-color: env(--unity-colors-app_toolbar_button-border);
+
+    /*border not compatible, replacing "--theme-dropdown-border: 0px solid #242424;"*/
+    --theme-dropdown-border-width: 1px;/* difference with IMGUI */
+    --theme-dropdown-border-color: env(--unity-colors-dropdown-border);
+    --theme-dropdown-accent-border-color: env(--unity-colors-dropdown-border_accent);
+    --theme-dropdown-text-color: env(--unity-colors-dropdown-text);
+    --theme-dropdown-background-color: env(--unity-colors-dropdown-background);
+    --theme-dropdown-background-color-hover: env(--unity-colors-dropdown-background-hover);
+
+    --theme-scrollbar-thumb-background-color: env(--unity-colors-scrollbar_thumb-background);
+    --theme-scrollbar-thumb-border-width: 1px;
+    --theme-scrollbar-thumb-border-color: env(--unity-colors-scrollbar_thumb-border);
+    --theme-scrollbar-thumb-background-color-hover: env(--unity-colors-scrollbar_thumb-background-hover);
+    --theme-scrollbar-border-color: env(--unity-colors-scrollbar_groove-border);
+    --theme-scrollbar-background-color: env(--unity-colors-scrollbar_groove-background);
+    --theme-scrollbar-button-background-color: env(--unity-colors-scrollbar_button-background);
+    --theme-scrollbar-button-background-color-hover: env(--unity-colors-scrollbar_button-background-hover);
+
+    --theme-slider-background-color: env(--unity-colors-slider_groove-background);
+    --theme-slider-background-color-disabled: env(--unity-colors-slider_groove-background-disabled);
+    --theme-slider-thumb-background-color: env(--unity-colors-slider_thumb-background);
+    --theme-slider-thumb-background-color-hover: env(--unity-colors-slider_thumb-background-hover);
+    --theme-slider-thumb-background-color-disabled: env(--unity-colors-slider_thumb-background-disabled);
+    --theme-slider-thumb-border-width: 1px;
+    --theme-slider-thumb-border-color: env(--unity-colors-slider_thumb-border);
+    --theme-slider-thumb-border-color-disabled: env(--unity-colors-slider_thumb-border-disabled);
+    --theme-slider-thumb-extent-background-color-focus: env(--unity-colors-slider_thumb_halo-background);
+
+    --theme-box-background-color: env(--unity-colors-box-background);
+    --theme-box-border-color: env(--unity-colors-box-border);
+
+    --theme-help-box-background-color: #CACACA;
+    --theme-help-box-border-color: #9A9A9A;
+    --theme-help-box-icon-info: url("/Packages/com.unity.ui/PackageResources/Images/console.infoicon.png");
+    --theme-help-box-icon-warning: url("/Packages/com.unity.ui/PackageResources/Images/console.warnicon.png");
+    --theme-help-box-icon-error: url("/Packages/com.unity.ui/PackageResources/Images/console.erroricon.png");
+
+    --theme-list-view-drag-hover-bar-color: #3356DA;
+    --theme-list-view-drag-hover-item-background-color: #3E5F96;
+    --theme-image-pick: url("/Packages/com.unity.ui/PackageResources/Images/pick_uielements.png");
+
+    --theme-image-toggle-bg: env(--unity-icons-toggle_bg);
+    --theme-image-toggle-bg-hover: env(--unity-icons-toggle_bg-hover);
+    --theme-image-toggle-bg-focus: env(--unity-icons-toggle_bg-focus);
+    --theme-image-toggle-on: env(--unity-icons-toggle-checked);
+    --theme-image-toggle-on-hover: env(--unity-icons-toggle-checked_hover);
+    --theme-image-toggle-on-focus: env(--unity-icons-toggle-checked_focus);
+
+    --theme-image-foldout: env(--unity-icons-foldout);
+    --theme-image-foldout-act: env(--unity-icons-foldout-pressed);
+    --theme-image-foldout-focus: env(--unity-icons-foldout-focus);
+    --theme-image-foldout-on: env(--unity-icons-foldout-checked);
+    --theme-image-foldout-on-act: env(--unity-icons-foldout-checked_pressed);
+    --theme-image-foldout-on-focus: env(--unity-icons-foldout-checked_focus);
+
+    --theme-image-pulldown: env(--unity-icons-pulldown);
+    --theme-image-dropdown: env(--unity-icons-dropdown);
+    --theme-image-search: url("/Packages/com.unity.ui/PackageResources/Images/search_icon.png");
+    --theme-image-popup-search: url("/Packages/com.unity.ui/PackageResources/Images/search_menu.png");
+    --theme-image-clear: url("/Packages/com.unity.ui/PackageResources/Images/clear_uielements.png");
+    --theme-image-checkmark: url("/Packages/com.unity.ui/PackageResources/Images/checkmark.png");
+
+    --theme-image-toolbar-breadcrumbs-item: url("/Packages/com.unity.ui/PackageResources/Images/breadcrump_mid.png");
+    --theme-image-toolbar-breadcrumbs-item-active: url("/Packages/com.unity.ui/PackageResources/Images/breadcrump_mid_act.png");
+    --theme-image-toolbar-breadcrumbs-first-item: url("/Packages/com.unity.ui/PackageResources/Images/breadcrump_left.png");
+    --theme-image-toolbar-breadcrumbs-first-item-active: url("/Packages/com.unity.ui/PackageResources/Images/breadcrump_left_act.png");
+
+    --theme-image-scroll-up: url("/Packages/com.unity.ui/PackageResources/Images/scrollup_uielements.png");
+    --theme-image-scroll-down: url("/Packages/com.unity.ui/PackageResources/Images/scrolldown_uielements.png");
+    --theme-image-scroll-left: url("/Packages/com.unity.ui/PackageResources/Images/scrollleft_uielements.png");
+    --theme-image-scroll-right: url("/Packages/com.unity.ui/PackageResources/Images/scrollright_uielements.png");
+
+    --theme-radio-button-checkmark-background-color: #555555;
+
+    --theme-view-background-color: #C2C2C2;
+    --theme-line-background-color-hover: #B2B2B2;
+
+    --theme-background-color-alternate: #BCBCBC;
+    --theme-line-selection-background-color: #AEAEAE;
+    --theme-line-selection-background-color-focus: #3A72B0;
+    --theme-line-selection-text-color: #FFFFFF;
+
+    --progress-bar-back-background-color: #B6B6B6;
+    --progress-bar-back-border-color: #808080;
+    --progress-bar-progress-color: #4E8DD3;
+    --progress-bar-text-color: env(--unity-colors-label-text);
+
+    --theme-base-field-label-mixed-values-color: rgba(9, 9, 9, 0.5);
+}
+
+/* Following are selectors which are specifying colors used in a single place / can't be named to meaningful variable */
+
+/**********************************************************************************************************************/
+/* Bindings                                                                                                           */
+/**********************************************************************************************************************/
+
+.unity-binding__prefab-override-bar {
+    background-color: rgb(50, 163, 225);
+}
+
+.unity-binding--animation-animated,
+.unity-binding--animation-animated > .unity-toggle__checkmark {
+    -unity-background-image-tint-color: rgb(209, 247, 255);
+}
+
+.unity-binding--animation-recorded,
+.unity-binding--animation-recorded > .unity-toggle__checkmark {
+    -unity-background-image-tint-color: rgb(255, 153, 153);
+}
+
+.unity-binding--animation-candidate,
+.unity-binding--animation-candidate > .unity-toggle__checkmark {
+    -unity-background-image-tint-color: rgb(255, 178, 153);
+}
+
+/* MinMaxSlider */
+.unity-min-max-slider__dragger {
+    background-image: url("/Packages/com.unity.ui/PackageResources/Images/minmax_slider_thumb.png");
+}
+
+.unity-min-max-slider__input:active > .unity-min-max-slider__dragger:hover {
+    background-image: url("/Packages/com.unity.ui/PackageResources/Images/minmax_slider_thumb_act.png");
+}
+
+.unity-min-max-slider__input:focus > .unity-min-max-slider__dragger {
+    background-image: url("/Packages/com.unity.ui/PackageResources/Images/minmax_slider_thumb.png");
+}
+
+/**********************************************************************************************************************/
+/* InputField, FloatInput, DoubleInput, IntegerInput, LongInput, TextInput                                            */
+/**********************************************************************************************************************/
+
+.unity-base-text-field {
+    /* color: #000; */
+    /* background-image: resource("Builtin Skins/LightSkin/Images/TextField.png"); */
+    --unity-cursor-color:#000;
+}
+
+/**********************************************************************************************************************/
+/* GradientInput                                                                                                      */
+/**********************************************************************************************************************/
+
+.unity-gradient-field__border {
+    border-color:rgb(105,105,105);
+}
+
+.unity-gradient-field__input:focus > .unity-gradient-field__border {
+    border-color:rgb(51,81,226);
+}

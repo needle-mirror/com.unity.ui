@@ -50,6 +50,7 @@ namespace UnityEngine.UIElements
                 panel.duringLayoutPhase = true;
                 visualTree.yogaNode.CalculateLayout();
                 panel.duringLayoutPhase = false;
+
                 using (new EventDispatcherGate(visualTree.panel.dispatcher))
                 {
                     UpdateSubTree(visualTree, validateLayoutCount);
@@ -61,9 +62,16 @@ namespace UnityEngine.UIElements
                     break;
                 }
             }
+
+            // This call happens here for two reasons
+            // 1. Visibility style of the focused element may have changed (regardless of the layout having updated)
+            // 2. Display style of the focused element may have changed, but it's only manually propagated to children
+            //    as part of this updater.
+            // Note: this is a O(1) call
+            visualTree.focusController.ReevaluateFocus();
         }
 
-        private void UpdateSubTree(VisualElement ve, int currentLayoutPass)
+        private void UpdateSubTree(VisualElement ve, int currentLayoutPass, bool isDisplayed = true)
         {
             Rect yogaLayoutRect = new Rect(ve.yogaNode.LayoutX, ve.yogaNode.LayoutY, ve.yogaNode.LayoutWidth, ve.yogaNode.LayoutHeight);
             Rect yogaPaddingRect = new Rect(
@@ -73,9 +81,9 @@ namespace UnityEngine.UIElements
                 ve.yogaNode.LayoutHeight - (ve.yogaNode.LayoutPaddingTop + ve.yogaNode.LayoutPaddingBottom));
             Rect lastLayoutRect = ve.lastLayout;
             Rect lastPaddingRect = ve.lastPadding;
+            bool wasHierarchyDisplayed = ve.isHierarchyDisplayed;
 
             VersionChangeType changeType = 0;
-
             // Changing the layout/padding size should trigger the following version changes:
             // - Size:    to update the clipping rect, when required
             // - Repaint: to update the geometry inside the new rect
@@ -91,6 +99,9 @@ namespace UnityEngine.UIElements
             if (layoutPositionChanged || paddingPositionChanged)
                 changeType |= VersionChangeType.Transform;
 
+            isDisplayed &= ve.resolvedStyle.display != DisplayStyle.None;
+            ve.isHierarchyDisplayed = isDisplayed;
+
             if (changeType != 0)
                 ve.IncrementVersion(changeType);
 
@@ -104,7 +115,7 @@ namespace UnityEngine.UIElements
                 var childCount = ve.hierarchy.childCount;
                 for (int i = 0; i < childCount; ++i)
                 {
-                    UpdateSubTree(ve.hierarchy[i], currentLayoutPass);
+                    UpdateSubTree(ve.hierarchy[i], currentLayoutPass, isDisplayed);
                 }
             }
 

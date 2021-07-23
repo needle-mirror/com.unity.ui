@@ -15,6 +15,7 @@ namespace UnityEditor.UIElements
         private static string k_GameViewLiveReloadPreferenceKey = null;
 
         private IMGUIContainer m_NotificationContainer;
+        private IMGUIContainer m_OverlayContainer;
 
         // Cached version of the static color for the actual object instance...
         Color m_PlayModeDarkenColor;
@@ -30,11 +31,8 @@ namespace UnityEditor.UIElements
                 m_Owner = owner;
             }
 
-            internal override void OnVisualTreeAssetChanged(bool inMemoryChange)
+            internal override void OnVisualTreeAssetChanged()
             {
-                if ((inMemoryChange && !m_Owner.panel.enableAssetReload) || !m_Owner.m_WindowRegistered)
-                    return;
-
                 m_Owner.RecreateWindow();
             }
         }
@@ -60,12 +58,16 @@ namespace UnityEditor.UIElements
                 m_NotificationContainer.StretchToParentSize();
                 m_NotificationContainer.pickingMode = PickingMode.Ignore;
 
+                m_OverlayContainer = new IMGUIContainer();
+                m_OverlayContainer.StretchToParentSize();
+                m_OverlayContainer.pickingMode = PickingMode.Ignore;
+
                 RegisterImguiContainerGUICallbacks();
 
                 // Window is non-null when set by deserialization; it's usually null when OnCreate is called.
                 if (editorWindowModel.window != null)
                 {
-                    RegisterWindow();
+                    RegisterWindow(true);
                 }
             }
             catch (Exception e)
@@ -103,7 +105,7 @@ namespace UnityEditor.UIElements
         }
 
         private bool m_WindowRegistered;
-        void RegisterWindow()
+        void RegisterWindow(bool duringOnCreate = false)
         {
             if (m_WindowRegistered)
                 return;
@@ -130,11 +132,12 @@ namespace UnityEditor.UIElements
             m_Panel.saveViewData = window.SaveViewData;
             m_Panel.name = window.GetType().Name;
             m_NotificationContainer.onGUIHandler = window.DrawNotification;
+            m_OverlayContainer.onGUIHandler = () => m_OverlayGUIHandler?.Invoke();
 
             UpdateStyleMargins();
             m_WindowRegistered = true;
 
-            SendInitializeIfNecessary();
+            SendInitializeIfNecessary(duringOnCreate);
         }
 
         void UnregisterWindow()
@@ -151,6 +154,7 @@ namespace UnityEditor.UIElements
             }
 
             m_NotificationContainer.onGUIHandler = null;
+            m_OverlayContainer.onGUIHandler = null;
             m_WindowRegistered = false;
         }
 
@@ -219,6 +223,9 @@ namespace UnityEditor.UIElements
             m_NotificationContainer.onGUIHandler = null;
             m_NotificationContainer.RemoveFromHierarchy();
 
+            m_OverlayContainer.onGUIHandler = null;
+            m_OverlayContainer.RemoveFromHierarchy();
+
             UnregisterImguiContainerGUICallbacks();
             UnregisterWindow();
 
@@ -238,6 +245,37 @@ namespace UnityEditor.UIElements
             else
             {
                 m_NotificationContainer.RemoveFromHierarchy();
+            }
+        }
+
+        private event Action m_OverlayGUIHandler;
+        public event Action overlayGUIHandler
+        {
+            add
+            {
+                m_OverlayGUIHandler += value;
+                OverlayChanged();
+            }
+            remove
+            {
+                m_OverlayGUIHandler -= value;
+                OverlayChanged();
+            }
+        }
+
+        private void OverlayChanged()
+        {
+            if (m_OverlayGUIHandler != null)
+            {
+                if (m_OverlayContainer.parent == null)
+                {
+                    m_Panel.visualTree.Add(m_OverlayContainer);
+                    m_OverlayContainer.StretchToParentSize();
+                }
+            }
+            else
+            {
+                m_OverlayContainer.RemoveFromHierarchy();
             }
         }
 
@@ -284,29 +322,28 @@ namespace UnityEditor.UIElements
         }
 
         private static readonly string k_InitializedWindowPropertyName = "Initialized";
-        void SendInitializeIfNecessary()
+        void SendInitializeIfNecessary(bool duringOnCreate = false)
         {
             if (editorWindowModel == null)
                 return;
 
             var window = editorWindowModel.window;
 
-
             if (window != null)
             {
                 var rootElement = window.rootVisualElement;
 
-                //we make sure styles have been applied
-                UIElementsEditorUtility.AddDefaultEditorStyleSheets(rootElement);
+                if (EditorApplication.isUpdating || duringOnCreate)
+                {
+                    rootElement.schedule.Execute(() => { SendInitializeIfNecessary(false); });
+                    return;
+                }
 
                 if (rootElement.GetProperty(k_InitializedWindowPropertyName) != null)
                     return;
 
-                if (EditorApplication.isUpdating)
-                {
-                    EditorApplication.delayCall += SendInitializeIfNecessary;
-                    return;
-                }
+                //we make sure styles have been applied
+                UIElementsEditorUtility.AddDefaultEditorStyleSheets(rootElement);
 
                 rootElement.SetProperty(k_InitializedWindowPropertyName, true);
 
@@ -366,9 +403,13 @@ namespace UnityEditor.UIElements
             panel.enableAssetReload = !panel.enableAssetReload;
             EditorPrefs.SetBool(m_LiveReloadPreferenceKey, panel.enableAssetReload);
 
-            if (panel.enableAssetReload)
+            // We recreate the window regardless of Live Reload being on or off to guarantee tracking is there or not
+            // depending on the option being on or off, and we don't leave leftover tracking by turning it off.
+            RecreateWindow();
+
+            if (SetupLiveReloadPanelTrackers != null && editorWindowModel?.window.GetType() == typeof(GameView))
             {
-                RecreateWindow();
+                SetupLiveReloadPanelTrackers(panel.enableAssetReload);
             }
         }
 
@@ -411,6 +452,14 @@ namespace UnityEditor.UIElements
 
         private void RecreateWindow()
         {
+            // Validate that recreating the window will work, otherwise users end up with a broken window.
+            if (MonoScript.FromScriptableObject(editorWindowModel.window) == null)
+            {
+                Debug.LogError("Window serialization will fail for " + editorWindowModel.window.GetType() +
+                    ", will not reload it. Make sure that there are no compile errors and that the file name and class name match.");
+                return;
+            }
+
             if (editorWindowModel.window.rootVisualElement.panel is BaseVisualElementPanel panel)
             {
                 var view = panel.ownerObject as HostView;
@@ -420,6 +469,8 @@ namespace UnityEditor.UIElements
                 }
             }
         }
+
+        internal static Action<bool> SetupLiveReloadPanelTrackers;
 
         private static string GetWindowLiveReloadPreferenceKey(Type windowType)
         {

@@ -45,6 +45,7 @@ namespace UnityEngine.UIElements
             UxmlStringAttributeDescription m_MaskCharacter = new UxmlStringAttributeDescription { name = "mask-character", obsoleteNames = new[] { "maskCharacter" }, defaultValue = kMaskCharDefault.ToString()};
             UxmlStringAttributeDescription m_Text = new UxmlStringAttributeDescription { name = "text" };
             UxmlBoolAttributeDescription m_IsReadOnly = new UxmlBoolAttributeDescription { name = "readonly" };
+            UxmlBoolAttributeDescription m_IsDelayed = new UxmlBoolAttributeDescription {name = "is-delayed"};
 
             /// <summary>
             /// Initialize the traits for this field.
@@ -60,6 +61,7 @@ namespace UnityEngine.UIElements
                 field.maxLength = m_MaxLength.GetValueFromBag(bag, cc);
                 field.isPasswordField = m_Password.GetValueFromBag(bag, cc);
                 field.isReadOnly = m_IsReadOnly.GetValueFromBag(bag, cc);
+                field.isDelayed = m_IsDelayed.GetValueFromBag(bag, cc);
                 string maskCharacter = m_MaskCharacter.GetValueFromBag(bag, cc);
                 if (!string.IsNullOrEmpty(maskCharacter))
                 {
@@ -118,6 +120,9 @@ namespace UnityEngine.UIElements
         /// </summary>
         public static readonly string textInputUssName = "unity-text-input";
 
+        /// <summary>
+        /// The value of the input field.
+        /// </summary>
         public string text
         {
             get { return m_TextInputBase.text; }
@@ -128,12 +133,21 @@ namespace UnityEngine.UIElements
         }
 
         /// <summary>
+        /// Calls the methods in its invocation list when <see cref="isReadOnly"/> changes.
+        /// </summary>
+        protected event Action<bool> onIsReadOnlyChanged;
+
+        /// <summary>
         /// Returns true if the field is read only.
         /// </summary>
         public bool isReadOnly
         {
             get { return m_TextInputBase.isReadOnly; }
-            set { m_TextInputBase.isReadOnly = value; }
+            set
+            {
+                m_TextInputBase.isReadOnly = value;
+                onIsReadOnlyChanged?.Invoke(value);
+            }
         }
 
         // Password field (indirectly lossy behaviour when activated via multiline)
@@ -198,7 +212,7 @@ namespace UnityEngine.UIElements
         }
 
         /// <summary>
-        /// If set to true, the value property is not updated until either the user presses Enter or the text field loses focus.
+        /// If set to true, the value property isn't updated until either the user presses Enter or the text field loses focus.
         /// </summary>
         public bool isDelayed
         {
@@ -216,7 +230,7 @@ namespace UnityEngine.UIElements
         }
 
         /// <summary>
-        /// Computes the size needed to display a text string based on element style values such as font, font-size, word-wrap, and so on.
+        /// Computes the size needed to display a text string based on element style values such as font, font-size, and word-wrap.
         /// </summary>
         /// <param name="textToMeasure">The text to measure.</param>
         /// <param name="width">Suggested width. Can be zero.</param>
@@ -238,11 +252,23 @@ namespace UnityEngine.UIElements
 
         internal bool hasFocus => m_TextInputBase.hasFocus;
 
+        /// <summary>
+        /// Converts a value of the specified generic type from the subclass to a string representation.
+        /// </summary>
+        /// <remarks>Subclasses must implement this method.</remarks>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>A string representing the value.</returns>
         protected virtual string ValueToString(TValueType value)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Converts a string to the value of the specified generic type from the subclass.
+        /// </summary>
+        /// <remarks>Subclasses must implement this method.</remarks>
+        /// <param name="str">The string to convert.</param>
+        /// <returns>A value converted from the string.</returns>
         protected virtual TValueType StringToValue(string str)
         {
             throw new NotImplementedException();
@@ -293,7 +319,7 @@ namespace UnityEngine.UIElements
         {
             iTextHandle = e.destinationPanel.contextType == ContextType.Editor
                 ? TextNativeHandle.New()
-                : TextHandleFactory.GetRuntimeHandle();
+                : TextCoreHandle.New();
         }
 
         private void OnFieldCustomStyleResolved(CustomStyleResolvedEvent e)
@@ -555,6 +581,9 @@ namespace UnityEngine.UIElements
 
             private string m_Text;
 
+            /// <summary>
+            /// The value of the input field.
+            /// </summary>
             public string text
             {
                 get { return m_Text; }
@@ -654,11 +683,11 @@ namespace UnityEngine.UIElements
                 SyncGUIStyle(this, editorEngine.style);
             }
 
-            private void OnAttachToPanel(AttachToPanelEvent e)
+            private void OnAttachToPanel(AttachToPanelEvent attachEvent)
             {
-                m_TextHandle = e.destinationPanel.contextType == ContextType.Editor
-                    ? TextHandleFactory.GetEditorHandle()
-                    : TextHandleFactory.GetRuntimeHandle();
+                m_TextHandle = attachEvent.destinationPanel.contextType == ContextType.Editor
+                    ? TextNativeHandle.New()
+                    : TextCoreHandle.New();
             }
 
             internal virtual void SyncTextEngine()
@@ -824,7 +853,7 @@ namespace UnityEngine.UIElements
                 // Draw the cursor
                 if (!isReadOnly && !isDragging)
                 {
-                    if (cursorIndex == selectionEndIndex && (computedStyle.unityFont != null || !computedStyle.unityFontDefinition.IsEmpty()))
+                    if (cursorIndex == selectionEndIndex && TextUtilities.IsFontAssigned(this))
                     {
                         cursorParams = CursorPositionStylePainterParameters.GetDefault(this, text);
                         cursorParams.text = editorEngine.text;
@@ -1022,8 +1051,7 @@ namespace UnityEngine.UIElements
                 bool overflowVisible = computedStyle.overflow == OverflowInternal.Visible;
                 style.clipping = overflowVisible ? TextClipping.Overflow : TextClipping.Clip;
 
-                if (computedStyle.unityFont != null)
-                    style.font = computedStyle.unityFont;
+                style.font = TextUtilities.GetFont(textInput);
 
                 style.fontSize = (int)computedStyle.fontSize.value;
                 style.fontStyle = computedStyle.unityFontStyleAndWeight;

@@ -35,7 +35,7 @@ namespace UnityEditor.UIElements
             public UxmlTraits()
             {
                 m_PropertyPath = new UxmlStringAttributeDescription { name = "binding-path" };
-                m_Label = new UxmlStringAttributeDescription { name = "label" };
+                m_Label = new UxmlStringAttributeDescription { name = "label", defaultValue = null };
             }
 
             public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
@@ -54,7 +54,14 @@ namespace UnityEditor.UIElements
             }
         }
 
+        /// <summary>
+        /// Binding object that will be updated.
+        /// </summary>
         public IBinding binding { get; set; }
+
+        /// <summary>
+        /// Path of the target property to be bound.
+        /// </summary>
         public string bindingPath { get; set; }
 
         /// <summary>
@@ -65,6 +72,9 @@ namespace UnityEditor.UIElements
         private SerializedProperty m_SerializedProperty;
         private PropertyField m_ParentPropertyField;
         private int m_FoldoutDepth;
+
+        private int m_DrawNestingLevel;
+        private PropertyField m_DrawParentProperty;
 
         private float m_LabelWidthRatio;
         private float m_LabelExtraPadding;
@@ -152,64 +162,148 @@ namespace UnityEditor.UIElements
             if (bindProperty == null)
                 return;
 
+            VisualElement customPropertyGUI;
+#if UNITY_2021_2_OR_NEWER || !UIE_PACKAGE
+            ComputeNestingLevel();
+
+
+            // Case 1292133: set proper nesting level before calling CreatePropertyGUI
             var handler = ScriptAttributeUtility.GetHandler(m_SerializedProperty);
+            using (var nestingContext = handler.ApplyNestingContext(m_DrawNestingLevel))
+            {
+                InitializeCustomPropertyGUI(handler, bindProperty, out customPropertyGUI);
+            }
+#else
+            var handler = ScriptAttributeUtility.GetHandler(m_SerializedProperty);
+            InitializeCustomPropertyGUI(handler, bindProperty, out customPropertyGUI);
+#endif
+
+            if (customPropertyGUI != null)
+            {
+                PropagateNestingLevel(customPropertyGUI);
+                hierarchy.Add(customPropertyGUI);
+            }
+        }
+
+        void InitializeCustomPropertyGUI(PropertyHandler handler, SerializedProperty bindProperty , out VisualElement customPropertyGUI)
+        {
+            customPropertyGUI = null;
+
             if (handler.hasPropertyDrawer)
             {
-                var customPropertyGUI = handler.propertyDrawer.CreatePropertyGUI(m_SerializedProperty);
+                customPropertyGUI = handler.propertyDrawer.CreatePropertyGUI(m_SerializedProperty);
 
                 if (customPropertyGUI == null)
                 {
-                    customPropertyGUI = new IMGUIContainer(() =>
-                    {
-                        var originalWideMode = InspectorElement.SetWideModeForWidth(this);
-
-                        try
-                        {
-                            EditorGUI.BeginChangeCheck();
-                            m_SerializedProperty.serializedObject.Update();
-
-                            if (m_FoldoutDepth > 0)
-                                EditorGUI.indentLevel += m_FoldoutDepth;
-
-                            if (label == null)
-                            {
-                                EditorGUILayout.PropertyField(m_SerializedProperty, true);
-                            }
-                            else if (label == string.Empty)
-                            {
-                                EditorGUILayout.PropertyField(m_SerializedProperty, GUIContent.none, true);
-                            }
-                            else
-                            {
-                                EditorGUILayout.PropertyField(m_SerializedProperty, new GUIContent(label), true);
-                            }
-
-                            if (m_FoldoutDepth > 0)
-                                EditorGUI.indentLevel -= m_FoldoutDepth;
-
-                            m_SerializedProperty.serializedObject.ApplyModifiedProperties();
-                            if (EditorGUI.EndChangeCheck())
-                            {
-                                DispatchPropertyChangedEvent();
-                            }
-                        }
-                        finally
-                        {
-                            EditorGUIUtility.wideMode = originalWideMode;
-                        }
-                    });
+                    customPropertyGUI = CreatePropertyIMGUIContainer();
                 }
                 else
                 {
                     RegisterPropertyChangesOnCustomDrawerElement(customPropertyGUI);
                 }
-                hierarchy.Add(customPropertyGUI);
             }
             else
             {
-                var field = CreateFieldFromProperty(bindProperty);
-                if (field != null)
-                    hierarchy.Add(field);
+                customPropertyGUI = CreateFieldFromProperty(bindProperty);
+            }
+        }
+
+        private VisualElement CreatePropertyIMGUIContainer()
+        {
+            GUIContent customLabel = string.IsNullOrEmpty(label) ? null : new GUIContent(label);
+
+            return new IMGUIContainer(() =>
+            {
+                var originalWideMode = InspectorElement.SetWideModeForWidth(this);
+                try
+                {
+                    if (!m_SerializedProperty.isValid)
+                        return;
+
+                    EditorGUI.BeginChangeCheck();
+                    m_SerializedProperty.serializedObject.Update();
+
+                    if (m_FoldoutDepth > 0)
+                        EditorGUI.indentLevel += m_FoldoutDepth;
+
+#if UNITY_2021_2_OR_NEWER
+                    // Wait at last minute to call GetHandler, sometimes the handler cache is cleared between calls.
+                    var handler = ScriptAttributeUtility.GetHandler(m_SerializedProperty);
+                    using (var nestingContext = handler.ApplyNestingContext(m_DrawNestingLevel))
+                    {
+                        if (label == null)
+                        {
+                            EditorGUILayout.PropertyField(m_SerializedProperty, true);
+                        }
+                        else if (label == string.Empty)
+                        {
+                            EditorGUILayout.PropertyField(m_SerializedProperty, GUIContent.none, true);
+                        }
+                        else
+                        {
+                            EditorGUILayout.PropertyField(m_SerializedProperty, new GUIContent(label), true);
+                        }
+                    }
+#else
+                    if (label == null)
+                    {
+                        EditorGUILayout.PropertyField(m_SerializedProperty, true);
+                    }
+                    else if (label == string.Empty)
+                    {
+                        EditorGUILayout.PropertyField(m_SerializedProperty, GUIContent.none, true);
+                    }
+                    else
+                    {
+                        EditorGUILayout.PropertyField(m_SerializedProperty, new GUIContent(label), true);
+                    }
+#endif
+
+                    if (m_FoldoutDepth > 0)
+                        EditorGUI.indentLevel -= m_FoldoutDepth;
+
+                    m_SerializedProperty.serializedObject.ApplyModifiedProperties();
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        DispatchPropertyChangedEvent();
+                    }
+                }
+                finally
+                {
+                    EditorGUIUtility.wideMode = originalWideMode;
+                }
+            });
+        }
+
+        #if UNITY_2021_2_OR_NEWER || !UIE_PACKAGE
+        private void ComputeNestingLevel()
+        {
+            m_DrawNestingLevel = 0;
+            for (var ve = m_DrawParentProperty; ve != null; ve = ve.m_DrawParentProperty)
+            {
+                if (ve.m_SerializedProperty == m_SerializedProperty ||
+                    ScriptAttributeUtility.CanUseSameHandler(ve.m_SerializedProperty, m_SerializedProperty))
+                {
+                    m_DrawNestingLevel = ve.m_DrawNestingLevel + 1;
+                    break;
+                }
+            }
+        }
+
+        #endif
+
+        private void PropagateNestingLevel(VisualElement customPropertyGUI)
+        {
+            var p = customPropertyGUI as PropertyField;
+            if (p != null)
+            {
+                p.m_DrawParentProperty = this;
+            }
+
+            int childCount = customPropertyGUI.hierarchy.childCount;
+            for (var i = 0; i < childCount; i++)
+            {
+                PropagateNestingLevel(customPropertyGUI.hierarchy[i]);
             }
         }
 
@@ -483,19 +577,27 @@ namespace UnityEditor.UIElements
 
                 case SerializedPropertyType.Enum:
                 {
-                    Type enumType;
-                    ScriptAttributeUtility.GetFieldInfoFromProperty(property, out enumType);
-                    if (enumType.IsDefined(typeof(FlagsAttribute), false))
+                    ScriptAttributeUtility.GetFieldInfoFromProperty(property, out var enumType);
+
+                    if (enumType != null && enumType.IsDefined(typeof(FlagsAttribute), false))
                     {
-                        var field = new EnumFlagsField();
-                        field.choices = property.enumDisplayNames.ToList();
-                        field.value = (Enum)Enum.ToObject(enumType, property.intValue);
+                        var enumData = EnumDataUtility.GetCachedEnumData(enumType);
+                        var field = new EnumFlagsField
+                        {
+                            choices = enumData.displayNames.ToList(),
+                            value = (Enum)Enum.ToObject(enumType, property.intValue)
+                        };
                         return ConfigureField<EnumFlagsField, Enum>(field, property);
                     }
                     else
                     {
-                        var field = new PopupField<string>(property.enumDisplayNames.ToList(), property.enumValueIndex);
-                        field.index = property.enumValueIndex;
+                        var popupEntries = enumType != null
+                            ? EnumDataUtility.GetCachedEnumData(enumType).displayNames.ToList()
+                            : property.enumDisplayNames.ToList();
+                        var field = new PopupField<string>(popupEntries, property.enumValueIndex)
+                        {
+                            index = property.enumValueIndex
+                        };
                         return ConfigureField<PopupField<string>, string>(field, property);
                     }
                 }

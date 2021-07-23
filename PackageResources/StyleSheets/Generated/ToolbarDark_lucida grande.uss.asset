@@ -199,281 +199,291 @@ MonoBehaviour:
       m_Values:
       - m_ValueType: 4
         valueIndex: 25
-    - m_Name: --unity-colors-button-background-focus
+    - m_Name: --unity-colors-button-background-hover_pressed
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 26
-    - m_Name: --unity-colors-button-background-hover
+    - m_Name: --unity-colors-button-background-focus
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 27
-    - m_Name: --unity-colors-button-border
+    - m_Name: --unity-colors-button-background-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 28
-    - m_Name: --unity-colors-button-border-pressed
+    - m_Name: --unity-colors-button-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 29
-    - m_Name: --unity-colors-button-border_accent
+    - m_Name: --unity-colors-button-border-pressed
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 30
-    - m_Name: --unity-colors-button-text
+    - m_Name: --unity-colors-button-border_accent-focus
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 31
-    - m_Name: --unity-colors-dropdown-background
+    - m_Name: --unity-colors-button-border_accent
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 32
-    - m_Name: --unity-colors-dropdown-background-hover
+    - m_Name: --unity-colors-button-text
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 33
-    - m_Name: --unity-colors-dropdown-border
+    - m_Name: --unity-colors-dropdown-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 34
-    - m_Name: --unity-colors-dropdown-border_accent
+    - m_Name: --unity-colors-dropdown-background-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 35
-    - m_Name: --unity-colors-dropdown-text
+    - m_Name: --unity-colors-dropdown-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 36
-    - m_Name: --unity-colors-helpbox-background
+    - m_Name: --unity-colors-dropdown-border_accent
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 37
-    - m_Name: --unity-colors-helpbox-border
+    - m_Name: --unity-colors-dropdown-text
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 38
-    - m_Name: --unity-colors-helpbox-text
+    - m_Name: --unity-colors-helpbox-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 39
-    - m_Name: --unity-colors-input_field-background
+    - m_Name: --unity-colors-helpbox-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 40
-    - m_Name: --unity-colors-input_field-border
+    - m_Name: --unity-colors-helpbox-text
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 41
-    - m_Name: --unity-colors-input_field-border-focus
+    - m_Name: --unity-colors-input_field-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 42
-    - m_Name: --unity-colors-input_field-border-hover
+    - m_Name: --unity-colors-input_field-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 43
-    - m_Name: --unity-colors-input_field-border_accent
+    - m_Name: --unity-colors-input_field-border-focus
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 44
-    - m_Name: --unity-colors-label-text
+    - m_Name: --unity-colors-input_field-border-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 45
-    - m_Name: --unity-colors-label-text-focus
+    - m_Name: --unity-colors-input_field-border_accent
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 46
-    - m_Name: --unity-colors-object_field-background
+    - m_Name: --unity-colors-label-text
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 47
-    - m_Name: --unity-colors-object_field-border
+    - m_Name: --unity-colors-label-text-focus
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 48
-    - m_Name: --unity-colors-object_field-border-focus
+    - m_Name: --unity-colors-object_field-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 49
-    - m_Name: --unity-colors-object_field-border-hover
+    - m_Name: --unity-colors-object_field-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 50
-    - m_Name: --unity-colors-object_field_button-background
+    - m_Name: --unity-colors-object_field-border-focus
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 51
-    - m_Name: --unity-colors-object_field_button-background-hover
+    - m_Name: --unity-colors-object_field-border-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 52
-    - m_Name: --unity-colors-popup-background
+    - m_Name: --unity-colors-object_field_button-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 53
-    - m_Name: --unity-colors-preview-background
+    - m_Name: --unity-colors-object_field_button-background-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 54
-    - m_Name: --unity-colors-preview-border
+    - m_Name: --unity-colors-popup-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 55
-    - m_Name: --unity-colors-preview-text
+    - m_Name: --unity-colors-preview-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 56
-    - m_Name: --unity-colors-preview_overlay-text
+    - m_Name: --unity-colors-preview-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 57
-    - m_Name: --unity-colors-scrollbar_groove-background
+    - m_Name: --unity-colors-preview-text
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 58
-    - m_Name: --unity-colors-scrollbar_groove-border
+    - m_Name: --unity-colors-preview_overlay-text
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 59
-    - m_Name: --unity-colors-scrollbar_thumb-background
+    - m_Name: --unity-colors-scrollbar_groove-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 60
-    - m_Name: --unity-colors-scrollbar_thumb-background-hover
+    - m_Name: --unity-colors-scrollbar_groove-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 61
-    - m_Name: --unity-colors-scrollbar_thumb-border
+    - m_Name: --unity-colors-scrollbar_thumb-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 62
-    - m_Name: --unity-colors-scrollbar_thumb-border-hover
+    - m_Name: --unity-colors-scrollbar_thumb-background-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 63
-    - m_Name: --unity-colors-scrollbar_button-background
+    - m_Name: --unity-colors-scrollbar_thumb-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 64
-    - m_Name: --unity-colors-scrollbar_button-background-hover
+    - m_Name: --unity-colors-scrollbar_thumb-border-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 65
-    - m_Name: --unity-colors-progress-background
+    - m_Name: --unity-colors-scrollbar_button-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 66
-    - m_Name: --unity-colors-slider_groove-background
+    - m_Name: --unity-colors-scrollbar_button-background-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 67
-    - m_Name: --unity-colors-slider_groove-background-disabled
+    - m_Name: --unity-colors-progress-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 68
-    - m_Name: --unity-colors-slider_thumb-background
+    - m_Name: --unity-colors-slider_groove-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 69
-    - m_Name: --unity-colors-slider_thumb-background-disabled
+    - m_Name: --unity-colors-slider_groove-background-disabled
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 70
-    - m_Name: --unity-colors-slider_thumb-background-hover
+    - m_Name: --unity-colors-slider_thumb-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 71
-    - m_Name: --unity-colors-slider_thumb-border
+    - m_Name: --unity-colors-slider_thumb-background-disabled
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 72
-    - m_Name: --unity-colors-slider_thumb-border-disabled
+    - m_Name: --unity-colors-slider_thumb-background-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 73
-    - m_Name: --unity-colors-slider_thumb_halo-background
+    - m_Name: --unity-colors-slider_thumb-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 74
-    - m_Name: --unity-colors-tab-background
+    - m_Name: --unity-colors-slider_thumb-border-disabled
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 75
-    - m_Name: --unity-colors-tab-background-checked
+    - m_Name: --unity-colors-slider_thumb_halo-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 76
-    - m_Name: --unity-colors-tab-background-hover
+    - m_Name: --unity-colors-tab-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 77
-    - m_Name: --unity-colors-tab-text
+    - m_Name: --unity-colors-tab-background-checked
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 78
-    - m_Name: --unity-colors-toolbar-background
+    - m_Name: --unity-colors-tab-background-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 79
-    - m_Name: --unity-colors-toolbar-border
+    - m_Name: --unity-colors-tab-text
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 80
+    - m_Name: --unity-colors-toolbar-background
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 81
+    - m_Name: --unity-colors-toolbar-border
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 82
     - m_Name: --unity-metrics-toolbar-height
       m_Line: -1
       m_Values:
@@ -483,42 +493,42 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 81
+        valueIndex: 83
     - m_Name: --unity-colors-toolbar_button-background-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 82
+        valueIndex: 84
     - m_Name: --unity-colors-toolbar_button-background-checked
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 83
+        valueIndex: 85
     - m_Name: --unity-colors-toolbar_button-background-focus
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 84
+        valueIndex: 86
     - m_Name: --unity-colors-toolbar_button-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 85
+        valueIndex: 87
     - m_Name: --unity-colors-toolbar_button-text
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 86
+        valueIndex: 88
     - m_Name: --unity-colors-toolbar_button-text-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 87
+        valueIndex: 89
     - m_Name: --unity-colors-toolbar_button-text-checked
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 88
+        valueIndex: 90
     - m_Name: --unity-metrics-toolbar_button-height
       m_Line: -1
       m_Values:
@@ -528,37 +538,37 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 89
+        valueIndex: 91
     - m_Name: --unity-colors-window-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 90
+        valueIndex: 92
     - m_Name: --unity-colors-window-text
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 91
+        valueIndex: 93
     - m_Name: --unity-colors-inspector_titlebar-background
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 92
+        valueIndex: 94
     - m_Name: --unity-colors-inspector_titlebar-background-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 93
+        valueIndex: 95
     - m_Name: --unity-colors-inspector_titlebar-border
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 94
+        valueIndex: 96
     - m_Name: --unity-colors-inspector_titlebar-border_accent
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 95
+        valueIndex: 97
     - m_Name: --unity-metrics-inspector_titlebar-height
       m_Line: -1
       m_Values:
@@ -568,377 +578,392 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 96
+        valueIndex: 98
     - m_Name: --unity-theme-background-color-2
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 97
+        valueIndex: 99
     - m_Name: --unity-theme-background-color-3
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 98
+        valueIndex: 100
     - m_Name: --unity-theme-background-color-4
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 99
+        valueIndex: 101
     - m_Name: --unity-theme-background-color-5
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 100
+        valueIndex: 102
     - m_Name: --unity-theme-background-color-6
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 101
+        valueIndex: 103
     - m_Name: --unity-theme-background-color-7
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 102
+        valueIndex: 104
     - m_Name: --unity-theme-background-color-8
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 103
+        valueIndex: 105
     - m_Name: --unity-theme-background-color-9
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 104
+        valueIndex: 106
     - m_Name: --unity-theme-background-color-10
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 105
+        valueIndex: 107
     - m_Name: --unity-theme-background-color-11
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 106
+        valueIndex: 108
     - m_Name: --unity-theme-background-color-12
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 107
+        valueIndex: 109
     - m_Name: --unity-theme-background-color-13
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 108
+        valueIndex: 110
     - m_Name: --unity-theme-background-color-14
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 109
+        valueIndex: 111
     - m_Name: --unity-theme-background-color-15
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 110
+        valueIndex: 112
     - m_Name: --unity-theme-background-color-16
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 111
+        valueIndex: 113
     - m_Name: --unity-theme-background-color-17
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 112
+        valueIndex: 114
     - m_Name: --unity-theme-background-color-50
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 113
+        valueIndex: 115
     - m_Name: --unity-theme-background-color-51
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 114
+        valueIndex: 116
     - m_Name: --unity-theme-background-color-52
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 115
+        valueIndex: 117
     - m_Name: --unity-theme-background-color-53
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 116
+        valueIndex: 118
     - m_Name: --unity-theme-background-color-54
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 117
+        valueIndex: 119
     - m_Name: --unity-theme-background-color-55
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 118
+        valueIndex: 120
     - m_Name: --unity-theme-background-color-56
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 119
+        valueIndex: 121
     - m_Name: --unity-theme-background-color-57
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 120
+        valueIndex: 122
     - m_Name: --unity-theme-background-color-58
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 121
+        valueIndex: 123
     - m_Name: --unity-theme-background-color-59
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 122
+        valueIndex: 124
     - m_Name: --unity-theme-background-color-60
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 123
+        valueIndex: 125
     - m_Name: --unity-theme-background-color-80
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 124
+        valueIndex: 126
     - m_Name: --unity-theme-background-color-81
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 125
+        valueIndex: 127
     - m_Name: --unity-theme-background-color-82
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 126
+        valueIndex: 128
     - m_Name: --unity-theme-background-color-83
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 127
+        valueIndex: 129
     - m_Name: --unity-theme-background-color-84
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 128
+        valueIndex: 130
     - m_Name: --unity-theme-background-color-85
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 129
+        valueIndex: 131
     - m_Name: --unity-theme-background-color-86
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 130
+        valueIndex: 132
     - m_Name: --unity-theme-background-color-87
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 131
+        valueIndex: 133
     - m_Name: --unity-theme-background-color-88
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 132
+        valueIndex: 134
     - m_Name: --unity-theme-background-color-89
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 133
+        valueIndex: 135
     - m_Name: --unity-theme-background-color-90
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 134
-    - m_Name: --unity-theme-border-color-1
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 135
-    - m_Name: --unity-theme-border-color-2
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
         valueIndex: 136
-    - m_Name: --unity-theme-border-color-3
+    - m_Name: --unity-theme-background-color-91
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 137
-    - m_Name: --unity-theme-border-color-4
+    - m_Name: --unity-theme-background-color-92
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 138
-    - m_Name: --unity-theme-border-color-5
+    - m_Name: --unity-theme-border-color-1
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 139
-    - m_Name: --unity-theme-border-color-6
+    - m_Name: --unity-theme-border-color-2
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 140
-    - m_Name: --unity-theme-border-color-7
+    - m_Name: --unity-theme-border-color-3
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 141
-    - m_Name: --unity-theme-border-color-8
+    - m_Name: --unity-theme-border-color-4
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 142
-    - m_Name: --unity-theme-border-color-9
+    - m_Name: --unity-theme-border-color-5
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 143
-    - m_Name: --unity-theme-border-color-10
+    - m_Name: --unity-theme-border-color-6
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 144
-    - m_Name: --unity-theme-border-color-11
+    - m_Name: --unity-theme-border-color-7
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 145
-    - m_Name: --unity-theme-border-color-12
+    - m_Name: --unity-theme-border-color-8
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 146
-    - m_Name: --unity-theme-border-color-13
+    - m_Name: --unity-theme-border-color-9
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 147
-    - m_Name: --unity-theme-border-color-14
+    - m_Name: --unity-theme-border-color-10
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 148
-    - m_Name: --unity-theme-border-color-15
+    - m_Name: --unity-theme-border-color-11
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 149
-    - m_Name: --unity-theme-border-color-16
+    - m_Name: --unity-theme-border-color-12
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 150
-    - m_Name: --unity-theme-border-color-17
+    - m_Name: --unity-theme-border-color-13
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 151
-    - m_Name: --unity-theme-border-color-18
+    - m_Name: --unity-theme-border-color-14
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 152
-    - m_Name: --unity-theme-border-color-19
+    - m_Name: --unity-theme-border-color-15
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 153
-    - m_Name: --unity-theme-border-color-20
+    - m_Name: --unity-theme-border-color-16
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 154
-    - m_Name: --unity-theme-border-color-21
+    - m_Name: --unity-theme-border-color-17
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 155
-    - m_Name: --unity-theme-border-color-22
+    - m_Name: --unity-theme-border-color-18
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 156
-    - m_Name: --unity-theme-border-color-23
+    - m_Name: --unity-theme-border-color-19
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 157
-    - m_Name: --unity-theme-text-color-1
+    - m_Name: --unity-theme-border-color-20
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 158
-    - m_Name: --unity-theme-text-color-2
+    - m_Name: --unity-theme-border-color-21
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 159
-    - m_Name: --unity-theme-text-color-3
+    - m_Name: --unity-theme-border-color-22
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 160
-    - m_Name: --unity-theme-text-color-4
+    - m_Name: --unity-theme-border-color-23
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 161
-    - m_Name: --unity-theme-text-color-5
+    - m_Name: --unity-theme-border-color-24
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 162
-    - m_Name: --unity-theme-text-color-6
+    - m_Name: --unity-theme-text-color-1
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 163
-    - m_Name: --unity-theme-text-color-7
+    - m_Name: --unity-theme-text-color-2
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 164
-    - m_Name: --unity-theme-text-color-8
+    - m_Name: --unity-theme-text-color-3
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 165
-    - m_Name: --unity-theme-text-color-9
+    - m_Name: --unity-theme-text-color-4
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 166
-    - m_Name: --unity-theme-text-color-10
+    - m_Name: --unity-theme-text-color-5
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 167
-    - m_Name: --unity-theme-text-color-11
+    - m_Name: --unity-theme-text-color-6
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 168
-    - m_Name: --unity-theme-text-color-12
+    - m_Name: --unity-theme-text-color-7
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 169
-    - m_Name: --unity-theme-text-color-13
+    - m_Name: --unity-theme-text-color-8
       m_Line: -1
       m_Values:
       - m_ValueType: 4
         valueIndex: 170
+    - m_Name: --unity-theme-text-color-9
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 171
+    - m_Name: --unity-theme-text-color-10
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 172
+    - m_Name: --unity-theme-text-color-11
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 173
+    - m_Name: --unity-theme-text-color-12
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 174
+    - m_Name: --unity-theme-text-color-13
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 175
     - m_Name: --unity-icons-arrow_right
       m_Line: -1
       m_Values:
@@ -1395,58 +1420,58 @@ MonoBehaviour:
     - m_Name: --current-font
       m_Line: -1
       m_Values:
-      - m_ValueType: 5
-        valueIndex: 31
+      - m_ValueType: 6
+        valueIndex: 0
     - m_Name: --unity-text-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 171
+        valueIndex: 176
     - m_Name: --unity-active-text-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 172
+        valueIndex: 177
     - m_Name: --theme-window-text-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 173
+        valueIndex: 178
     - m_Name: --theme-window-border-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 174
+        valueIndex: 179
     - m_Name: --theme-window-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 175
+        valueIndex: 180
     - m_Name: --theme-label-text-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 176
+        valueIndex: 181
     - m_Name: --theme-input-text-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 177
+        valueIndex: 182
     - m_Name: --theme-input-text-color-selected
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 178
+        valueIndex: 183
     - m_Name: --theme-input-text-color-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 179
+        valueIndex: 184
     - m_Name: --theme-input-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 180
+        valueIndex: 185
     - m_Name: --theme-input-border-width
       m_Line: -1
       m_Values:
@@ -1456,12 +1481,12 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 181
+        valueIndex: 186
     - m_Name: --theme-input-accent-border-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 182
+        valueIndex: 187
     - m_Name: --theme-input-border-focus-width
       m_Line: -1
       m_Values:
@@ -1471,7 +1496,7 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 183
+        valueIndex: 188
     - m_Name: --theme-input-border-hover-width
       m_Line: -1
       m_Values:
@@ -1481,7 +1506,7 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 184
+        valueIndex: 189
     - m_Name: --theme-input-border-checked-width
       m_Line: -1
       m_Values:
@@ -1491,12 +1516,12 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 185
+        valueIndex: 190
     - m_Name: --theme-object-field-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 186
+        valueIndex: 191
     - m_Name: --theme-object-field-border-width
       m_Line: -1
       m_Values:
@@ -1506,7 +1531,7 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 187
+        valueIndex: 192
     - m_Name: --theme-object-field-border-hover-width
       m_Line: -1
       m_Values:
@@ -1516,7 +1541,7 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 188
+        valueIndex: 193
     - m_Name: --theme-object-field-border-focus-width
       m_Line: -1
       m_Values:
@@ -1526,7 +1551,7 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 189
+        valueIndex: 194
     - m_Name: --theme-object-field-border-checked-width
       m_Line: -1
       m_Values:
@@ -1536,37 +1561,37 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 190
+        valueIndex: 195
     - m_Name: --theme-object-field-button-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 191
+        valueIndex: 196
     - m_Name: --theme-object-field-button-background-color-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 192
+        valueIndex: 197
     - m_Name: --theme-button-text-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 193
+        valueIndex: 198
     - m_Name: --theme-button-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 194
+        valueIndex: 199
     - m_Name: --theme-button-background-color-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 195
+        valueIndex: 200
     - m_Name: --theme-button-background-color-checked
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 196
+        valueIndex: 201
     - m_Name: --theme-button-border-width
       m_Line: -1
       m_Values:
@@ -1576,32 +1601,32 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 197
+        valueIndex: 202
     - m_Name: --theme-button-accent-border-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 198
+        valueIndex: 203
     - m_Name: --theme-toolbar-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 199
+        valueIndex: 204
     - m_Name: --theme-toolbar-button-text-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 200
+        valueIndex: 205
     - m_Name: --theme-toolbar-button-text-color-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 201
+        valueIndex: 206
     - m_Name: --theme-toolbar-button-text-color-checked
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 202
+        valueIndex: 207
     - m_Name: --theme-toolbar-button-border-width
       m_Line: -1
       m_Values:
@@ -1611,7 +1636,7 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 203
+        valueIndex: 208
     - m_Name: --theme-toolbar-button-border-2-width
       m_Line: -1
       m_Values:
@@ -1621,27 +1646,27 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 204
+        valueIndex: 209
     - m_Name: --theme-toolbar-button-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 205
+        valueIndex: 210
     - m_Name: --theme-toolbar-button-background-color-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 206
+        valueIndex: 211
     - m_Name: --theme-toolbar-button-background-color-checked
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 207
+        valueIndex: 212
     - m_Name: --theme-toolbar-button-background-color-focus
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 208
+        valueIndex: 213
     - m_Name: --theme-app-toolbar-button-border-width
       m_Line: -1
       m_Values:
@@ -1651,7 +1676,7 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 209
+        valueIndex: 214
     - m_Name: --theme-dropdown-border-width
       m_Line: -1
       m_Values:
@@ -1661,32 +1686,32 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 210
+        valueIndex: 215
     - m_Name: --theme-dropdown-accent-border-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 211
+        valueIndex: 216
     - m_Name: --theme-dropdown-text-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 212
+        valueIndex: 217
     - m_Name: --theme-dropdown-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 213
+        valueIndex: 218
     - m_Name: --theme-dropdown-background-color-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 214
+        valueIndex: 219
     - m_Name: --theme-scrollbar-thumb-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 215
+        valueIndex: 220
     - m_Name: --theme-scrollbar-thumb-border-width
       m_Line: -1
       m_Values:
@@ -1696,57 +1721,57 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 216
+        valueIndex: 221
     - m_Name: --theme-scrollbar-thumb-background-color-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 217
+        valueIndex: 222
     - m_Name: --theme-scrollbar-border-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 218
+        valueIndex: 223
     - m_Name: --theme-scrollbar-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 219
+        valueIndex: 224
     - m_Name: --theme-scrollbar-button-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 220
+        valueIndex: 225
     - m_Name: --theme-scrollbar-button-background-color-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 221
+        valueIndex: 226
     - m_Name: --theme-slider-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 222
+        valueIndex: 227
     - m_Name: --theme-slider-background-color-disabled
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 223
+        valueIndex: 228
     - m_Name: --theme-slider-thumb-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 224
+        valueIndex: 229
     - m_Name: --theme-slider-thumb-background-color-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 225
+        valueIndex: 230
     - m_Name: --theme-slider-thumb-background-color-disabled
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 226
+        valueIndex: 231
     - m_Name: --theme-slider-thumb-border-width
       m_Line: -1
       m_Values:
@@ -1756,62 +1781,62 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 227
+        valueIndex: 232
     - m_Name: --theme-slider-thumb-border-color-disabled
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 228
+        valueIndex: 233
     - m_Name: --theme-slider-thumb-extent-background-color-focus
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 229
+        valueIndex: 234
     - m_Name: --theme-box-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 230
+        valueIndex: 235
     - m_Name: --theme-box-border-color
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 32
+        valueIndex: 31
     - m_Name: --theme-help-box-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 231
+        valueIndex: 236
     - m_Name: --theme-help-box-border-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 232
+        valueIndex: 237
     - m_Name: --theme-help-box-icon-info
       m_Line: -1
       m_Values:
       - m_ValueType: 6
-        valueIndex: 0
+        valueIndex: 1
     - m_Name: --theme-help-box-icon-warning
       m_Line: -1
       m_Values:
       - m_ValueType: 6
-        valueIndex: 1
+        valueIndex: 2
     - m_Name: --theme-help-box-icon-error
       m_Line: -1
       m_Values:
       - m_ValueType: 6
-        valueIndex: 2
+        valueIndex: 3
     - m_Name: --theme-list-view-drag-hover-bar-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 233
+        valueIndex: 238
     - m_Name: --theme-list-view-drag-hover-item-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 234
+        valueIndex: 239
     - m_Name: --theme-image-pick
       m_Line: -1
       m_Values:
@@ -1906,7 +1931,7 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 6
-        valueIndex: 3
+        valueIndex: 4
     - m_Name: --theme-image-toolbar-breadcrumbs-item
       m_Line: -1
       m_Values:
@@ -1951,62 +1976,62 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 235
+        valueIndex: 240
     - m_Name: --theme-view-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 236
+        valueIndex: 241
     - m_Name: --theme-line-background-color-hover
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 237
+        valueIndex: 242
     - m_Name: --theme-background-color-alternate
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 238
+        valueIndex: 243
     - m_Name: --theme-line-selection-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 239
+        valueIndex: 244
     - m_Name: --theme-line-selection-background-color-focus
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 240
+        valueIndex: 245
     - m_Name: --theme-line-selection-text-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 241
+        valueIndex: 246
     - m_Name: --progress-bar-back-background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 242
+        valueIndex: 247
     - m_Name: --progress-bar-back-border-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 243
+        valueIndex: 248
     - m_Name: --progress-bar-progress-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 244
+        valueIndex: 249
     - m_Name: --progress-bar-text-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 245
+        valueIndex: 250
     - m_Name: --theme-base-field-label-mixed-values-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 246
+        valueIndex: 251
     line: 3
   - m_Properties:
     - m_Name: height
@@ -2018,22 +2043,22 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 33
+        valueIndex: 32
     - m_Name: align-items
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 34
+        valueIndex: 33
     - m_Name: white-space
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 35
+        valueIndex: 34
     - m_Name: background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 247
+        valueIndex: 252
     - m_Name: border-bottom-width
       m_Line: -1
       m_Values:
@@ -2043,12 +2068,17 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 248
+        valueIndex: 253
     - m_Name: font-size
       m_Line: -1
       m_Values:
       - m_ValueType: 3
         valueIndex: 54
+    - m_Name: flex-shrink
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 2
+        valueIndex: 3
     line: 5
   - m_Properties:
     - m_Name: left
@@ -2070,76 +2100,32 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 3
+        valueIndex: 4
     - m_Name: padding-bottom
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 4
+        valueIndex: 5
     - m_Name: margin-top
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 5
+        valueIndex: 6
     - m_Name: margin-right
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 6
+        valueIndex: 7
     - m_Name: margin-bottom
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 7
+        valueIndex: 8
     - m_Name: margin-left
       m_Line: -1
       m_Values:
       - m_ValueType: 3
         valueIndex: 58
-    - m_Name: color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 249
-    - m_Name: background-color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 250
-    - m_Name: border-width
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 3
-        valueIndex: 59
-    - m_Name: border-color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 251
-    - m_Name: border-top-width
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 2
-        valueIndex: 8
-    - m_Name: border-bottom-width
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 2
-        valueIndex: 9
-    line: 17
-  - m_Properties:
-    - m_Name: color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 252
-    - m_Name: background-color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 253
-    line: 37
-  - m_Properties:
     - m_Name: color
       m_Line: -1
       m_Values:
@@ -2150,19 +2136,63 @@ MonoBehaviour:
       m_Values:
       - m_ValueType: 4
         valueIndex: 255
-    line: 42
+    - m_Name: border-width
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 3
+        valueIndex: 59
+    - m_Name: border-color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 256
+    - m_Name: border-top-width
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 2
+        valueIndex: 9
+    - m_Name: border-bottom-width
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 2
+        valueIndex: 10
+    line: 18
   - m_Properties:
     - m_Name: color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 256
+        valueIndex: 257
     - m_Name: background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 257
-    line: 42
+        valueIndex: 258
+    line: 38
+  - m_Properties:
+    - m_Name: color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 259
+    - m_Name: background-color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 260
+    line: 43
+  - m_Properties:
+    - m_Name: color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 261
+    - m_Name: background-color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 262
+    line: 43
   - m_Properties:
     - m_Name: background-image
       m_Line: -1
@@ -2173,39 +2203,39 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 10
+        valueIndex: 11
     - m_Name: width
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 11
+        valueIndex: 12
     - m_Name: height
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 12
+        valueIndex: 13
     - m_Name: flex
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 13
-      - m_ValueType: 2
         valueIndex: 14
+      - m_ValueType: 2
+        valueIndex: 15
       - m_ValueType: 1
         valueIndex: 2
     - m_Name: align-self
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 36
-    line: 46
+        valueIndex: 35
+    line: 47
   - m_Properties:
     - m_Name: margin-bottom
       m_Line: -1
       m_Values:
       - m_ValueType: 3
         valueIndex: 60
-    line: 54
+    line: 55
   - m_Properties:
     - m_Name: left
       m_Line: -1
@@ -2226,56 +2256,12 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 15
+        valueIndex: 16
     - m_Name: padding-bottom
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 16
-    - m_Name: color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 258
-    - m_Name: background-color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 259
-    - m_Name: border-width
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 3
-        valueIndex: 64
-    - m_Name: border-color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 260
-    - m_Name: border-top-width
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 2
         valueIndex: 17
-    - m_Name: border-bottom-width
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 2
-        valueIndex: 18
-    line: 58
-  - m_Properties:
-    - m_Name: color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 261
-    - m_Name: background-color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 262
-    line: 73
-  - m_Properties:
     - m_Name: color
       m_Line: -1
       m_Values:
@@ -2286,7 +2272,58 @@ MonoBehaviour:
       m_Values:
       - m_ValueType: 4
         valueIndex: 264
-    line: 78
+    - m_Name: border-width
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 3
+        valueIndex: 64
+    - m_Name: border-color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 265
+    - m_Name: border-top-width
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 2
+        valueIndex: 18
+    - m_Name: border-bottom-width
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 2
+        valueIndex: 19
+    line: 59
+  - m_Properties:
+    - m_Name: color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 266
+    - m_Name: background-color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 267
+    line: 74
+  - m_Properties:
+    - m_Name: color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 268
+    - m_Name: background-color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 269
+    line: 79
+  - m_Properties:
+    - m_Name: border-color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 270
+    line: 84
   - m_Properties:
     - m_Name: margin-left
       m_Line: -1
@@ -2297,7 +2334,7 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 37
+        valueIndex: 36
     - m_Name: padding-left
       m_Line: -1
       m_Values:
@@ -2312,17 +2349,17 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 38
+        valueIndex: 37
     - m_Name: color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 265
+        valueIndex: 271
     - m_Name: background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 266
+        valueIndex: 272
     - m_Name: border-width
       m_Line: -1
       m_Values:
@@ -2332,64 +2369,64 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 267
+        valueIndex: 273
     - m_Name: border-top-width
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 19
+        valueIndex: 20
     - m_Name: border-bottom-width
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 20
-    line: 83
+        valueIndex: 21
+    line: 88
   - m_Properties:
     - m_Name: color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 268
+        valueIndex: 274
     - m_Name: background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 269
-    line: 98
-  - m_Properties:
-    - m_Name: color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 270
-    - m_Name: background-color
-      m_Line: -1
-      m_Values:
-      - m_ValueType: 4
-        valueIndex: 271
+        valueIndex: 275
     line: 103
+  - m_Properties:
+    - m_Name: color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 276
+    - m_Name: background-color
+      m_Line: -1
+      m_Values:
+      - m_ValueType: 4
+        valueIndex: 277
+    line: 108
   - m_Properties:
     - m_Name: overflow
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 39
+        valueIndex: 38
     - m_Name: -unity-text-align
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 40
+        valueIndex: 39
     - m_Name: white-space
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 41
+        valueIndex: 40
     - m_Name: flex-grow
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 21
-    line: 108
+        valueIndex: 22
+    line: 113
   - m_Properties:
     - m_Name: background-image
       m_Line: -1
@@ -2410,34 +2447,34 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 42
-    line: 115
+        valueIndex: 41
+    line: 120
   - m_Properties:
     - m_Name: width
       m_Line: -1
       m_Values:
       - m_ValueType: 3
         valueIndex: 71
-    line: 122
+    line: 127
   - m_Properties:
     - m_Name: flex
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 22
+        valueIndex: 23
     - m_Name: width
       m_Line: -1
       m_Values:
       - m_ValueType: 1
         valueIndex: 1
-    line: 126
+    line: 131
   - m_Properties:
     - m_Name: flex-direction
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 43
-    line: 131
+        valueIndex: 42
+    line: 136
   - m_Properties:
     - m_Name: padding-left
       m_Line: -1
@@ -2453,47 +2490,47 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 23
+        valueIndex: 24
     - m_Name: -unity-slice-left
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 24
+        valueIndex: 25
     - m_Name: -unity-slice-right
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 25
+        valueIndex: 26
     - m_Name: -unity-slice-top
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 26
+        valueIndex: 27
     - m_Name: -unity-slice-bottom
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 27
+        valueIndex: 28
     - m_Name: flex-direction
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 44
+        valueIndex: 43
     - m_Name: justify-content
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 45
+        valueIndex: 44
     - m_Name: align-items
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 46
+        valueIndex: 45
     - m_Name: -unity-text-align
       m_Line: -1
       m_Values:
       - m_ValueType: 7
-        valueIndex: 47
+        valueIndex: 46
     - m_Name: margin-left
       m_Line: -1
       m_Values:
@@ -2503,31 +2540,31 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 272
+        valueIndex: 278
     - m_Name: background-image
       m_Line: -1
       m_Values:
       - m_ValueType: 12
         valueIndex: 61
-    line: 135
+    line: 140
   - m_Properties:
     - m_Name: background-image
       m_Line: -1
       m_Values:
       - m_ValueType: 12
         valueIndex: 62
-    line: 152
+    line: 157
   - m_Properties:
     - m_Name: -unity-slice-left
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 28
+        valueIndex: 29
     - m_Name: margin-left
       m_Line: -1
       m_Values:
       - m_ValueType: 2
-        valueIndex: 29
+        valueIndex: 30
     - m_Name: padding-left
       m_Line: -1
       m_Values:
@@ -2538,20 +2575,20 @@ MonoBehaviour:
       m_Values:
       - m_ValueType: 12
         valueIndex: 63
-    line: 156
+    line: 161
   - m_Properties:
     - m_Name: background-image
       m_Line: -1
       m_Values:
       - m_ValueType: 12
         valueIndex: 64
-    line: 163
+    line: 168
   - m_Properties:
     - m_Name: background-image
       m_Line: -1
       m_Values:
       - m_ValueType: 5
-        valueIndex: 48
+        valueIndex: 47
     - m_Name: width
       m_Line: -1
       m_Values:
@@ -2562,13 +2599,13 @@ MonoBehaviour:
       m_Values:
       - m_ValueType: 3
         valueIndex: 77
-    line: 167
+    line: 172
   - m_Properties:
     - m_Name: background-image
       m_Line: -1
       m_Values:
       - m_ValueType: 5
-        valueIndex: 49
+        valueIndex: 48
     - m_Name: width
       m_Line: -1
       m_Values:
@@ -2579,62 +2616,62 @@ MonoBehaviour:
       m_Values:
       - m_ValueType: 3
         valueIndex: 79
-    line: 173
+    line: 178
   - m_Properties:
     - m_Name: display
       m_Line: -1
       m_Values:
       - m_ValueType: 1
         valueIndex: 6
-    line: 179
+    line: 184
   - m_Properties:
     - m_Name: background-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 273
+        valueIndex: 279
     line: 169
   - m_Properties:
     - m_Name: -unity-background-image-tint-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 274
+        valueIndex: 280
     line: 173
   - m_Properties:
     - m_Name: -unity-background-image-tint-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 275
+        valueIndex: 281
     line: 173
   - m_Properties:
     - m_Name: -unity-background-image-tint-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 276
+        valueIndex: 282
     line: 178
   - m_Properties:
     - m_Name: -unity-background-image-tint-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 277
+        valueIndex: 283
     line: 178
   - m_Properties:
     - m_Name: -unity-background-image-tint-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 278
+        valueIndex: 284
     line: 183
   - m_Properties:
     - m_Name: -unity-background-image-tint-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 279
+        valueIndex: 285
     line: 183
   - m_Properties:
     - m_Name: background-image
@@ -2662,21 +2699,21 @@ MonoBehaviour:
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 280
+        valueIndex: 286
     line: 205
   - m_Properties:
     - m_Name: border-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 281
+        valueIndex: 287
     line: 215
   - m_Properties:
     - m_Name: border-color
       m_Line: -1
       m_Values:
       - m_ValueType: 4
-        valueIndex: 282
+        valueIndex: 288
     line: 219
   m_ComplexSelectors:
   - m_Specificity: 11
@@ -2781,13 +2818,22 @@ MonoBehaviour:
         m_Type: 4
       m_PreviousRelationship: 0
     ruleIndex: 11
+  - m_Specificity: 21
+    m_Selectors:
+    - m_Parts:
+      - m_Value: unity-toolbar-button
+        m_Type: 3
+      - m_Value: focus
+        m_Type: 4
+      m_PreviousRelationship: 0
+    ruleIndex: 12
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-toolbar-menu
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 12
+    ruleIndex: 13
   - m_Specificity: 21
     m_Selectors:
     - m_Parts:
@@ -2796,7 +2842,7 @@ MonoBehaviour:
       - m_Value: hover
         m_Type: 4
       m_PreviousRelationship: 0
-    ruleIndex: 13
+    ruleIndex: 14
   - m_Specificity: 21
     m_Selectors:
     - m_Parts:
@@ -2805,65 +2851,65 @@ MonoBehaviour:
       - m_Value: active
         m_Type: 4
       m_PreviousRelationship: 0
-    ruleIndex: 14
+    ruleIndex: 15
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-toolbar-menu__text
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 15
+    ruleIndex: 16
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-toolbar-menu__arrow
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 16
+    ruleIndex: 17
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-toolbar-spacer
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 17
+    ruleIndex: 18
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-toolbar-spacer--flexible
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 18
+    ruleIndex: 19
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-toolbar-breadcrumbs
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 19
+    ruleIndex: 20
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-toolbar-breadcrumbs__item
         m_Type: 3
-      m_PreviousRelationship: 0
-    ruleIndex: 20
-  - m_Specificity: 21
-    m_Selectors:
-    - m_Parts:
-      - m_Value: unity-toolbar-breadcrumbs__item
-        m_Type: 3
-      - m_Value: active
-        m_Type: 4
       m_PreviousRelationship: 0
     ruleIndex: 21
+  - m_Specificity: 21
+    m_Selectors:
+    - m_Parts:
+      - m_Value: unity-toolbar-breadcrumbs__item
+        m_Type: 3
+      - m_Value: active
+        m_Type: 4
+      m_PreviousRelationship: 0
+    ruleIndex: 22
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-toolbar-breadcrumbs__first-item
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 22
+    ruleIndex: 23
   - m_Specificity: 21
     m_Selectors:
     - m_Parts:
@@ -2872,14 +2918,14 @@ MonoBehaviour:
       - m_Value: active
         m_Type: 4
       m_PreviousRelationship: 0
-    ruleIndex: 23
+    ruleIndex: 24
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-icon-arrow-preview-packages-in-use
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 24
+    ruleIndex: 25
   - m_Specificity: 21
     m_Selectors:
     - m_Parts:
@@ -2890,7 +2936,7 @@ MonoBehaviour:
       - m_Value: unity-editor-toolbar-preview-package-in-use__icon
         m_Type: 3
       m_PreviousRelationship: 2
-    ruleIndex: 25
+    ruleIndex: 26
   - m_Specificity: 21
     m_Selectors:
     - m_Parts:
@@ -2901,21 +2947,21 @@ MonoBehaviour:
       - m_Value: unity-editor-toolbar-element-preview-packages-in-use__label
         m_Type: 3
       m_PreviousRelationship: 2
-    ruleIndex: 26
+    ruleIndex: 27
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-binding__prefab-override-bar
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 27
-  - m_Specificity: 11
-    m_Selectors:
-    - m_Parts:
-      - m_Value: unity-binding--animation-animated
-        m_Type: 3
-      m_PreviousRelationship: 0
     ruleIndex: 28
+  - m_Specificity: 11
+    m_Selectors:
+    - m_Parts:
+      - m_Value: unity-binding--animation-animated
+        m_Type: 3
+      m_PreviousRelationship: 0
+    ruleIndex: 29
   - m_Specificity: 21
     m_Selectors:
     - m_Parts:
@@ -2926,14 +2972,14 @@ MonoBehaviour:
       - m_Value: unity-toggle__checkmark
         m_Type: 3
       m_PreviousRelationship: 1
-    ruleIndex: 29
-  - m_Specificity: 11
-    m_Selectors:
-    - m_Parts:
-      - m_Value: unity-binding--animation-recorded
-        m_Type: 3
-      m_PreviousRelationship: 0
     ruleIndex: 30
+  - m_Specificity: 11
+    m_Selectors:
+    - m_Parts:
+      - m_Value: unity-binding--animation-recorded
+        m_Type: 3
+      m_PreviousRelationship: 0
+    ruleIndex: 31
   - m_Specificity: 21
     m_Selectors:
     - m_Parts:
@@ -2944,14 +2990,14 @@ MonoBehaviour:
       - m_Value: unity-toggle__checkmark
         m_Type: 3
       m_PreviousRelationship: 1
-    ruleIndex: 31
+    ruleIndex: 32
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-binding--animation-candidate
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 32
+    ruleIndex: 33
   - m_Specificity: 21
     m_Selectors:
     - m_Parts:
@@ -2962,14 +3008,14 @@ MonoBehaviour:
       - m_Value: unity-toggle__checkmark
         m_Type: 3
       m_PreviousRelationship: 1
-    ruleIndex: 33
+    ruleIndex: 34
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-min-max-slider__dragger
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 34
+    ruleIndex: 35
   - m_Specificity: 41
     m_Selectors:
     - m_Parts:
@@ -2984,7 +3030,7 @@ MonoBehaviour:
       - m_Value: hover
         m_Type: 4
       m_PreviousRelationship: 1
-    ruleIndex: 35
+    ruleIndex: 36
   - m_Specificity: 31
     m_Selectors:
     - m_Parts:
@@ -2997,21 +3043,21 @@ MonoBehaviour:
       - m_Value: unity-min-max-slider__dragger
         m_Type: 3
       m_PreviousRelationship: 1
-    ruleIndex: 36
+    ruleIndex: 37
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-base-text-field
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 37
+    ruleIndex: 38
   - m_Specificity: 11
     m_Selectors:
     - m_Parts:
       - m_Value: unity-gradient-field__border
         m_Type: 3
       m_PreviousRelationship: 0
-    ruleIndex: 38
+    ruleIndex: 39
   - m_Specificity: 31
     m_Selectors:
     - m_Parts:
@@ -3024,10 +3070,11 @@ MonoBehaviour:
       - m_Value: unity-gradient-field__border
         m_Type: 3
       m_PreviousRelationship: 1
-    ruleIndex: 39
+    ruleIndex: 40
   floats:
   - 0
   - 1
+  - 0
   - 0
   - 1
   - 0
@@ -3243,11 +3290,13 @@ MonoBehaviour:
   - {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 1}
   - {r: 0.15686275, g: 0.15686275, b: 0.15686275, a: 0.3019608}
   - {r: 0.34509805, g: 0.34509805, b: 0.34509805, a: 1}
-  - {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 1}
+  - {r: 0.27450982, g: 0.3764706, b: 0.4862745, a: 1}
+  - {r: 0.30980393, g: 0.39607844, b: 0.49803922, a: 1}
   - {r: 0.43137255, g: 0.43137255, b: 0.43137255, a: 1}
   - {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
   - {r: 0.1882353, g: 0.1882353, b: 0.1882353, a: 1}
   - {r: 0.050980393, g: 0.050980393, b: 0.050980393, a: 1}
+  - {r: 0.48235294, g: 0.68235296, b: 0.98039216, a: 1}
   - {r: 0.14117648, g: 0.14117648, b: 0.14117648, a: 1}
   - {r: 0.93333334, g: 0.93333334, b: 0.93333334, a: 1}
   - {r: 0.31764707, g: 0.31764707, b: 0.31764707, a: 1}
@@ -3353,6 +3402,8 @@ MonoBehaviour:
   - {r: 0.24313726, g: 0.24313726, b: 0.24313726, a: 1}
   - {r: 0.2784314, g: 0.2784314, b: 0.2784314, a: 1}
   - {r: 0.1882353, g: 0.1882353, b: 0.1882353, a: 1}
+  - {r: 0.27450982, g: 0.3764706, b: 0.4862745, a: 1}
+  - {r: 0.30980393, g: 0.39607844, b: 0.49803922, a: 1}
   - {r: 0.050980393, g: 0.050980393, b: 0.050980393, a: 1}
   - {r: 0.0627451, g: 0.0627451, b: 0.0627451, a: 1}
   - {r: 0.08235294, g: 0.08235294, b: 0.08235294, a: 1}
@@ -3376,6 +3427,7 @@ MonoBehaviour:
   - {r: 0.09803922, g: 0.09803922, b: 0.09803922, a: 1}
   - {r: 0.6, g: 0.6, b: 0.6, a: 1}
   - {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  - {r: 0.48235294, g: 0.68235296, b: 0.98039216, a: 1}
   - {r: 0.8235294, g: 0.8235294, b: 0.8235294, a: 1}
   - {r: 0.76862746, g: 0.76862746, b: 0.76862746, a: 1}
   - {r: 0.7411765, g: 0.7411765, b: 0.7411765, a: 1}
@@ -3414,7 +3466,7 @@ MonoBehaviour:
   - {r: 0.93333334, g: 0.93333334, b: 0.93333334, a: 1}
   - {r: 0.34509805, g: 0.34509805, b: 0.34509805, a: 1}
   - {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
-  - {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 1}
+  - {r: 0.27450982, g: 0.3764706, b: 0.4862745, a: 1}
   - {r: 0.1882353, g: 0.1882353, b: 0.1882353, a: 1}
   - {r: 0.14117648, g: 0.14117648, b: 0.14117648, a: 1}
   - {r: 0.23529412, g: 0.23529412, b: 0.23529412, a: 1}
@@ -3483,6 +3535,7 @@ MonoBehaviour:
   - {r: 0.27450982, g: 0.27450982, b: 0.27450982, a: 1}
   - {r: 0.76862746, g: 0.76862746, b: 0.76862746, a: 1}
   - {r: 0.3137255, g: 0.3137255, b: 0.3137255, a: 1}
+  - {r: 0.48235294, g: 0.68235296, b: 0.98039216, a: 1}
   - {r: 0.76862746, g: 0.76862746, b: 0.76862746, a: 1}
   - {r: 0.23529412, g: 0.23529412, b: 0.23529412, a: 1}
   - {r: 0.13725491, g: 0.13725491, b: 0.13725491, a: 1}
@@ -3533,7 +3586,6 @@ MonoBehaviour:
   - Icons/d_winbtn_win_max.png
   - Icons/d_winbtn_win_restore.png
   - text
-  - Fonts/Lucida Grande.ttf
   - transparent
   - row
   - stretch
@@ -3553,10 +3605,11 @@ MonoBehaviour:
   - StyleSheets/Northstar/Images/dropdown_PreviewPackages.png
   - Icons/PreviewPackageInUse.png
   assets:
+  - {fileID: 11400000, guid: fe1b8eabc0eac40cb9b3113d56142175, type: 2}
   - {fileID: 2800000, guid: 8f1a9a3bed34449819aacf4cae3f8c76, type: 3}
   - {fileID: 2800000, guid: 4edec75118f804698bce9bdf02df235a, type: 3}
   - {fileID: 2800000, guid: 3b142ed2079d24f0e9aef7dedd967eeb, type: 3}
-  - {fileID: 2800000, guid: e7c71eaefde3a48c08ffb65501af9da8, type: 3}
+  - {fileID: 2800000, guid: 220c84907fcb54cd6815db29ad0a33da, type: 3}
   imports: []
   m_FlattenedImportedStyleSheets: []
   m_ContentHash: 0

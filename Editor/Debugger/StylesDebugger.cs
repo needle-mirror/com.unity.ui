@@ -390,8 +390,12 @@ namespace UnityEditor.UIElements.Debugger
 
             foreach (StyleSheet sheet in cursor.styleSheetList)
             {
+                // Skip deleted style sheets
+                if (sheet == null)
+                    continue;
+
                 string name = AssetDatabase.GetAssetPath(sheet);
-                if (string.IsNullOrEmpty(name) || sheet.isUnityStyleSheet)
+                if (string.IsNullOrEmpty(name) || sheet.isDefaultStyleSheet)
                     name = sheet.name;
 
                 void RecursivePrintStyleSheetNames(StyleSheet importedSheet)
@@ -400,7 +404,7 @@ namespace UnityEditor.UIElements.Debugger
                     {
                         var thisImportedSheet = importedSheet.imports[i].styleSheet;
                         name += "\n(" + thisImportedSheet.name + ")";
-                        matchingContext.styleSheetStack.Add(thisImportedSheet);
+                        matchingContext.AddStyleSheet(thisImportedSheet);
                         RecursivePrintStyleSheetNames(thisImportedSheet);
                     }
                 }
@@ -408,7 +412,7 @@ namespace UnityEditor.UIElements.Debugger
                 RecursivePrintStyleSheetNames(sheet);
 
                 selectedElementStylesheets.Add(name);
-                matchingContext.styleSheetStack.Add(sheet);
+                matchingContext.AddStyleSheet(sheet);
             }
         }
 

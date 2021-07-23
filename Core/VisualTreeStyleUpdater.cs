@@ -18,8 +18,9 @@ namespace UnityEngine.UIElements
             return s_ComputedStyleCache.TryGetValue(hash, out data);
         }
 
-        public static void SetValue(Int64 hash, ComputedStyle data)
+        public static void SetValue(Int64 hash, ref ComputedStyle data)
         {
+            // No need to acquire ComputedStyle here because it's freshly created and already has the correct ref count
             s_ComputedStyleCache[hash] = data;
         }
 
@@ -35,6 +36,9 @@ namespace UnityEngine.UIElements
 
         public static void ClearStyleCache()
         {
+            foreach (var kvp in s_ComputedStyleCache)
+                kvp.Value.Release();
+
             s_ComputedStyleCache.Clear();
             s_StyleVariableContextCache.Clear();
         }
@@ -48,6 +52,16 @@ namespace UnityEngine.UIElements
         private uint m_LastVersion = 0;
 
         private VisualTreeStyleUpdaterTraversal m_StyleContextHierarchyTraversal = new VisualTreeStyleUpdaterTraversal();
+
+        public VisualTreeStyleUpdaterTraversal traversal
+        {
+            get => m_StyleContextHierarchyTraversal;
+            set
+            {
+                m_StyleContextHierarchyTraversal = value;
+                panel?.visualTree.IncrementVersion(VersionChangeType.Styles | VersionChangeType.StyleSheet | VersionChangeType.Layout | VersionChangeType.Transform);
+            }
+        }
 
         private static readonly string s_Description = "Update Style";
         private static readonly ProfilerMarker s_ProfilerMarker = new ProfilerMarker(s_Description);
@@ -65,7 +79,7 @@ namespace UnityEngine.UIElements
 
         public override void OnVersionChanged(VisualElement ve, VersionChangeType versionChangeType)
         {
-            if ((versionChangeType & VersionChangeType.StyleSheet) != VersionChangeType.StyleSheet)
+            if ((versionChangeType & (VersionChangeType.StyleSheet | VersionChangeType.InlineStyleRemove)) == 0)
                 return;
 
             ++m_Version;
@@ -77,7 +91,7 @@ namespace UnityEngine.UIElements
             }
             else
             {
-                m_StyleContextHierarchyTraversal.AddChangedElement(ve);
+                m_StyleContextHierarchyTraversal.AddChangedElement(ve, versionChangeType);
             }
         }
 
@@ -87,7 +101,6 @@ namespace UnityEngine.UIElements
                 return;
 
             m_LastVersion = m_Version;
-
             ApplyStyles();
 
             m_StyleContextHierarchyTraversal.Clear();
@@ -95,7 +108,7 @@ namespace UnityEngine.UIElements
             // Add elements to process next frame
             foreach (var ve in m_ApplyStyleUpdateList)
             {
-                m_StyleContextHierarchyTraversal.AddChangedElement(ve);
+                m_StyleContextHierarchyTraversal.AddChangedElement(ve, VersionChangeType.StyleSheet);
             }
             m_ApplyStyleUpdateList.Clear();
         }
@@ -112,17 +125,38 @@ namespace UnityEngine.UIElements
 
     class StyleMatchingContext
     {
-        public List<StyleSheet> styleSheetStack;
+        private List<StyleSheet> m_StyleSheetStack;
+
+        public int styleSheetCount => m_StyleSheetStack.Count;
+
         public StyleVariableContext variableContext;
         public VisualElement currentElement;
         public Action<VisualElement, MatchResultInfo> processResult;
 
         public StyleMatchingContext(Action<VisualElement, MatchResultInfo> processResult)
         {
-            styleSheetStack = new List<StyleSheet>();
+            m_StyleSheetStack = new List<StyleSheet>();
             variableContext = StyleVariableContext.none;
             currentElement = null;
             this.processResult = processResult;
+        }
+
+        public void AddStyleSheet(StyleSheet sheet)
+        {
+            if (sheet == null)
+                return;
+
+            m_StyleSheetStack.Add(sheet);
+        }
+
+        public void RemoveStyleSheetRange(int index, int count)
+        {
+            m_StyleSheetStack.RemoveRange(index, count);
+        }
+
+        public StyleSheet GetStyleSheetAt(int index)
+        {
+            return m_StyleSheetStack[index];
         }
     }
 
@@ -139,15 +173,21 @@ namespace UnityEngine.UIElements
         StyleMatchingContext m_StyleMatchingContext = new StyleMatchingContext(OnProcessMatchResult);
         StylePropertyReader m_StylePropertyReader = new StylePropertyReader();
 
+        public StyleMatchingContext styleMatchingContext => m_StyleMatchingContext;
+
         public void PrepareTraversal(float pixelsPerPoint)
         {
             currentPixelsPerPoint = pixelsPerPoint;
         }
 
-        public void AddChangedElement(VisualElement ve)
+        public void AddChangedElement(VisualElement ve, VersionChangeType versionChangeType)
         {
             m_UpdateList.Add(ve);
-            PropagateToChildren(ve);
+
+            // If VersionChangeType.StyleSheet is not set no need to propagate to children
+            if ((versionChangeType & VersionChangeType.StyleSheet) == VersionChangeType.StyleSheet)
+                PropagateToChildren(ve);
+
             PropagateToParents(ve);
         }
 
@@ -207,7 +247,7 @@ namespace UnityEngine.UIElements
                 element.dependencyPseudoMask = 0;
             }
 
-            int originalStyleSheetCount = m_StyleMatchingContext.styleSheetStack.Count;
+            int originalStyleSheetCount = m_StyleMatchingContext.styleSheetCount;
             if (element.styleSheetList != null)
             {
                 for (var i = 0; i < element.styleSheetList.Count; i++)
@@ -217,22 +257,22 @@ namespace UnityEngine.UIElements
                     {
                         for (var j = 0; j < addedStyleSheet.flattenedRecursiveImports.Count; j++)
                         {
-                            m_StyleMatchingContext.styleSheetStack.Add(addedStyleSheet.flattenedRecursiveImports[j]);
+                            m_StyleMatchingContext.AddStyleSheet(addedStyleSheet.flattenedRecursiveImports[j]);
                         }
                     }
 
-                    m_StyleMatchingContext.styleSheetStack.Add(addedStyleSheet);
+                    m_StyleMatchingContext.AddStyleSheet(addedStyleSheet);
                 }
             }
 
             // Store the number of custom style before processing rules in case an element stop
             // to have matching custom styles the event still need to be sent and only looking
             // at the matched custom styles won't suffice.
+            var originalVariableContext = m_StyleMatchingContext.variableContext;
             int originalCustomStyleCount = element.computedStyle.customPropertiesCount;
             if (updateElement)
             {
                 m_StyleMatchingContext.currentElement = element;
-
                 StyleSelectorHelper.FindMatches(m_StyleMatchingContext, m_TempMatchResults, originalStyleSheetCount - 1);
 
                 ProcessMatchedRules(element, m_TempMatchResults);
@@ -259,13 +299,14 @@ namespace UnityEngine.UIElements
 
             Recurse(element, depth);
 
-            if (m_StyleMatchingContext.styleSheetStack.Count > originalStyleSheetCount)
+            m_StyleMatchingContext.variableContext = originalVariableContext;
+            if (m_StyleMatchingContext.styleSheetCount > originalStyleSheetCount)
             {
-                m_StyleMatchingContext.styleSheetStack.RemoveRange(originalStyleSheetCount, m_StyleMatchingContext.styleSheetStack.Count - originalStyleSheetCount);
+                m_StyleMatchingContext.RemoveStyleSheetRange(originalStyleSheetCount, m_StyleMatchingContext.styleSheetCount - originalStyleSheetCount);
             }
         }
 
-        bool ShouldSkipElement(VisualElement element)
+        protected bool ShouldSkipElement(VisualElement element)
         {
             return !m_ParentList.Contains(element) && !m_UpdateList.Contains(element);
         }
@@ -294,8 +335,10 @@ namespace UnityEngine.UIElements
 
             foreach (var record in matchingSelectors)
             {
-                StyleRule rule = record.complexSelector.rule;
-                int specificity = record.complexSelector.specificity;
+                var sheet = record.sheet;
+                var rule = record.complexSelector.rule;
+                var specificity = record.complexSelector.specificity;
+                matchingRulesHash = (matchingRulesHash * 397) ^ sheet.contentHash;
                 matchingRulesHash = (matchingRulesHash * 397) ^ rule.GetHashCode();
                 matchingRulesHash = (matchingRulesHash * 397) ^ specificity;
 
@@ -306,7 +349,7 @@ namespace UnityEngine.UIElements
             }
 
             var parent = element.hierarchy.parent;
-            int inheritedStyleHash = parent != null ? parent.inheritedStylesHash : 0;
+            int inheritedStyleHash = parent?.inheritedStylesHash ?? 0;
             matchingRulesHash = (matchingRulesHash * 397) ^ inheritedStyleHash;
 
             int variablesHash = oldVariablesHash;
@@ -330,28 +373,28 @@ namespace UnityEngine.UIElements
             element.variableContext = m_StyleMatchingContext.variableContext;
             m_ProcessVarContext.Clear();
 
-            ComputedStyle resolvedStyles;
-            if (StyleCache.TryGetValue(matchingRulesHash, out resolvedStyles))
+            if (StyleCache.TryGetValue(matchingRulesHash, out var resolvedStyles))
             {
-                element.SetSharedStyles(resolvedStyles);
+                element.SetComputedStyle(ref resolvedStyles);
             }
             else
             {
-                var parentStyle = parent?.computedStyle;
-                resolvedStyles = ComputedStyle.Create(parentStyle, true);
+                ref var parentStyle = ref parent?.computedStyle != null ? ref parent.computedStyle : ref InitialStyle.Get();
+                resolvedStyles = ComputedStyle.Create(ref parentStyle);
+                resolvedStyles.matchingRulesHash = matchingRulesHash;
 
                 float dpiScaling = element.scaledPixelsPerPoint;
                 foreach (var record in matchingSelectors)
                 {
                     m_StylePropertyReader.SetContext(record.sheet, record.complexSelector, m_StyleMatchingContext.variableContext, dpiScaling);
-                    resolvedStyles.ApplyProperties(m_StylePropertyReader, parentStyle);
+                    resolvedStyles.ApplyProperties(m_StylePropertyReader, ref parentStyle);
                 }
 
-                resolvedStyles.FinalizeApply(parentStyle);
+                resolvedStyles.FinalizeApply(ref parentStyle);
 
-                StyleCache.SetValue(matchingRulesHash, resolvedStyles);
+                StyleCache.SetValue(matchingRulesHash, ref resolvedStyles);
 
-                element.SetSharedStyles(resolvedStyles);
+                element.SetComputedStyle(ref resolvedStyles);
             }
         }
 

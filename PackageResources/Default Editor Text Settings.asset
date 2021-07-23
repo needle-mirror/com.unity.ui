@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83edbd52c03fc4d319804b472b97f952, type: 3}
+  m_Name: Default Editor Text Settings
+  m_EditorClassIdentifier:
+  m_Version:
+  m_DefaultFontAsset: {fileID: 11400000, guid: 20e9f1f31c1cc4e6faf54fff6b4b58c1, type: 2}
+  m_DefaultFontAssetPath: Fonts & Materials/
+  m_FallbackFontAssets:
+  - {fileID: 11400000, guid: 33d5080fac506427fab325cdba801247, type: 2}
+  - {fileID: 11400000, guid: 4f54c9837b02f4bada3ef86f566d8c8f, type: 2}
+  m_MatchMaterialPreset: 0
+  m_MissingCharacterUnicode: 0
+  m_ClearDynamicDataOnBuild: 1
+  m_DefaultSpriteAsset: {fileID: 0}
+  m_DefaultSpriteAssetPath: Sprite Assets/
+  m_FallbackSpriteAssets: []
+  m_MissingSpriteCharacterUnicode: 0
+  m_DefaultStyleSheet: {fileID: 0}
+  m_StyleSheetsResourcePath: Text Style Sheets/
+  m_DefaultColorGradientPresetsPath: Text Color Gradients/
+  m_UnicodeLineBreakingRules:
+    m_UnicodeLineBreakingRules: {fileID: 0}
+    m_LeadingCharacters: {fileID: 0}
+    m_FollowingCharacters: {fileID: 0}
+    m_UseModernHangulLineBreakingRules: 0
+  m_DisplayWarnings: 1

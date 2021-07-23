@@ -125,6 +125,31 @@ namespace UnityEditor.UIElements.Bindings
             }
         }
 
+        private static readonly string k_EnabledOverrideSet = "EnabledSetByBindings";
+
+        static void SyncEditableState(VisualElement fieldElement, bool shouldBeEditable)
+        {
+            if (fieldElement.enabledSelf != shouldBeEditable)
+            {
+                if (shouldBeEditable)
+                {
+                    if (fieldElement.GetProperty(k_EnabledOverrideSet) != null)
+                    {
+                        fieldElement.SetEnabled(true);
+                    }
+                    else
+                    {
+                        // the field was disabled by user code, we don't want to re-enable it.
+                    }
+                }
+                else
+                {
+                    fieldElement.SetProperty(k_EnabledOverrideSet, fieldElement.enabledSelf);
+                    fieldElement.SetEnabled(false);
+                }
+            }
+        }
+
         internal SerializedProperty BindPropertyRelative(IBindable field, SerializedProperty parentProperty)
         {
             var property = parentProperty?.FindPropertyRelative(field.bindingPath);
@@ -143,6 +168,9 @@ namespace UnityEditor.UIElements.Bindings
 
             //we first remove any binding that were already present
             RemoveBinding(field);
+
+            // Set enabled state before sending the event because element like PropertyField may stop the event
+            SyncEditableState(fieldElement, property.editable);
 
             using (var evt = SerializedPropertyBindEvent.GetPooled(property))
             {
@@ -591,6 +619,10 @@ namespace UnityEditor.UIElements.Bindings
             }
         }
 
+        /// <summary>
+        /// Map of value trackers per serialized property type. WARNING: tracker may be null for some types.
+        /// Check <see cref="GetTrackedValueForPropertyType"/> for reference.
+        /// </summary>
         private Dictionary<SerializedPropertyType, ITrackedValues> m_ValueTracker;
 
         void UpdateTrackedValues()
@@ -599,7 +631,7 @@ namespace UnityEditor.UIElements.Bindings
             {
                 foreach (var kvp in m_ValueTracker)
                 {
-                    kvp.Value.Update(this);
+                    kvp.Value?.Update(this);
                 }
             }
         }
@@ -714,6 +746,7 @@ namespace UnityEditor.UIElements.Bindings
                     case SerializedPropertyType.ExposedReference:
                     case SerializedPropertyType.Generic:
                         // nothing to bind here
+                        Debug.LogWarning("Serialized property type " + prop.propertyType + " does not support value tracking; callback is not set for " + prop.name);
                         values = null;
                         break;
                     default:
@@ -797,7 +830,7 @@ namespace UnityEditor.UIElements.Bindings
             {
                 foreach (var trackers in m_ValueTracker)
                 {
-                    trackers.Value.UpdateValidProperties(m_ValidPropertyPaths);
+                    trackers.Value?.UpdateValidProperties(m_ValidPropertyPaths);
                 }
             }
         }
@@ -808,6 +841,7 @@ namespace UnityEditor.UIElements.Bindings
     {
         public void Bind(VisualElement element, SerializedObject obj)
         {
+            element.SetProperty(BindingExtensions.s_DataSourceProperty, obj);
             if (element.panel != null || element is EditorElement || element is InspectorElement)
             {
                 var context = FindOrCreateBindingContext(element, obj);
@@ -820,6 +854,12 @@ namespace UnityEditor.UIElements.Bindings
         }
 
         public void Unbind(VisualElement element)
+        {
+            element?.SetProperty(BindingExtensions.s_DataSourceProperty, null);
+            UnbindTree(element);
+        }
+
+        private void UnbindTree(VisualElement element)
         {
             if (element == null)
             {
@@ -840,7 +880,7 @@ namespace UnityEditor.UIElements.Bindings
 
                 for (int i = 0; i < childCount; ++i)
                 {
-                    Unbind(element.hierarchy[i]);
+                    UnbindTree(element.hierarchy[i]);
                 }
             }
         }
@@ -1151,6 +1191,7 @@ namespace UnityEditor.UIElements.Bindings
         protected IBindable m_Field;
         private SerializedObjectBindingContext m_BindingContext;
 
+        private bool m_TooltipWasSet;
         protected IBindable boundElement
         {
             get { return m_Field; }
@@ -1161,6 +1202,9 @@ namespace UnityEditor.UIElements.Bindings
                 {
                     ve.UnregisterCallback<AttachToPanelEvent>(OnFieldAttached);
                     ve.UnregisterCallback<DetachFromPanelEvent>(OnFieldDetached);
+                    if (m_TooltipWasSet)
+                        ve.tooltip = null;
+                    m_TooltipWasSet = false;
                 }
 
                 m_Field = value;
@@ -1172,6 +1216,17 @@ namespace UnityEditor.UIElements.Bindings
                     {
                         ve.RegisterCallback<AttachToPanelEvent>(OnFieldAttached);
                         ve.RegisterCallback<DetachFromPanelEvent>(OnFieldDetached);
+
+                        if (string.IsNullOrEmpty(ve.tooltip))
+                        {
+                            ve.tooltip = boundProperty.tooltip;
+
+                            string attributeTooltip = ScriptAttributeUtility.GetHandler(boundProperty)?.tooltip;
+                            if (attributeTooltip != null)
+                                ve.tooltip = attributeTooltip;
+
+                            m_TooltipWasSet = true;
+                        }
                     }
                     FieldBinding = this;
                 }
@@ -1311,9 +1366,11 @@ namespace UnityEditor.UIElements.Bindings
             get { return m_Field as TField; }
             set
             {
-                field?.UnregisterValueChangedCallback(FieldValueChanged);
+                var ve = field as VisualElement;
+                ve?.UnregisterCallback<ChangeEvent<TValue>>(FieldValueChanged);
                 boundElement = value as IBindable;
-                field?.RegisterValueChangedCallback(FieldValueChanged);
+                ve = field as VisualElement;
+                ve?.RegisterCallback<ChangeEvent<TValue>>(FieldValueChanged, TrickleDown.TrickleDown);
             }
         }
 
@@ -1341,6 +1398,7 @@ namespace UnityEditor.UIElements.Bindings
                 UpdateLastFieldValue();
                 if (IsPropertyValid())
                 {
+                    SerializedPropertyHelper.ForceSync(boundProperty);
                     if (SyncFieldValueToProperty())
                     {
                         bindingContext.UpdateRevision();     //we make sure to Poll the ChangeTracker here
@@ -1387,6 +1445,9 @@ namespace UnityEditor.UIElements.Bindings
                     if (bindingContext.IsValid() && IsPropertyValid())
                     {
                         lastUpdatedRevision = bindingContext.lastRevision;
+                        // Here we somehow need to make sure the property internal object version is synced with its serializedObject
+                        SerializedPropertyHelper.ForceSync(boundProperty);
+
                         SyncPropertyToField(field, boundProperty);
                         BindingsStyleHelpers.UpdateElementStyle(field as VisualElement, boundProperty);
                         return;
@@ -1428,9 +1489,6 @@ namespace UnityEditor.UIElements.Bindings
                 throw new ArgumentNullException(nameof(c));
             }
 
-            // Here we somehow need to make sure the property internal object version is synced with its serializedObject
-            SerializedPropertyHelper.ForceSync(p);
-
             if (!propCompareValues(lastFieldValue, p, propGetValue))
             {
                 lastFieldValue = propGetValue(p);
@@ -1440,7 +1498,6 @@ namespace UnityEditor.UIElements.Bindings
 
         protected override bool SyncFieldValueToProperty()
         {
-            SerializedPropertyHelper.ForceSync(boundProperty);
             if (!propCompareValues(lastFieldValue, boundProperty, propGetValue))
             {
                 propSetValue(boundProperty, lastFieldValue);
@@ -1667,9 +1724,6 @@ namespace UnityEditor.UIElements.Bindings
                 throw new ArgumentNullException(nameof(c));
             }
 
-            // Here we somehow need to make sure the property internal object version is synced with its serializedObject
-            SerializedPropertyHelper.ForceSync(p);
-
             int enumValueAsInt = p.intValue;
             if (enumValueAsInt != lastEnumValue)
             {
@@ -1775,7 +1829,19 @@ namespace UnityEditor.UIElements.Bindings
             this.field = c;
             this.originalChoices = field.choices;
             this.originalIndex = field.index;
-            this.field.choices = property.enumLocalizedDisplayNames.ToList();
+
+            Type enumType;
+            ScriptAttributeUtility.GetFieldInfoFromProperty(property, out enumType);
+            if (enumType != null)
+            {
+                var enumData = EnumDataUtility.GetCachedEnumData(enumType, true);
+                this.field.choices = enumData.displayNames.ToList();
+            }
+            else
+            {
+                this.field.choices = property.enumLocalizedDisplayNames.ToList();
+            }
+
             var originalValue = this.lastFieldValueIndex = c.index;
 
             BindingsStyleHelpers.RegisterRightClickMenu(c, property);
@@ -1805,9 +1871,6 @@ namespace UnityEditor.UIElements.Bindings
             {
                 throw new ArgumentNullException(nameof(c));
             }
-
-            // Here we somehow need to make sure the property internal object version is synced with its serializedObject
-            SerializedPropertyHelper.ForceSync(p);
 
             int propValueIndex = p.enumValueIndex;
             if (propValueIndex != lastFieldValueIndex)

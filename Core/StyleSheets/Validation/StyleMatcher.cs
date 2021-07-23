@@ -23,8 +23,14 @@ namespace UnityEngine.UIElements.StyleSheets
 
     internal abstract class BaseStyleMatcher
     {
-        private Stack<int> m_MarkStack = new Stack<int>();
-        protected int m_CurrentIndex;
+        private struct MatchContext
+        {
+            public int valueIndex;
+            public int matchedVariableCount;
+        }
+
+        private Stack<MatchContext> m_ContextStack = new Stack<MatchContext>();
+        private MatchContext m_CurrentContext;
 
         protected abstract bool MatchKeyword(string keyword);
         protected abstract bool MatchNumber();
@@ -38,37 +44,46 @@ namespace UnityEngine.UIElements.StyleSheets
         public abstract int valueCount { get; }
         public abstract bool isVariable { get; }
 
-        public bool hasCurrent => m_CurrentIndex < valueCount;
-        public int matchedVariableCount { get; set; }
+        public bool hasCurrent => m_CurrentContext.valueIndex < valueCount;
+        public int currentIndex
+        {
+            get => m_CurrentContext.valueIndex;
+            set => m_CurrentContext.valueIndex = value;
+        }
+
+        public int matchedVariableCount
+        {
+            get => m_CurrentContext.matchedVariableCount;
+            set => m_CurrentContext.matchedVariableCount = value;
+        }
 
         protected void Initialize()
         {
-            m_CurrentIndex = 0;
-            m_MarkStack.Clear();
-            matchedVariableCount = 0;
+            m_CurrentContext = new MatchContext();
+            m_ContextStack.Clear();
         }
 
         public void MoveNext()
         {
-            if (m_CurrentIndex + 1 <= valueCount)
+            if (currentIndex + 1 <= valueCount)
             {
-                m_CurrentIndex++;
+                currentIndex++;
             }
         }
 
-        public void SaveMark()
+        public void SaveContext()
         {
-            m_MarkStack.Push(m_CurrentIndex);
+            m_ContextStack.Push(m_CurrentContext);
         }
 
-        public void RestoreMark()
+        public void RestoreContext()
         {
-            m_CurrentIndex = m_MarkStack.Pop();
+            m_CurrentContext = m_ContextStack.Pop();
         }
 
-        public void DropMark()
+        public void DropContext()
         {
-            m_MarkStack.Pop();
+            m_ContextStack.Pop();
         }
 
         protected bool Match(Expression exp)
@@ -148,7 +163,7 @@ namespace UnityEngine.UIElements.StyleSheets
 
         private bool MatchCombinator(Expression exp)
         {
-            SaveMark();
+            SaveContext();
 
             bool result = false;
             switch (exp.combinator)
@@ -173,21 +188,42 @@ namespace UnityEngine.UIElements.StyleSheets
             }
 
             if (result)
-                DropMark();
+                DropContext();
             else
-                RestoreMark();
+                RestoreContext();
 
             return result;
         }
 
         private bool MatchOr(Expression exp)
         {
-            bool result = false;
-            for (int i = 0; !result && i < exp.subExpressions.Length; i++)
+            // Try all expressions and select the one with the most match
+            MatchContext resultContext = new MatchContext();
+            int maxMatch = 0;
+            for (int i = 0; i < exp.subExpressions.Length; i++)
             {
-                result = Match(exp.subExpressions[i]);
+                SaveContext();
+
+                int oldIndex = currentIndex;
+                bool result = Match(exp.subExpressions[i]);
+
+                int matchCount = currentIndex - oldIndex;
+                if (result && matchCount > maxMatch)
+                {
+                    maxMatch = matchCount;
+                    resultContext = m_CurrentContext;
+                }
+
+                RestoreContext();
             }
-            return result;
+
+            if (maxMatch > 0)
+            {
+                m_CurrentContext = resultContext;
+                return true;
+            }
+
+            return false;
         }
 
         private bool MatchOrOr(Expression exp)
@@ -208,18 +244,56 @@ namespace UnityEngine.UIElements.StyleSheets
 
         private unsafe int MatchMany(Expression exp)
         {
-            int matchCount = 0;
-            int matchVariableCount = 0;
+            MatchContext resultContext = new MatchContext();
+            int maxMatch = 0;
+            int matchOrderStart = -1;
+            int subExpCount = exp.subExpressions.Length;
+            int* matchOrder = stackalloc int[subExpCount];
+
+            do
+            {
+                SaveContext();
+                ++matchOrderStart;
+
+                // Set the expressions order for the match
+                for (int i = 0; i < subExpCount; i++)
+                {
+                    int matchIndex = matchOrderStart > 0 ? (matchOrderStart + i) % subExpCount : i;
+                    matchOrder[i] = matchIndex;
+                }
+
+                int matchCount =  MatchManyByOrder(exp, matchOrder);
+                if (matchCount > maxMatch)
+                {
+                    maxMatch = matchCount;
+                    resultContext = m_CurrentContext;
+                }
+
+                RestoreContext();
+            }
+            while (maxMatch < subExpCount && matchOrderStart < subExpCount);
+
+            if (maxMatch > 0)
+                m_CurrentContext = resultContext;
+
+            return maxMatch;
+        }
+
+        private unsafe int MatchManyByOrder(Expression exp, int* matchOrder)
+        {
             int subExpCount = exp.subExpressions.Length;
             int* matchedExp = stackalloc int[subExpCount];
 
-            int i = 0;
-            while (i < subExpCount && matchCount + matchVariableCount < subExpCount)
+            int matchCount = 0;
+            int matchVariableCount = 0;
+
+            for (int i = 0; i < subExpCount && matchCount + matchVariableCount < subExpCount;)
             {
+                int expressionIndex = matchOrder[i];
                 bool alreadyMatched = false;
                 for (int j = 0; j < matchCount; j++)
                 {
-                    if (matchedExp[j] == i)
+                    if (matchedExp[j] == expressionIndex)
                     {
                         alreadyMatched = true;
                         break;
@@ -229,14 +303,14 @@ namespace UnityEngine.UIElements.StyleSheets
                 bool result = false;
                 if (!alreadyMatched)
                 {
-                    result = Match(exp.subExpressions[i]);
+                    result = Match(exp.subExpressions[expressionIndex]);
                 }
 
                 if (result)
                 {
                     if (matchVariableCount == matchedVariableCount)
                     {
-                        matchedExp[matchCount] = i;
+                        matchedExp[matchCount] = expressionIndex;
                         ++matchCount;
                     }
                     else
@@ -295,8 +369,6 @@ namespace UnityEngine.UIElements.StyleSheets
                     case DataType.Url:
                         result = MatchUrl();
                         break;
-                    default:
-                        break;
                 }
             }
 
@@ -309,7 +381,7 @@ namespace UnityEngine.UIElements.StyleSheets
         private StylePropertyValueParser m_Parser = new StylePropertyValueParser();
         private string[] m_PropertyParts;
 
-        private string current => hasCurrent ? m_PropertyParts[m_CurrentIndex] : null;
+        private string current => hasCurrent ? m_PropertyParts[currentIndex] : null;
 
         public override int valueCount => m_PropertyParts.Length;
         public override bool isVariable => hasCurrent && current.StartsWith("var(");
@@ -462,7 +534,7 @@ namespace UnityEngine.UIElements.StyleSheets
     {
         private List<StylePropertyValue> m_Values;
 
-        private StylePropertyValue current => hasCurrent ? m_Values[m_CurrentIndex] : default(StylePropertyValue);
+        private StylePropertyValue current => hasCurrent ? m_Values[currentIndex] : default(StylePropertyValue);
 
         public override int valueCount => m_Values.Count;
         // This matcher is only validating resolved value handles

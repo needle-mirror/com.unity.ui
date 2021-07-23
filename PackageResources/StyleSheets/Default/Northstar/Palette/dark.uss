@@ -1,0 +1,166 @@
+:root {
+    /* COLOR TABLE*/
+    --unity-theme-background-color-1: #585858;
+    --unity-theme-background-color-2: #676767;
+    --unity-theme-background-color-3: #353535;
+    --unity-theme-background-color-4: #6E6E6E;
+    --unity-theme-background-color-5: #3C3C3C;
+    --unity-theme-background-color-6: #464646;
+    --unity-theme-background-color-7: #505050;
+    --unity-theme-background-color-8: #515151;
+    --unity-theme-background-color-9: #303030;
+    --unity-theme-background-color-10: #353535;
+    --unity-theme-background-color-11: #5E5E5E;
+    --unity-theme-background-color-12: #999999;
+    --unity-theme-background-color-13: #EAEAEA;
+    --unity-theme-background-color-14: #575757;
+    --unity-theme-background-color-15: #666666;
+    --unity-theme-background-color-16: rgba(16, 111, 205, 0.5);
+    --unity-theme-background-color-17: #383838;
+    --unity-theme-background-color-50: #2C5D87;
+    --unity-theme-background-color-51: rgba(255, 255, 255, 0.06);
+    --unity-theme-background-color-52: #4D4D4D;
+    --unity-theme-background-color-53: #2A2A2A;
+    --unity-theme-background-color-54: #282828;
+    --unity-theme-background-color-55: #373737;
+    --unity-theme-background-color-56: #4C4C4C;
+    --unity-theme-background-color-57: rgba(0, 0, 0, 0.05);
+    --unity-theme-background-color-58: #5F5F5F;
+    --unity-theme-background-color-59: #494949;
+    --unity-theme-background-color-60: #686868;
+    --unity-theme-background-color-80: #3F3F3F;
+    --unity-theme-background-color-81: rgba(40, 40, 40, 0.3);
+    --unity-theme-background-color-82: #191919;
+    --unity-theme-background-color-83: #6A6A6A;
+    --unity-theme-background-color-84: #424242;
+    --unity-theme-background-color-85: #313131;
+    --unity-theme-background-color-86: rgba(96, 96, 96, 0.20);
+    --unity-theme-background-color-87: #606060;
+    --unity-theme-background-color-88: #3E3E3E;
+    --unity-theme-background-color-89: #474747;
+    --unity-theme-background-color-90: #303030;
+    --unity-theme-background-color-91: #46607C;
+    --unity-theme-background-color-92: #4F657F;
+
+    --unity-theme-border-color-1: #0D0D0D;
+    --unity-theme-border-color-2: #101010;
+    --unity-theme-border-color-3: #151515;
+    --unity-theme-border-color-4: #1A1A1A;
+    --unity-theme-border-color-5: #202020;
+    --unity-theme-border-color-6: #212121;
+    --unity-theme-border-color-7: #232323;
+    --unity-theme-border-color-8: #242424;
+    --unity-theme-border-color-9: #282828;
+    --unity-theme-border-color-10: #303030;
+    --unity-theme-border-color-11: #323232;
+    --unity-theme-border-color-12: #333333;
+    --unity-theme-border-color-13: #3A79BB;
+    --unity-theme-border-color-14: #636363;
+    --unity-theme-border-color-15: #656565;
+    --unity-theme-border-color-16: #666666;
+    --unity-theme-border-color-17: #686868;
+    --unity-theme-border-color-18: #0D0D0D;
+    --unity-theme-border-color-19: rgba(0, 0, 0, 0.1);
+    --unity-theme-border-color-20: #222222;
+    --unity-theme-border-color-21: #191919;
+    --unity-theme-border-color-22: #999999;
+    --unity-theme-border-color-23: #CCCCCC;
+    --unity-theme-border-color-24: #7BAEFA;
+
+    --unity-theme-text-color-1: #D2D2D2;
+    --unity-theme-text-color-2: #C4C4C4;
+    --unity-theme-text-color-3: #BDBDBD;
+    --unity-theme-text-color-4: #E4E4E4;
+    --unity-theme-text-color-5: #FFFFFF;
+    --unity-theme-text-color-6: #4c7eff;
+    --unity-theme-text-color-7: #EEEEEE;
+    --unity-theme-text-color-8: #d32222;
+    --unity-theme-text-color-9: #f4bc02;
+    --unity-theme-text-color-10: #81B4FF;
+    --unity-theme-text-color-11: #4c7eff;
+    --unity-theme-text-color-12: #ff00ff;
+    --unity-theme-text-color-13: #DEDEDE;
+
+    /* ICONS */
+
+    --unity-icons-arrow_right: resource("Builtin Skins/DarkSkin/Images/ArrowNavigationRight.png");
+    --unity-icons-arrow_left: resource("Builtin Skins/DarkSkin/Images/ArrowNavigationLeft.png");
+
+    --unity-icons-clear: url("/Packages/com.unity.ui/PackageResources/Images/d_clear.png");
+    --unity-icons-color_picker: url("/Packages/com.unity.ui/PackageResources/Images/d_color_picker.png");
+
+    --unity-icons-console_entry_error: resource("Icons/d_console.erroricon.png");
+    --unity-icons-console_entry_error_small: resource("Icons/d_console.erroricon.sml.png");
+    --unity-icons-console_entry_info: resource("Icons/d_console.infoicon.png");
+    --unity-icons-console_entry_info_small: resource("Icons/d_console.infoicon.sml.png");
+    --unity-icons-console_entry_warn: resource("Icons/d_console.warnicon.png");
+    --unity-icons-console_entry_warn_small: resource("Icons/d_console.warnicon.sml.png");
+
+    --unity-icons-dropdown: url("/Packages/com.unity.ui/PackageResources/Images/d_dropdown.png");
+    --unity-icons-dropdown_toggle: url("/Packages/com.unity.ui/PackageResources/Images/d_dropdown_toggle.png");
+
+    --unity-icons-foldout: url("/Packages/com.unity.ui/PackageResources/Images/d_IN_foldout.png");
+    --unity-icons-foldout-checked_focus: url("/Packages/com.unity.ui/PackageResources/Images/d_IN_foldout_focus_on.png");
+    --unity-icons-foldout-checked_pressed: url("/Packages/com.unity.ui/PackageResources/Images/d_IN_foldout_act_on.png");
+    --unity-icons-foldout-focus: url("/Packages/com.unity.ui/PackageResources/Images/d_IN_foldout_focus.png");
+    --unity-icons-foldout-pressed: url("/Packages/com.unity.ui/PackageResources/Images/d_IN_foldout_act.png");
+    --unity-icons-foldout-checked: url("/Packages/com.unity.ui/PackageResources/Images/d_IN_foldout_on.png");
+
+    --unity-icons-link: resource("Icons/d_UnLinked.png");
+    --unity-icons-link-checked: resource("Icons/d_Linked.png");
+
+    --unity-icons-lock: resource("Builtin Skins/DarkSkin/Images/IN LockButton.png");
+    --unity-icons-lock-checked: resource("Builtin Skins/DarkSkin/Images/IN LockButton on.png");
+    --unity-icons-lock-checked_pressed: resource("Builtin Skins/DarkSkin/Images/IN LockButton on act.png");
+    --unity-icons-lock-pressed: resource("Builtin Skins/DarkSkin/Images/IN LockButton act.png");
+
+    --unity-icons-minus: url("/Packages/com.unity.ui/PackageResources/Images/d_ol_minus.png");
+    --unity-icons-minus-hover: url("/Packages/com.unity.ui/PackageResources/Images/d_ol_minus_act.png");
+
+    --unity-icons-pane_options: resource("Builtin Skins/DarkSkin/Images/pane options.png");
+
+    --unity-icons-picker: url("/Packages/com.unity.ui/PackageResources/Images/d_pick.png");
+
+    --unity-icons-plus: url("/Packages/com.unity.ui/PackageResources/Images/d_ol_plus.png");
+    --unity-icons-plus-hover: url("/Packages/com.unity.ui/PackageResources/Images/d_ol_plus_act.png");
+
+    --unity-icons-profiler_timeline_digdown_arrow: resource("Profiler/d_ProfilerTimelineDigDownArrow.png");
+    --unity-icons-profiler_timeline_rollup_arrow: resource("Profiler/d_ProfilerTimelineRollUpArrow.png");
+
+    --unity-icons-pulldown: url("/Packages/com.unity.ui/PackageResources/Images/d_dropdown.png");
+
+    --unity-icons-scroll_down: url("/Packages/com.unity.ui/PackageResources/Images/d_scrolldown.png");
+    --unity-icons-scroll_left: url("/Packages/com.unity.ui/PackageResources/Images/d_scrollleft.png");
+    --unity-icons-scroll_right: url("/Packages/com.unity.ui/PackageResources/Images/d_scrollright.png");
+    --unity-icons-scroll_up: url("/Packages/com.unity.ui/PackageResources/Images/d_scrollup.png");
+
+    --unity-icons-search: url("/Packages/com.unity.ui/PackageResources/Images/d_search_icon.png");
+    --unity-icons-search_menu: url("/Packages/com.unity.ui/PackageResources/Images/d_search_menu.png");
+
+    --unity-icons-shuriken_toggle-checked: resource("Builtin Skins/DarkSkin/Images/ShurikenToggleNormalOn.png");
+    --unity-icons-shuriken_toggle-checked_focus: resource("Builtin Skins/DarkSkin/Images/ShurikenToggleFocusedOn.png");
+    --unity-icons-shuriken_toggle-checked_hover: resource("Builtin Skins/DarkSkin/Images/ShurikenToggleHoverOn.png");
+    --unity-icons-shuriken_toggle_bg: resource("Builtin Skins/DarkSkin/Images/ShurikenToggleNormal.png");
+    --unity-icons-shuriken_toggle_bg-focus: resource("Builtin Skins/DarkSkin/Images/ShurikenToggleFocused.png");
+    --unity-icons-shuriken_toggle_bg-focus_mixed: resource("Builtin Skins/DarkSkin/Images/ShurikenToggleFocusedMixed.png");
+    --unity-icons-shuriken_toggle_bg-hover: resource("Builtin Skins/DarkSkin/Images/ShurikenToggleHover.png");
+    --unity-icons-shuriken_toggle_bg-hover_mixed: resource("Builtin Skins/DarkSkin/Images/ShurikenToggleHoverMixed.png");
+    --unity-icons-shuriken_toggle_bg-mixed: resource("Builtin Skins/DarkSkin/Images/ShurikenToggleNormalMixed.png");
+
+    --unity-icons-toggle-checked: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_on.png");
+    --unity-icons-toggle-checked_focus: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_on_focus.png");
+    --unity-icons-toggle-checked_hover: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_on_hover.png");
+    --unity-icons-toggle-hover_mixed: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_on_hover.png");
+    --unity-icons-toggle-focus_mixed: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_on_focus.png");
+    --unity-icons-toggle-mixed: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_on.png");
+    --unity-icons-toggle_bg: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_bg.png");
+    --unity-icons-toggle_bg-focus: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_bg_focus.png");
+    --unity-icons-toggle_bg-focus_mixed: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_mixed_bg_focus.png");
+    --unity-icons-toggle_bg-hover: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_bg_hover.png");
+    --unity-icons-toggle_bg-hover_mixed: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_mixed_bg_hover.png");
+    --unity-icons-toggle_bg-mixed: url("/Packages/com.unity.ui/PackageResources/Images/d_toggle_mixed_bg.png");
+
+    --unity-icons-window_button_close: resource("Icons/d_winbtn_win_close.png");
+    --unity-icons-window_button_max: resource("Icons/d_winbtn_win_max.png");
+    --unity-icons-window_button_restore: resource("Icons/d_winbtn_win_restore.png");
+}

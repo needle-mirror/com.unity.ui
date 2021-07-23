@@ -39,10 +39,10 @@ namespace UnityEngine.UIElements
         // Set this delegate to have your IMGUI code execute inside the container
         private Action m_OnGUIHandler;
         /// <summary>
-        /// The function that is called to render and handle IMGUI events.
+        /// The function that's called to render and handle IMGUI events.
         /// </summary>
         /// <remarks>
-        /// The function is assigned to onGUIHandler and is similar to <see cref="MonoBehaviour.OnGUI"/>.
+        /// This is assigned to onGUIHandler and is similar to <see cref="MonoBehaviour.OnGUI"/>.
         /// </remarks>
         public Action onGUIHandler
         {
@@ -611,7 +611,7 @@ namespace UnityEngine.UIElements
 
         private bool VerifyBounds(EventBase evt)
         {
-            return IsContainerCapturingTheMouse() || !IsLocalEvent(evt) || IsEventInsideLocalWindow(evt);
+            return IsContainerCapturingTheMouse() || !IsLocalEvent(evt) || IsEventInsideLocalWindow(evt) || IsDockAreaMouseUp(evt);
         }
 
         private bool IsContainerCapturingTheMouse()
@@ -634,6 +634,12 @@ namespace UnityEngine.UIElements
             string pointerType = (evt as IPointerEvent)?.pointerType;
             bool isDirectManipulationDevice = (pointerType == PointerType.touch || pointerType == PointerType.pen);
             return GUIUtility.HitTest(clippingRect, evt.originalMousePosition, isDirectManipulationDevice);
+        }
+
+        private static bool IsDockAreaMouseUp(EventBase evt)
+        {
+            return evt.eventTypeId == MouseUpEvent.TypeId() &&
+                   evt.target == (evt.target as VisualElement)?.elementPanel.rootIMGUIContainer;
         }
 
         private bool HandleIMGUIEvent(Event e, bool canAffectFocus)
@@ -866,8 +872,12 @@ namespace UnityEngine.UIElements
             }
         }
 
+        /// <summary>
+        /// Releases the native memory that this IMGUIContainer instance uses.
+        /// </summary>
         public void Dispose()
         {
+            // TODO there is no finalizer in this class, but it should probably be the case!
             Dispose(true);
             GC.SuppressFinalize(this);
         }

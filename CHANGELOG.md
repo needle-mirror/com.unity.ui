@@ -4,6 +4,146 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-preview.15] - 2021-07-23
+---
+
+### Added
+
+- Added new controls (RadioButton, RadioButtonGroup, DropdownField) to the UITK Samples and UI Builder Standard Library (case 1310158)
+- Added visualTreeAssetSource property to VisualElement to allow identifying the VisualTreeAsset a visual tree was cloned from
+- Added multi-language support
+- Added Textcore package as a dependency
+
+### Changed
+
+- Deprecated OnKeyDown method in ListView. Use the event system instead, see SendEvent.
+- Optimized some data access for Live Reload feature
+- Removed additional overhead of attaching to panel for Live Reload when the option is turned off, improving performance in loading VisualTreeAssets
+- Added a new RuntimeDefault theme with less overhead for runtime usage
+- Improved UI Toolkit event debugger. Improvements include optimizations, adjustable UI, settings, event and callback filtering, event replay
+- Buttons are now focusable
+- Improved USS validation to support more complex properties
+
+### Fixed
+
+- Fixed regression on the styling of the ProgressWindow's progress bars, removed usage of images in progress bar (case 1297045)
+- Prevented infinite recursion using UIElements with nested property drawers (case 1292133)
+- Fixes performance of Line Renderer list of positions when its size is big enough to require scroll on the Inspector view (case 1296193)
+- Fixed playmode tint applied twice on text (case 1283050)
+- Fixed InspectorElement enabled state in EditorElement.Reinit (case 1221162)
+- Fixed window creator on linux caused a null reference and the new editor window was displayed corrupted (case 1295140)
+- Fix add component button is overlapping on Default Material after undoing added component (case 1279830)
+- Fixed bug where multiple elements could be shown as being focused simultaneously due to delayed focus events not being well tracked when there is more than 1 of them in the queue (case 1154256)
+- Fixed VisualElement contains "null" stylesheet after deleted uss file from project (case 1290271)
+- Capturing mouse/pointer during a click will cancel that click (case 1283061)
+- Changed EnumField+derivatives & BasePopupField-based classes to properly handle pointer down events (case 1248669)
+- Fixed PropertyField now has no label displayed if an empty string is passed as the label argument. If a null value is passed, the label will still be displayed using the localized display name, like before (case 1293580)
+- Elements hover and focused states are not properly reset when attaching to a new hierarchy (case 1287198)
+- Fixed older GraphView still relying on old idsFlags field
+- Patched graphics issue with Intel drivers causing bad stretching and clipping in the editor (case 1309555)
+- Fixed Graph Inspector window sticks to the mouse cursor on changing any dropdown value in Node settings (case 1297002)
+- Fixed scrollbar showing for no meaningful reason when the content of a scrollview is almost equal to the size of the scrollview (case 1297053)
+- Fix undocking and redocking a shadergraph and then selecting a property on the blackboard throws UIElement errors (case 1302295)
+- Fixed ArgumentException is thrown when the PropertyField is bind to the BuildTarget enum Popup/Dropdown (Enum-compatible) fields now gracefully handle unselected/invalid values (case 1304581)
+- Fixed errors caused by the use of the current culture to parse UXML attributes as float/double (case 1308180)
+- Fix Custom UIElements Inspector is editable when GameObject has its Flags set to NotEditable (case 1306242)
+- Fixed cases where errors during static initialization of style resources would make the inspector window blank (case 1294463)
+- Fixed cases where errors during static initialization of style resources would cause an infinite window layout loading error loop (case 1309276)
+- Fixed issue where SerializedObject bindings use cases would lead to editor crashes (case 1305198)
+- InspectorElement now correctly supports rebinding when used outside of the InspectorWindow (case 1299036)
+- Fixed empty name showing up in Memory Profiler for one of the UI Toolkit internal render texture (case 1307441)
+- Fixed custom editor not showing as disabled for read-only inspectors (case 1299346)
+- Fix PropertyField shows that it is actively selected when it has been disabled while being actively selected (case 1306238)
+- Fixed Label Element is not resized when Display Style is changed from None to Flex (case 1293761)
+- Fixed an Error in the asset management of the StyleSheet that would show up in a build
+- Fixed PropertyField created from UXML missing its default label (case 1309780)
+- Fixed NullReferenceException on turning UI Toolkit Live Reload on/off on maximized docked Search window (case 1312367)
+- GenericDropdownMenu no longer needs to be reinstanced on every use (case 1308433)
+- Changing choices programmatically after setting the value will show the correct selection, in RadioButtonGroup
+- Fixed exception on Text Settings coming from uninitialized Line Breaking Rules when text wrap is enabled (case 1305483)
+- Fixed ellipsis showing up for no reason on UI Toolkit labels (case 1291452)
+- Missing theme style sheet on PanelSettings now gets logged to console
+- Fixed highlighter positioning and draw order (case 1174816)
+- Fixed bug where runtime cursor should not be reset unless it was overridden (case 1292577)
+- Fixed the inability to launch the editor in clamped GLES 3.0 and 3.1 mode. Also, it is now possible to use UIToolkit on GLES 3.0 and 3.1 devices that do not support float render textures (case 1311845)
+- Fixed InputSystem fails to store ElementUnderPointer when a VisualElement is moving, creating flickering hover feedback (case 1306526)
+- Fixes silent crash that can be caused by recursive onSelectionChange callback in ListView (case 1315473)
+- KeyboardNavigationManipulator does not trigger the callback if operation is None (case 1314063)
+- Fixed SVG triangle clipping issue (case 1288416)
+- Fixed clipping with large rects when under a group transform (case 1296815)
+- Fixed directional navigation bug where some elements could be skipped during horizontal navigation. Improved choice of next element when multiple candidates are valid (case 1298017)
+- Fixed EventSystem using InputSystem package sometimes sending large amounts of PointerMoveEvents during a single frame (case 1295751)
+- Fixed wrong runtime touch event coordinates on panels with scaling
+- Fixed NullReferenceException with using TrackPropertyValue on BindingExtensions for ExposedReference and Generic serialized property types (case 1312147)
+- Added missing styling definition for dropdown in runtime stylesheet (case 1314322)
+- Fixed the hover and pressed color of buttons in the Runtime theme (case 1316380)
+- Fixed an issue where changing the size of a TwoPaneSplitView would not resize its content (case 1313077)
+- Fixed multiple errors appear after modifying ScriptableObject's array indirectly (case 1303188)
+- Panels instantiated by PanelSettings assets now ordered deterministically when their sort order have the exact same value
+- The TwoPaneSplitView's view data will now be persisted when the viewDataKey is set (case 1314083)
+- Fixed the naming of Game Objects created using the "UI Toolkit > UI Document" creation menu on Hierarchy View to be incremental (case 1318889)
+- Improved readability of USS import error/warnings (case 1295682)
+- Fixed nested UI Document allowed changing the Panel Settings once (case 1315242)
+- Fixed left-click not opening EnumField after using ContextMenu on MacOS (case 1311011)
+- The label of a focused Foldout now has its color changed (case 1311200)
+- Fixed a bug in the test FinalAlphaValue on device with different DPI (case 1314061)
+- Scroll bars now use display instead of visibility to avoid scroll bars being visible when parent visibility is set to false (case 1297886)
+- Prevented clicks from passing through runtime panels if they weren't used (case 1314140)
+- Fixed custom element UXML factory not picked up in pre-compiled DLL (case 1316913)
+- Match text colors of UITK label and UITK field label with IMGUI label and IMGUI prefix label respectively. It also fixes the text color of buttons (case 1310581)
+- Fixed Tooltips of "Panel Settings" Asset always appear at the center of the Inspector window (case 1319166)
+- Cleaned up the Theme menu (case 1318600)
+- Fixed view data persistence not working inside custom inspectors that use UI Toolkit (case 1311181)
+- Fixed rebuild logic on inspectors with culled elements (case 1324058)
+- Fixed the focus handling so elements not displayed in the hierarchy cannot be focused (case 1324376)
+- Fixed default clicking scroll amount in ScrollView (case 1306562)
+- Fixed focus outline for the following controls: CurveField, GradientField, EnumField/PopupField (and derivatives), RadioButton (choice), ObjectField (when hovered) (case 1324381)
+- Removed an extra step from the RadioButtonGroup focus navigation (case 1324373)
+- Prevented reload of windows that will break when turning Live Reload on/off (case 1318930)
+- Child's reference is not renamed in parent UXML after renaming the child UXML file (case 1319903)
+- Set UIDocument's execution order to -100 to ensure root visual element is created when user's OnEnable runs
+- Fixed dynamic atlas not being regenerated after downloading a texture from the cache server (case 1333693)
+- Fixed performance test issue for UI Toolkit renderer repaints (case 1337832)
+- Fixed TextureId leak that could occur when a Panel was disposed or when the graphics device reloads (case 1336881)
+- Fixed scissor clipping on hidden elements (case 1340827)
+- Fixed Image class alignment issue on non-standard DPIs (case 1330817)
+- Fix incorrect pointer enter events and pointer leave events in playmode using the DefaultEventSystem (case 1313220)
+- Fix element sometimes entering hover state when window is resized (case 1290545)
+- Fixed clipping issue with nested scrollviews (case 1335094)
+- Fixed precision errors in gamma-linear conversions (case 1317742)
+- Fixed clipping of the content of a mask element whose size is zero (case 1320182)
+- Fixed issue that caused non-square dynamic atlases to be recreated every frame (case 1327689)
+- Fixed GroupTransform that was triggering asserts when the nested masking fallback was used (case 1328734)
+- Fixed corruption of the stencil buffer caused by misplaced geometry used to pop masks (case 1332741)
+- Value Change Callbacks for bound fields now happen after the value is applied to the target object (case 1321156)
+- Fixed issue with inspector fields failing to get focused when clicked depending on neighboring fields (case 1335344)
+- Fixed disabled state not showing properly after hierarchical changes were applied (case 1321042)
+- Fixed UI Toolkit package's InputSystemEventSystem component ceasing to feed events to UI Toolkit when a script is modified or reimported while in play mode, triggering a reload of the assemblies (case case 1324337)
+- Fixed Button remains in hover state after a touch (case 1326493)
+- Fixed invocation of callback event handlers for Click, Middle Click, Right Click, Point and Scroll Wheel actions configured using the Button type instead of the default (PassThrough) with the new Input System (case 1308116)
+- Fixed undo of a change of "Sort Order" field value for a UI Document (case 1337070)
+- Fixed an issue that was causing the content of a GroupTransform element to be clipped with the incorrect clipping rect (case 1328740)
+- Value Change Callbacks for bound fields now happen after the value is applied to the target object (case 1324728)
+- Nested InspectorElement for a different target and Editor type are now ignored when binding their parent Editor (case case 1336093)
+- An element can now receive a PointerUpEvent notification when the mouse position is outside of the game view (case 1306631)
+- An element with mouse capture enabled now receives runtime mouse events even when the mouse position is outside the element (case 1328035)
+- When loading a project that contains a dialog that is embedded in the editor, the dialog's CreateGUI callback is invoked after the Awake and OnEnable callbacks (case 1326173)
+- Fixed read only fields mouse dragger (case 1337002)
+- Fixed the missing Unicode arrow on ShaderGraph Transform Node (case case 1333774)
+- Fix corrupted atlas for Inter (case 1330758)
+- Fixed error when moving cursor over a reorderable ListView after clicking a context menu (case 1292065)
+- Fix exception in ListView when pressing page up key after hitting navigation keys (case 1324806)
+- Changed Image scale mode to the more intuitive default, being ScaleMode.ScaleToFit instead of ScaleMode.ScaleAndCrop. Changing scale mode will also trigger a repaint (case 1215470)
+- Fixed the theme selector ordering when importing uss files (case 1317035)
+- Fixed styling of runtime ScrollView (case 1323488)
+- Fixed ScrollView horizontal scrolling via scroll wheel does not scroll (case 1328220)
+- Fixed Toolbar shrinking when there is another element filling the parent container (case 1330415)
+- Fixed runtime horizontal ScrollView elements alignment (case 1328206)
+- Ensured Theme Style Sheet assignment for new and existing PanelSettings assets (case 1340472)
+- Fixed wrong mouse position on events when a UI Toolkit element has mouse capture, the mouse is outside the element's editor window and that window doesn't have the active mouse capture from the OS (case 1342115)
+- Fixed pointer events not working correctly when multiple UI Documents have different Screen Match values (case 1341135)
+- Fixed samples contained within the package
+
 ## [1.0.0-preview.14] - 2021-01-19
 ---
 
@@ -23,6 +163,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed wrong addressing of dynamic transforms when new atlas slot is used (case 1293058)
 - PropertyField now able to have no label displayed if an empty string is passed as the label argument. Note that if a null value is passed, the label will still be displayed using the localized display name, like before (case 1293580)
 - Fixed a bug where users were able to drag slider outside its container when a text field was present
+- Fixed an issue where sometimes style assets loading would fail during initialization
 
 
 ## [1.0.0-preview.13] - 2020-11-27

@@ -49,8 +49,11 @@ namespace UnityEngine.UIElements
         DisableClipping = 1 << 9,
         // Element needs to receive an AttachToPanel event
         NeedsAttachToPanelEvent = 1 << 10,
+        // Element is shown in the hierarchy (element or one of its ancestors is not DisplayStyle.None)
+        // Note that this flag is up-to-date only after UIRLayoutUpdater is done with its updates
+        HierarchyDisplayed = 1 << 11,
         // Element initial flags
-        Init = WorldTransformDirty | WorldTransformInverseDirty | WorldClipDirty | BoundingBoxDirty | WorldBoundingBoxDirty
+        Init = WorldTransformDirty | WorldTransformInverseDirty | WorldClipDirty | BoundingBoxDirty | WorldBoundingBoxDirty | HierarchyDisplayed
     }
 
     /// <summary>
@@ -233,6 +236,12 @@ namespace UnityEngine.UIElements
             set => m_Flags = value ? m_Flags | VisualElementFlags.CompositeRoot : m_Flags & ~VisualElementFlags.CompositeRoot;
         }
 
+        internal bool isHierarchyDisplayed
+        {
+            get => (m_Flags & VisualElementFlags.HierarchyDisplayed) == VisualElementFlags.HierarchyDisplayed;
+            set => m_Flags = value ? m_Flags | VisualElementFlags.HierarchyDisplayed : m_Flags & ~VisualElementFlags.HierarchyDisplayed;
+        }
+
         private static uint s_NextId;
 
         private static List<string> s_EmptyClassList = new List<string>(0);
@@ -327,7 +336,7 @@ namespace UnityEngine.UIElements
         /// This property can only be set when the <see cref="VisualElement"/> is not yet part of a <see cref="Panel"/>. Once part of a <see cref="Panel"/>, this property becomes effectively read-only, and attempts to change it will throw an exception.
         /// The specification of proper <see cref="UsageHints"/> drives the system to make better decisions on how to process or accelerate certain operations based on the anticipated usage pattern.
         /// Note that those hints do not affect behavioral or visual results, but only affect the overall performance of the panel and the elements within.
-        /// Generally it advised to always consider specifying the proper <see cref="UsageHints"/>, but keep in mind that some <see cref="UsageHints"/> may be internally ignored under certain conditions (e.g. due to hardware limitations on the target platform).
+        /// It's advised to always consider specifying the proper <see cref="UsageHints"/>, but keep in mind that some <see cref="UsageHints"/> might be internally ignored under certain conditions (e.g. due to hardware limitations on the target platform).
         /// </summary>
         public UsageHints usageHints
         {
@@ -369,13 +378,44 @@ namespace UnityEngine.UIElements
         internal Rect lastPadding;
         internal RenderChainVEData renderChainData;
 
+        // m_Pivot will be soon replaced by the resolved style and will default to  Vector3(float.NaN, float.NaN, 0);
+        Vector3 m_Pivot = Vector3.zero;
+
         Vector3 m_Position = Vector3.zero;
         Quaternion m_Rotation = Quaternion.identity;
         Vector3 m_Scale = Vector3.one;
 
+        /// <summary>
+        /// Returns a transform object for this VisualElement.
+        /// <seealso cref="ITransform"/>
+        /// </summary>
+        /// <remarks>
+        /// The transform object implements changes to the VisualElement object.
+        /// </remarks>
         public ITransform transform
         {
             get { return this; }
+        }
+
+        internal Vector3 transformOrigin
+        {
+            get
+            {
+                var pivot = m_Pivot;
+                if (float.IsNaN(pivot.x))
+                    pivot.x = layout.width / 2.0f;
+                if (float.IsNaN(pivot.y))
+                    pivot.y = layout.height / 2.0f;
+
+                return pivot;
+            }
+            set
+            {
+                if (m_Pivot == value)
+                    return;
+                m_Pivot = value;
+                IncrementVersion(VersionChangeType.Transform | VersionChangeType.Size);
+            }
         }
 
         Vector3 ITransform.position
@@ -458,6 +498,13 @@ namespace UnityEngine.UIElements
 
         // This will replace the Rect position
         // origin and size relative to parent
+        /// <summary>
+        /// The position and size of the VisualElement relative to its parent, as computed by the layout system.
+        /// </summary>
+        /// <remarks>
+        /// Before reading from this property, add it to a panel and wait for one frame to ensure that the element layout is computed.
+        /// After the layout is computed, a <see cref="GeometryChangedEvent"/> will be sent on this element.
+        /// </remarks>
         public Rect layout
         {
             get
@@ -513,6 +560,13 @@ namespace UnityEngine.UIElements
             }
         }
 
+        /// <summary>
+        /// The rectangle of the content area of the element, in the local space of the element.
+        /// </summary>
+        /// <remarks>
+        /// In the box model used by UI Toolkit, the content area refers to the inner rectangle for displaying text and images.
+        /// It excludes the borders and the padding.
+        /// </remarks>
         public Rect contentRect
         {
             get
@@ -526,6 +580,13 @@ namespace UnityEngine.UIElements
             }
         }
 
+        /// <summary>
+        /// The rectangle of the padding area of the element, in the local space of the element.
+        /// </summary>
+        /// <remarks>
+        /// In the box model used by UI Toolkit, the padding area refers to the inner rectangle. The inner rectangle includes
+        /// the <see cref="contentRect"/> and padding, but excludes the border.
+        /// </remarks>
         protected Rect paddingRect
         {
             get
@@ -727,12 +788,12 @@ namespace UnityEngine.UIElements
 
             if (hierarchy.parent != null)
             {
-                var mat = matrixWithLayout;
+                var mat = pivottedMatrixWithLayout;
                 MultiplyMatrix34(ref hierarchy.parent.worldTransformRef,  ref mat, out m_WorldTransformCache);
             }
             else
             {
-                m_WorldTransformCache = matrixWithLayout;
+                m_WorldTransformCache = pivottedMatrixWithLayout;
             }
 
             isWorldTransformInverseDirty = true;
@@ -753,6 +814,7 @@ namespace UnityEngine.UIElements
 
         private Rect m_WorldClip = Rect.zero;
         private Rect m_WorldClipMinusGroup = Rect.zero;
+        private bool m_WorldClipIsInfinite = false;
         internal Rect worldClip
         {
             get
@@ -779,6 +841,19 @@ namespace UnityEngine.UIElements
             }
         }
 
+        internal bool worldClipIsInfinite
+        {
+            get
+            {
+                if (isWorldClipDirty)
+                {
+                    UpdateWorldClip();
+                    isWorldClipDirty = false;
+                }
+                return m_WorldClipIsInfinite;
+            }
+        }
+
         internal void EnsureWorldTransformAndClipUpToDate()
         {
             if (isWorldTransformDirty)
@@ -790,16 +865,24 @@ namespace UnityEngine.UIElements
             }
         }
 
-        private static readonly Rect s_InfiniteRect = new Rect(-10000, -10000, 40000, 40000);
+        internal static readonly Rect s_InfiniteRect = new Rect(-10000, -10000, 40000, 40000);
 
         private void UpdateWorldClip()
         {
             if (hierarchy.parent != null)
             {
                 m_WorldClip = hierarchy.parent.worldClip;
+
+                bool parentWorldClipIsInfinite = hierarchy.parent.worldClipIsInfinite;
                 if (hierarchy.parent != renderChainData.groupTransformAncestor) // Accessing render data here?
+                {
                     m_WorldClipMinusGroup = hierarchy.parent.worldClipMinusGroup;
-                else m_WorldClipMinusGroup = panel?.contextType == ContextType.Player ? s_InfiniteRect : GUIClip.topmostRect;
+                }
+                else
+                {
+                    parentWorldClipIsInfinite = true;
+                    m_WorldClipMinusGroup = s_InfiniteRect;
+                }
 
                 if (ShouldClip())
                 {
@@ -808,27 +891,32 @@ namespace UnityEngine.UIElements
                     // be the last operation that's performed.
                     Rect wb = SubstractBorderPadding(worldBound);
 
-                    float x1 = Mathf.Max(wb.xMin, m_WorldClip.xMin);
-                    float x2 = Mathf.Min(wb.xMax, m_WorldClip.xMax);
-                    float y1 = Mathf.Max(wb.yMin, m_WorldClip.yMin);
-                    float y2 = Mathf.Min(wb.yMax, m_WorldClip.yMax);
-                    float width = Mathf.Max(x2 - x1, 0);
-                    float height = Mathf.Max(y2 - y1, 0);
-                    m_WorldClip = new Rect(x1, y1, width, height);
+                    m_WorldClip = CombineClipRects(wb, m_WorldClip);
+                    m_WorldClipMinusGroup = parentWorldClipIsInfinite ? wb : CombineClipRects(wb, m_WorldClipMinusGroup);
 
-                    x1 = Mathf.Max(wb.xMin, m_WorldClipMinusGroup.xMin);
-                    x2 = Mathf.Min(wb.xMax, m_WorldClipMinusGroup.xMax);
-                    y1 = Mathf.Max(wb.yMin, m_WorldClipMinusGroup.yMin);
-                    y2 = Mathf.Min(wb.yMax, m_WorldClipMinusGroup.yMax);
-                    width = Mathf.Max(x2 - x1, 0);
-                    height = Mathf.Max(y2 - y1, 0);
-                    m_WorldClipMinusGroup = new Rect(x1, y1, width, height);
+                    m_WorldClipIsInfinite = false;
+                }
+                else
+                {
+                    m_WorldClipIsInfinite = parentWorldClipIsInfinite;
                 }
             }
             else
             {
-                m_WorldClipMinusGroup = m_WorldClip = (panel != null) ? panel.visualTree.rect : s_InfiniteRect;
+                m_WorldClipMinusGroup = m_WorldClip = (panel != null) ? panel.visualTree.rect : s_InfiniteRect;;
+                m_WorldClipIsInfinite = true;
             }
+        }
+
+        private Rect CombineClipRects(Rect rect, Rect parentRect)
+        {
+            float x1 = Mathf.Max(rect.xMin, parentRect.xMin);
+            float x2 = Mathf.Min(rect.xMax, parentRect.xMax);
+            float y1 = Mathf.Max(rect.yMin, parentRect.yMin);
+            float y2 = Mathf.Min(rect.yMax, parentRect.yMax);
+            float width = Mathf.Max(x2 - x1, 0);
+            float height = Mathf.Max(y2 - y1, 0);
+            return new Rect(x1, y1, width, height);
         }
 
         private Rect SubstractBorderPadding(Rect worldRect)
@@ -907,7 +995,13 @@ namespace UnityEngine.UIElements
         /// </summary>
         public PickingMode pickingMode { get; set; }
 
-        // does not guarantee uniqueness
+        /// <summary>
+        /// The name of this VisualElement.
+        /// </summary>
+        /// <remarks>
+        /// Use this property to write USS selectors that target a specific element.
+        /// The standard practice is to give an element a unique name.
+        /// </remarks>
         public string name
         {
             get { return m_Name; }
@@ -939,14 +1033,8 @@ namespace UnityEngine.UIElements
         // Set and pass in values to be used for layout
         internal YogaNode yogaNode { get; private set; }
 
-        // shared style object, cannot be changed by the user
-        internal ComputedStyle m_SharedStyle = InitialStyle.Get();
-        // user-defined style object, if not set, is the same reference as m_SharedStyles
-        internal ComputedStyle m_Style = InitialStyle.Get();
-
-        internal ComputedStyle sharedStyle => m_SharedStyle;
-
-        internal ComputedStyle computedStyle => m_Style;
+        internal ComputedStyle m_Style = InitialStyle.Acquire();
+        internal ref ComputedStyle computedStyle => ref m_Style;
 
         // Variables that children inherit
         internal StyleVariableContext variableContext = StyleVariableContext.none;
@@ -954,7 +1042,7 @@ namespace UnityEngine.UIElements
         // Hash of the inherited style data values
         internal int inheritedStylesHash = 0;
 
-        internal bool hasInlineStyle => m_Style != m_SharedStyle;
+        internal bool hasInlineStyle => inlineStyleAccess != null;
 
         // Opacity is not fully supported so it's hidden from public API for now
         internal float opacity
@@ -984,6 +1072,9 @@ namespace UnityEngine.UIElements
             }
         }
 
+        /// <summary>
+        ///  Initializes and returns an instance of VisualElement.
+        /// </summary>
         public VisualElement()
         {
             m_Children = s_EmptyList;
@@ -1080,6 +1171,7 @@ namespace UnityEngine.UIElements
                 }
 
                 BaseVisualElementPanel previousPanel = elementPanel;
+                var previousHierarchyVersion = previousPanel?.hierarchyVersion ?? 0;
 
                 using (pDispatcherGate)
                 using (panelDispatcherGate)
@@ -1089,28 +1181,25 @@ namespace UnityEngine.UIElements
                         e.WillChangePanel(p);
                     }
 
+                    var hierarchyVersion = previousPanel?.hierarchyVersion ?? 0;
+                    if (previousHierarchyVersion != hierarchyVersion)
+                    {
+                        // Update the elements list since the hierarchy has changed after sending the detach events
+                        elements.Clear();
+                        elements.Add(this);
+                        GatherAllChildren(elements);
+                    }
+
                     VisualElementFlags flagToAdd = p != null ? VisualElementFlags.NeedsAttachToPanelEvent : 0;
 
                     foreach (var e in elements)
                     {
-                        // this can happen if the elements gets re-parented during a user callback
-                        // in this case another SetPanel() call should already have notified the element
-                        // so we simply ignore it
-                        if (previousPanel != e.elementPanel)
-                            continue;
-
                         e.elementPanel = p;
                         e.m_Flags |= flagToAdd;
                     }
 
                     foreach (var e in elements)
                     {
-                        // this can happen if the elements gets re-parented during a user callback
-                        // in this case another SetPanel() call should already have notified the element
-                        // so we simply ignore it
-                        if (p != e.elementPanel)
-                            continue;
-
                         e.HasChangedPanel(previousPanel);
                     }
                 }
@@ -1145,6 +1234,9 @@ namespace UnityEngine.UIElements
             {
                 yogaNode.Config = elementPanel.yogaConfig;
                 RegisterRunningAnimations();
+
+                //We need to reset any visual pseudo state
+                pseudoStates &= ~(PseudoStates.Focus | PseudoStates.Active | PseudoStates.Hover);
 
                 // Only send this event if the element hasn't received it yet
                 if ((m_Flags & VisualElementFlags.NeedsAttachToPanelEvent) == VisualElementFlags.NeedsAttachToPanelEvent)
@@ -1183,6 +1275,11 @@ namespace UnityEngine.UIElements
             elementPanel?.SendEvent(e);
         }
 
+        internal sealed override void SendEvent(EventBase e, DispatchMode dispatchMode)
+        {
+            elementPanel?.SendEvent(e, dispatchMode);
+        }
+
         internal void IncrementVersion(VersionChangeType changeType)
         {
             elementPanel?.OnVersionChanged(this, changeType);
@@ -1200,31 +1297,54 @@ namespace UnityEngine.UIElements
         private bool SetEnabledFromHierarchyPrivate(bool state)
         {
             var initialState = enabledInHierarchy;
+            bool disable = false;
             if (state)
             {
                 if (isParentEnabledInHierarchy)
                 {
                     if (enabledSelf)
                     {
-                        pseudoStates &= ~PseudoStates.Disabled;
                         RemoveFromClassList(disabledUssClassName);
                     }
                     else
                     {
-                        pseudoStates |= PseudoStates.Disabled;
+                        disable = true;
                         AddToClassList(disabledUssClassName);
                     }
                 }
                 else
                 {
-                    pseudoStates |= PseudoStates.Disabled;
+                    disable = true;
                     RemoveFromClassList(disabledUssClassName);
                 }
             }
             else
             {
-                pseudoStates |= PseudoStates.Disabled;
+                disable = true;
                 EnableInClassList(disabledUssClassName, isParentEnabledInHierarchy);
+            }
+
+            if (disable)
+            {
+                if (focusController != null && focusController.IsFocused(this))
+                {
+                    EventDispatcherGate? dispatcherGate = null;
+                    if (panel?.dispatcher != null)
+                    {
+                        dispatcherGate = new EventDispatcherGate(panel.dispatcher);
+                    }
+
+                    using (dispatcherGate)
+                    {
+                        BlurImmediately();
+                    }
+                }
+
+                pseudoStates |= PseudoStates.Disabled;
+            }
+            else
+            {
+                pseudoStates &= ~PseudoStates.Disabled;
             }
 
             return initialState != enabledInHierarchy;
@@ -1284,6 +1404,16 @@ namespace UnityEngine.UIElements
             }
         }
 
+        /// <summary>
+        /// Indicates whether or not this element should be rendered.
+        /// </summary>
+        /// <remarks>
+        /// The value of this property reflects the value of <see cref="IResolvedStyle.visibility"/> for this element.
+        /// The value is true for <see cref="Visibility.Visible"/> and false for <see cref="Visibility.Hidden"/>.
+        /// Writing to this property writes to <see cref="IStyle.visibility"/>.
+        /// <seealso cref="resolvedStyle"/>
+        /// <seealso cref="style"/>
+        /// </remarks>
         public bool visible
         {
             get
@@ -1311,9 +1441,9 @@ namespace UnityEngine.UIElements
         /// Called when the <see cref="VisualElement"/> visual contents need to be (re)generated.
         /// </summary>
         /// <remarks>
-        /// When handled, it is possible to generate custom geometry in the content region of the <see cref="VisualElement"/>.
-        ///                     This delegate is called only when the <see cref="VisualElement"/> has been detected to need to regenerate its visual contents. It is not called every frame when refreshing the panel. The content generated is cached and remains intact until a property on the <see cref="VisualElement"/> affecting visuals has changed or <see cref="VisualElement.MarkDirtyRepaint"/> is called.
-        ///                     While executing code in a handler to this delegate, refrain from making changes to any property of the <see cref="VisualElement"/>. A correct handler should treat the <see cref="VisualElement"/> as 'read-only' and generate the geometry without causing side-effects. Changes done to the <see cref="VisualElement"/> during this event could be missed or lag appearance at best.
+        /// <para>When this delegate is handled, you can generate custom geometry in the content region of the <see cref="VisualElement"/>. For an example, see the <see cref="MeshGenerationContext"/> documentation.</para>
+        /// <para>This delegate is called only when the <see cref="VisualElement"/> needs to regenerate its visual contents. It is not called every frame when the panel refreshes. The generated content is cached, and remains intact until any of the <see cref="VisualElement"/>'s properties that affects visuals either changes, or <see cref="VisualElement.MarkDirtyRepaint"/> is called.</para>
+        /// <para>When you execute code in a handler to this delegate, do not make changes to any property of the <see cref="VisualElement"/>. A handler should treat the <see cref="VisualElement"/> as 'read-only'. Changing the <see cref="VisualElement"/> during this event might cause undesirable side effects. For example, the changes might lag, or be missed completely.</para>
         /// </remarks>
         public Action<MeshGenerationContext> generateVisualContent { get; set; }
 
@@ -1468,13 +1598,26 @@ namespace UnityEngine.UIElements
 
         internal virtual void OnViewDataReady() {}
 
-        // position should be in local space
-        // override to customize intersection between point and shape
+
+        /// <summary>
+        /// Checks if the specified point intersects with this VisualElement's layout.
+        /// </summary>
+        /// <remarks>
+        /// Unity calls this method to find out what elements are under a cursor (such as a mouse).
+        /// Do not rely on this method to perform invalidation,
+        /// since Unity might cache results or skip some invocations of this method for performance reasons.
+        /// By default, a VisualElement has a rectangular area. Override this method in your VisualElement subclass to customize this behaviour.
+        /// </remarks>
+        /// <param name="localPoint">The point in the local space of the element.</param>
+        /// <returns>Returns true if the point is contained within the element's layout. Otherwise, returns false.</returns>
+        /// TODO rect is internal, yet it's probably what users would want to use in this case
         public virtual bool ContainsPoint(Vector2 localPoint)
         {
             return rect.Contains(localPoint);
         }
 
+        /// <undoc/>
+        // TODO this is only used by GraphView... should we maybe remove it from the API or make it internal?
         public virtual bool Overlaps(Rect rectangle)
         {
             return rect.Overlaps(rectangle, true);
@@ -1483,10 +1626,7 @@ namespace UnityEngine.UIElements
         /// <summary>
         /// The modes available to measure <see cref="VisualElement"/> sizes.
         /// </summary>
-        /// <remarks>
-        /// This enum value is passed to <see cref="UIElements.VisualElement.DoMeasure"/>. This lets UI elements indicate their natural size during the layout algorithm.
-        /// </remarks>
-        /// <seealso cref="VisualElement.MeasureTextSize"/>
+        /// <seealso cref="TextElement.MeasureTextSize"/>
         public enum MeasureMode
         {
             /// <summary>
@@ -1530,6 +1670,8 @@ namespace UnityEngine.UIElements
             yogaNode.SetMeasureFunction(null);
         }
 
+        /// <undoc/>
+        /// TODO this is public but since "requiresMeasureFunction" is internal this is not useful for users
         protected internal virtual Vector2 DoMeasure(float desiredWidth, MeasureMode widthMode, float desiredHeight, MeasureMode heightMode)
         {
             return new Vector2(float.NaN, float.NaN);
@@ -1571,14 +1713,13 @@ namespace UnityEngine.UIElements
             inlineStyleAccess.SetInlineRule(sheet, rule);
         }
 
-        internal void SetSharedStyles(ComputedStyle sharedStyle)
+        internal void SetComputedStyle(ref ComputedStyle style)
         {
-            Debug.Assert(sharedStyle.isShared);
-
-            if (sharedStyle == m_SharedStyle)
-            {
+            // When a parent class list change all children get their styles recomputed.
+            // A lot of time the children won't change and the same style will get computed so we can early exit in that case
+            // except if the element has inline style we may need to apply them again (happens when inline style get removed).
+            if (m_Style.matchingRulesHash == style.matchingRulesHash && !hasInlineStyle)
                 return;
-            }
 
             var previousOverflow = m_Style.overflow;
             var previousBorderBottomLeftRadius = m_Style.borderBottomLeftRadius;
@@ -1591,16 +1732,16 @@ namespace UnityEngine.UIElements
             var previousBorderBottomWidth = m_Style.borderBottomWidth;
             var previousOpacity = m_Style.opacity;
 
+            // Here we do a "smart" copy of the style instead of just acquiring them to prevent additional GC alloc.
+            // If this element has no inline styles it will release the current style data group and acquire the new one.
+            // However, when there a inline styles the style data group that is inline will have a ref count of 1
+            // so instead of releasing it and acquiring a new one we just copy the data to save on GC alloc.
+            m_Style.CopyFrom(ref style);
+
             if (hasInlineStyle)
             {
-                inlineStyleAccess.ApplyInlineStyles(sharedStyle);
+                inlineStyleAccess.ApplyInlineStyles();
             }
-            else
-            {
-                m_Style = sharedStyle;
-            }
-
-            m_SharedStyle = sharedStyle;
 
             FinalizeLayout();
 
@@ -1652,9 +1793,18 @@ namespace UnityEngine.UIElements
             style.width = StyleKeyword.Null;
             style.height = StyleKeyword.Null;
 
-            FinalizeLayout();
-
-            IncrementVersion(VersionChangeType.Layout);
+            // Reapply computed style here because GraphView expect the resolved style to be
+            // up to date after ResetPositionProperties is called
+            if (StyleCache.TryGetValue(m_Style.matchingRulesHash, out var sharedStyle))
+            {
+                SetComputedStyle(ref sharedStyle);
+            }
+            else
+            {
+                // If it's not in the cache it must be the initial styles
+                Debug.Assert(m_Style.matchingRulesHash == 0);
+                SetComputedStyle(ref InitialStyle.Get());
+            }
         }
 
         public override string ToString()
@@ -1677,6 +1827,14 @@ namespace UnityEngine.UIElements
             return m_ClassList;
         }
 
+        /// <summary>
+        /// Removes all classes from the class list of this element.
+        /// <seealso cref="AddToClassList"/>
+        /// </summary>
+        /// <remarks>
+        /// This method might cause unexpected results for built-in Unity elements,
+        /// since they might rely on classes to be present in their list to function.
+        /// </remarks>
         public void ClearClassList()
         {
             if (m_ClassList.Count > 0)
@@ -1687,6 +1845,10 @@ namespace UnityEngine.UIElements
             }
         }
 
+        /// <summary>
+        /// Adds a class to the class list of the element in order to assign styles from USS.
+        /// </summary>
+        /// <param name="className">The name of the class to add to the list.</param>
         public void AddToClassList(string className)
         {
             if (m_ClassList == s_EmptyClassList)
@@ -1711,6 +1873,10 @@ namespace UnityEngine.UIElements
             IncrementVersion(VersionChangeType.StyleSheet);
         }
 
+        /// <summary>
+        /// Removes a class from the class list of the element.
+        /// </summary>
+        /// <param name="className">The name of the class to remove to the list.</param>
         public void RemoveFromClassList(string className)
         {
             if (m_ClassList.Remove(className))
@@ -1755,6 +1921,11 @@ namespace UnityEngine.UIElements
                 RemoveFromClassList(className);
         }
 
+        /// <summary>
+        /// Searches for a class in the class list of this element.
+        /// </summary>
+        /// <param name="cls">The name of the class for the search query.</param>
+        /// <returns>Returns true if the class is part of the list. Otherwise, returns false.</returns>
         public bool ClassListContains(string cls)
         {
             for (int i = 0; i < m_ClassList.Count; i++)
@@ -1767,10 +1938,10 @@ namespace UnityEngine.UIElements
         }
 
         /// <summary>
-        /// Searchs up the hierachy of this VisualElement and retrieves stored userData, if any is found.
+        /// Searches up the hierarchy of this VisualElement and retrieves stored userData, if any is found.
         /// </summary>
         /// <remarks>
-        /// This will ignore the current userData and return the first parent's non-null userData
+        /// This ignores the current userData and returns the first parent's non-null userData.
         /// </remarks>
         public object FindAncestorUserData()
         {
@@ -1945,6 +2116,18 @@ namespace UnityEngine.UIElements
     /// </summary>
     public static partial class VisualElementExtensions
     {
+        /// <summary>
+        /// Aligns a VisualElement's left, top, right and bottom edges with the corresponding edges of its parent.
+        /// </summary>
+        /// <remarks>
+        /// This method provides a way to set the following styles in one operation:
+        /// - <see cref="IStyle.position"/> is set to <see cref="Position.Absolute"/>
+        /// - <see cref="IStyle.left"/> is set to 0
+        /// - <see cref="IStyle.top"/> is set to 0
+        /// - <see cref="IStyle.right"/> is set to 0
+        /// - <see cref="IStyle.bottom"/> is set to 0
+        /// </remarks>
+        /// <param name="elem">The element to be aligned with its parent</param>
         public static void StretchToParentSize(this VisualElement elem)
         {
             if (elem == null)
@@ -1961,8 +2144,15 @@ namespace UnityEngine.UIElements
         }
 
         /// <summary>
-        /// The given VisualElement's left and right edges will be aligned with the corresponding edges of the parent element.
+        /// Aligns a VisualElement's left and right edges with the corresponding edges of its parent.
         /// </summary>
+        /// <remarks>
+        /// This method provides a way to set the following styles in one operation:
+        /// - <see cref="IStyle.position"/> is set to <see cref="Position.Absolute"/>
+        /// - <see cref="IStyle.left"/> is set to 0
+        /// - <see cref="IStyle.right"/> is set to 0
+        /// </remarks>
+        /// <param name="elem">The element to be aligned with its parent</param>
         public static void StretchToParentWidth(this VisualElement elem)
         {
             if (elem == null)

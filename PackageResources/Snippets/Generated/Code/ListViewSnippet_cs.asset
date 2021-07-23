@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 13807, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: ListViewSnippet_cs
+  m_EditorClassIdentifier: 
+  m_Text: "using UnityEngine;\nusing UnityEngine.UIElements;\nusing System.Collections.Generic;\nusing
+    System;\n\nnamespace UnityEditor.UIElements.Samples\n{\n    internal class ListViewSnippet
+    : ElementSnippet<ListViewSnippet>\n    {\n        internal override void Apply(VisualElement
+    container)\n        {\n            /// <sample>\n            // Create some list
+    of data, here simply numbers in interval [1, 1000]\n            const int itemCount
+    = 1000;\n            var items = new List<string>(itemCount);\n            for
+    (int i = 1; i <= itemCount; i++)\n                items.Add(i.ToString());\n\n           
+    // The \"makeItem\" function will be called as needed\n            // when the
+    ListView needs more items to render\n            Func<VisualElement> makeItem
+    = () => new Label();\n\n            // As the user scrolls through the list,
+    the ListView object\n            // will recycle elements created by the \"makeItem\"\n           
+    // and invoke the \"bindItem\" callback to associate\n            // the element
+    with the matching data item (specified as an index in the list)\n           
+    Action<VisualElement, int> bindItem = (e, i) => (e as Label).text = items[i];\n\n           
+    var listView = container.Q<ListView>();\n            listView.makeItem = makeItem;\n           
+    listView.bindItem = bindItem;\n            listView.itemsSource = items;\n           
+    listView.selectionType = SelectionType.Multiple;\n\n            // Callback invoked
+    when the user double clicks an item\n            listView.onItemsChosen += Debug.Log;\n\n           
+    // Callback invoked when the user changes the selection inside the ListView\n           
+    listView.onSelectionChange += Debug.Log;\n            /// </sample>\n       
+    }\n    }\n}\n"

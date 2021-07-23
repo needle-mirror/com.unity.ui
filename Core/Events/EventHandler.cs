@@ -24,7 +24,7 @@ namespace UnityEngine.UIElements
         bool HasTrickleDownHandlers();
 
         /// <summary>
-        /// Return true if event handlers for the event propagation BubbleUp phase have been attached on this object.
+        /// Returns true if event handlers for the event propagation BubbleUp phase, have been attached on this object.
         /// </summary>
         /// <returns>True if object has event handlers for the BubbleUp phase.</returns>
         bool HasBubbleUpHandlers();
@@ -50,7 +50,10 @@ namespace UnityEngine.UIElements
             }
 
             m_CallbackRegistry.RegisterCallback<TEventType>(callback, useTrickleDown);
+
+#if UNITY_EDITOR
             GlobalCallbackRegistry.RegisterListeners<TEventType>(this, callback, useTrickleDown);
+#endif
         }
 
         /// <summary>
@@ -67,7 +70,10 @@ namespace UnityEngine.UIElements
             }
 
             m_CallbackRegistry.RegisterCallback<TEventType, TUserArgsType>(callback, userArgs, useTrickleDown);
+
+#if UNITY_EDITOR
             GlobalCallbackRegistry.RegisterListeners<TEventType>(this, callback, useTrickleDown);
+#endif
         }
 
         /// <summary>
@@ -82,7 +88,9 @@ namespace UnityEngine.UIElements
                 m_CallbackRegistry.UnregisterCallback(callback, useTrickleDown);
             }
 
+#if UNITY_EDITOR
             GlobalCallbackRegistry.UnregisterListeners<TEventType>(this, callback);
+#endif
         }
 
         /// <summary>
@@ -97,7 +105,9 @@ namespace UnityEngine.UIElements
                 m_CallbackRegistry.UnregisterCallback(callback, useTrickleDown);
             }
 
+#if UNITY_EDITOR
             GlobalCallbackRegistry.UnregisterListeners<TEventType>(this, callback);
+#endif
         }
 
         internal bool TryGetUserArgs<TEventType, TCallbackArgs>(EventCallback<TEventType, TCallbackArgs> callback, TrickleDown useTrickleDown, out TCallbackArgs userData) where TEventType : EventBase<TEventType>, new()
@@ -117,6 +127,8 @@ namespace UnityEngine.UIElements
         /// </summary>
         /// <param name="e">The event to send.</param>
         public abstract void SendEvent(EventBase e);
+
+        internal abstract void SendEvent(EventBase e, DispatchMode dispatchMode);
 
         internal void HandleEventAtTargetPhase(EventBase evt)
         {
@@ -139,15 +151,28 @@ namespace UnityEngine.UIElements
             switch (evt.propagationPhase)
             {
                 case PropagationPhase.TrickleDown:
-                case PropagationPhase.AtTarget:
                 case PropagationPhase.BubbleUp:
                 {
                     if (!evt.isPropagationStopped)
                     {
-                        m_CallbackRegistry?.InvokeCallbacks(evt);
+                        m_CallbackRegistry?.InvokeCallbacks(evt, evt.propagationPhase);
                     }
                     break;
                 }
+
+                case PropagationPhase.AtTarget:
+                {
+                    //We make sure we invoke callbacks from the TrickleDownPhase before the BubbleUp ones when we are directly at target
+                    if (!evt.isPropagationStopped)
+                    {
+                        m_CallbackRegistry?.InvokeCallbacks(evt, PropagationPhase.TrickleDown);
+                    }
+                    if (!evt.isPropagationStopped)
+                    {
+                        m_CallbackRegistry?.InvokeCallbacks(evt, PropagationPhase.BubbleUp);
+                    }
+                }
+                break;
 
                 case PropagationPhase.DefaultActionAtTarget:
                 {
@@ -193,8 +218,32 @@ namespace UnityEngine.UIElements
             return m_CallbackRegistry != null && m_CallbackRegistry.HasBubbleHandlers();
         }
 
+        /// <summary>
+        /// Executes logic after the callbacks registered on the event target have executed,
+        /// unless the event is marked to prevent its default behaviour.
+        /// <see cref="EventBase{T}.PreventDefault"/>.
+        /// </summary>
+        /// <remarks>
+        /// This method is designed to be overriden by subclasses. Use it to implement event handling without
+        /// registering callbacks, which guarantees precedences of callbacks registered by users of the subclass.
+        /// Unlike <see cref="ExecuteDefaultAction"/>, this method is called after the callbacks registered on
+        /// the element but before callbacks registered on its ancestors with <see cref="TrickleDown.NoTrickleDown"/>.
+        /// </remarks>
+        /// <param name="evt">The event instance.</param>
         protected virtual void ExecuteDefaultActionAtTarget(EventBase evt) {}
 
+        /// <summary>
+        /// Executes logic after the callbacks registered on the event target have executed,
+        /// unless the event has been marked to prevent its default behaviour.
+        /// <see cref="EventBase{T}.PreventDefault"/>.
+        /// </summary>
+        /// <remarks>
+        /// This method is designed to be overriden by subclasses. Use it to implement event handling without
+        /// registering callbacks which guarantees precedences of callbacks registered by users of the subclass.
+        /// Unlike <see cref="ExecuteDefaultActionAtTarget"/>, this method is called after both the callbacks registered
+        /// on the element and callbacks registered on its ancestors with <see cref="TrickleDown.NoTrickleDown"/>.
+        /// </remarks>
+        /// <param name="evt">The event instance.</param>
         protected virtual void ExecuteDefaultAction(EventBase evt) {}
     }
 }

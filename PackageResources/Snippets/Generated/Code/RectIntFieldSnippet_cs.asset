@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 13807, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: RectIntFieldSnippet_cs
+  m_EditorClassIdentifier: 
+  m_Text: "using UnityEditor.UIElements;\nusing UnityEngine;\nusing UnityEngine.UIElements;\n\nnamespace
+    UnityEditor.UIElements.Samples\n{\n    internal class RectIntFieldSnippet : ElementSnippet<RectIntFieldSnippet>\n   
+    {\n        internal override void Apply(VisualElement container)\n        {\n           
+    /// <sample>\n            // Get a reference to the field from UXML and assign
+    it its value.\n            var uxmlField = container.Q<RectIntField>(\"the-uxml-field\");\n           
+    uxmlField.value = new RectInt(0, 5, 10, 20);\n\n            // Create a new field,
+    disable it, and give it a style class.\n            var csharpField = new RectIntField(\"C#
+    Field\");\n            csharpField.SetEnabled(false);\n            csharpField.AddToClassList(\"some-styled-field\");\n           
+    csharpField.value = uxmlField.value;\n            container.Add(csharpField);\n\n           
+    // Mirror value of uxml field into the C# field.\n            uxmlField.RegisterCallback<ChangeEvent<RectInt>>((evt)
+    =>\n            {\n                csharpField.value = evt.newValue;\n           
+    });\n            /// </sample>\n        }\n    }\n}\n"

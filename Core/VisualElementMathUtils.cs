@@ -10,9 +10,10 @@ namespace UnityEngine.UIElements
             get { return m_Position + (Vector3)layout.min; }
         }
 
-        Matrix4x4 matrixWithLayout
+        // Translate to pivot, scale, rotate, translate back, then do final translation.
+        Matrix4x4 pivottedMatrixWithLayout
         {
-            get { return Matrix4x4.TRS(positionWithLayout, m_Rotation, m_Scale); }
+            get { return Matrix4x4.TRS(positionWithLayout + transformOrigin , m_Rotation, m_Scale) * Matrix4x4.Translate(-transformOrigin); }
         }
 
         void TransformAlignedRect(ref Rect r)
@@ -35,13 +36,54 @@ namespace UnityEngine.UIElements
             OrderMinMaxRect(ref r);
         }
 
+        [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
+        internal static float Min(float a, float b, float c, float d)
+        {
+            return Mathf.Min(Mathf.Min(a, b), Mathf.Min(c, d));
+        }
+
+        [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
+        internal static float Max(float a, float b, float c, float d)
+        {
+            return Mathf.Max(Mathf.Max(a, b), Mathf.Max(c, d));
+        }
+
+        internal static Rect CalculateConservativeRect(ref Matrix4x4 matrix, Rect rect)
+        {
+            //Mathf.Min does not check for NAN
+            if (float.IsNaN(rect.height) | float.IsNaN(rect.width) | float.IsNaN(rect.x) | float.IsNaN(rect.y))
+            {
+                //fall back to old algorithm
+                rect = new Rect(MultiplyMatrix44Point2(ref matrix, rect.position),
+                    MultiplyVector2(ref matrix, rect.size));
+                OrderMinMaxRect(ref rect);
+                return rect;
+            }
+
+            var topLeft = new Vector2(rect.xMin, rect.yMin);
+            var bottomRight = new Vector2(rect.xMax, rect.yMax);
+            var topRight = new Vector2(rect.xMax, rect.yMin);
+            var bottomLeft = new Vector2(rect.xMin, rect.yMax);
+
+            var transformedTL = matrix.MultiplyPoint3x4(topLeft);
+            var transformedBR = matrix.MultiplyPoint3x4(bottomRight);
+            var transformedRL = matrix.MultiplyPoint3x4(topRight);
+            var transformedBL = matrix.MultiplyPoint3x4(bottomLeft);
+
+            Vector2 min = new Vector2(
+                Min(transformedTL.x, transformedBR.x, transformedRL.x, transformedBL.x),
+                Min(transformedTL.y, transformedBR.y, transformedRL.y, transformedBL.y));
+
+            Vector2 max = new Vector2(
+                Max(transformedTL.x, transformedBR.x, transformedRL.x, transformedBL.x),
+                Max(transformedTL.y, transformedBR.y, transformedRL.y, transformedBL.y));
+
+            return new Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+        }
+
         internal static void TransformAlignedRect(ref Matrix4x4 matrix, ref Rect rect)
         {
-            // We assume that the transform performs translation/scaling without rotation.
-            rect = new Rect(
-                MultiplyMatrix44Point2(ref matrix, rect.position),
-                MultiplyVector2(ref matrix, rect.size));
-            OrderMinMaxRect(ref rect);
+            rect =  CalculateConservativeRect(ref matrix, rect);
         }
 
         internal static void OrderMinMaxRect(ref Rect rect)
@@ -110,7 +152,16 @@ namespace UnityEngine.UIElements
 
     public static partial class VisualElementExtensions
     {
-        // transforms a point assumed in Panel space to the referential inside of the element bound (local)
+        /// <summary>
+        /// Transforms a point from the world space to the local space of the element.
+        /// </summary>
+        /// <remarks>
+        /// This element needs to be attached to a panel and must have a valid <see cref="VisualElement.layout"/>.
+        /// Otherwise, this method might return invalid results.
+        /// </remarks>
+        /// <param name="ele">The element to use as a reference for the local space.</param>
+        /// <param name="p">The point to transform, in world space.</param>
+        /// <returns>A point in the local space of the element.</returns>
         public static Vector2 WorldToLocal(this VisualElement ele, Vector2 p)
         {
             if (ele == null)
@@ -121,7 +172,16 @@ namespace UnityEngine.UIElements
             return VisualElement.MultiplyMatrix44Point2(ref ele.worldTransformInverse, p);
         }
 
-        // transforms a point to Panel space referential
+        /// <summary>
+        /// Transforms a point from the local space of the element to the world space.
+        /// </summary>
+        /// <remarks>
+        /// This element needs to be attached to a panel and must receive a valid <see cref="VisualElement.layout"/>.
+        /// Otherwise, this method may return invalid results.
+        /// </remarks>
+        /// <param name="ele">The element to use as a reference for the local space.</param>
+        /// <param name="p">The point to transform, in local space.</param>
+        /// <returns>A point in the world space.</returns>
         public static Vector2 LocalToWorld(this VisualElement ele, Vector2 p)
         {
             if (ele == null)
@@ -132,7 +192,16 @@ namespace UnityEngine.UIElements
             return VisualElement.MultiplyMatrix44Point2(ref ele.worldTransformRef, p);
         }
 
-        // transforms a rect assumed in Panel space to the referential inside of the element bound (local)
+        /// <summary>
+        /// Transforms a rectangle from the world space to the local space of the element.
+        /// </summary>
+        /// <remarks>
+        /// This element needs to be attached to a panel and must receive a valid <see cref="VisualElement.layout"/>.
+        /// Otherwise, this method may return invalid results.
+        /// </remarks>
+        /// <param name="ele">The element to use as a reference for the local space.</param>
+        /// <param name="r">The rectangle to transform, in world space.</param>
+        /// <returns>A rectangle in the local space of the element.</returns>
         public static Rect WorldToLocal(this VisualElement ele, Rect r)
         {
             if (ele == null)
@@ -140,10 +209,19 @@ namespace UnityEngine.UIElements
                 throw new ArgumentNullException(nameof(ele));
             }
 
-            return VisualElement.MultiplyMatrix44Rect2(ref ele.worldTransformInverse, r);
+            return VisualElement.CalculateConservativeRect(ref ele.worldTransformInverse, r);
         }
 
-        // transforms a rect to Panel space referential
+        /// <summary>
+        /// Transforms a rectangle from the local space of the element to the world space.
+        /// </summary>
+        /// <remarks>
+        /// This element needs to be attached to a panel and must receive a valid <see cref="VisualElement.layout"/>.
+        /// Otherwise, this method may return invalid results.
+        /// </remarks>
+        /// <param name="ele">The element to use as a reference for the local space.</param>
+        /// <param name="r">The rectangle to transform, in local space.</param>
+        /// <returns>A rectangle in the world space.</returns>
         public static Rect LocalToWorld(this VisualElement ele, Rect r)
         {
             if (ele == null)
@@ -151,16 +229,36 @@ namespace UnityEngine.UIElements
                 throw new ArgumentNullException(nameof(ele));
             }
 
-            return VisualElement.MultiplyMatrix44Rect2(ref ele.worldTransformRef, r);
+            return VisualElement.CalculateConservativeRect(ref ele.worldTransformRef, r);
         }
 
-        // transform point from the local space of one element to to the local space of another
+        /// <summary>
+        /// Transforms a point from the local space of an element to the local space of another element.
+        /// </summary>
+        /// <remarks>
+        /// The elements both need to be attached to a panel and must receive a valid <see cref="VisualElement.layout"/>.
+        /// Otherwise, this method may return invalid results.
+        /// </remarks>
+        /// <param name="src">The element to use as a reference as the source local space.</param>
+        /// <param name="dest">The element to use as a reference as the destination local space.</param>
+        /// <param name="point">The point to transform, in the local space of the source element.</param>
+        /// <returns>A point in the local space of destination element.</returns>
         public static Vector2 ChangeCoordinatesTo(this VisualElement src, VisualElement dest, Vector2 point)
         {
             return dest.WorldToLocal(src.LocalToWorld(point));
         }
 
-        // transform rect from the local space of one element to to the local space of another
+        /// <summary>
+        /// Transforms a rectangle from the local space of an element to the local space of another element.
+        /// </summary>
+        /// <remarks>
+        /// The elements both need to be attached to a panel and have received a valid <see cref="VisualElement.layout"/>.
+        /// Otherwise, this method may return invalid results.
+        /// </remarks>
+        /// <param name="src">The element to use as a reference as the source local space.</param>
+        /// <param name="dest">The element to use as a reference as the destination local space.</param>
+        /// <param name="rect">The rectangle to transform, in the local space of the source element.</param>
+        /// <returns>A rectangle in the local space of destination element.</returns>
         public static Rect ChangeCoordinatesTo(this VisualElement src, VisualElement dest, Rect rect)
         {
             return dest.WorldToLocal(src.LocalToWorld(rect));

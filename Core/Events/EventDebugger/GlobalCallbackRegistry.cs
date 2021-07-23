@@ -1,12 +1,14 @@
+#if UNITY_EDITOR
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace UnityEngine.UIElements
 {
     internal static class GlobalCallbackRegistry
     {
-#if UNITY_EDITOR
         private static bool m_IsEventDebuggerConnected = false;
         public static bool IsEventDebuggerConnected
         {
@@ -31,12 +33,21 @@ namespace UnityEngine.UIElements
         // Global registry
         internal static readonly Dictionary<CallbackEventHandler, Dictionary<Type, List<ListenerRecord>>> s_Listeners =
             new Dictionary<CallbackEventHandler, Dictionary<Type, List<ListenerRecord>>>();
-#endif
+
+        public static void CleanListeners(IPanel panel)
+        {
+            var listeners = s_Listeners.ToList();
+            foreach (var eventRegistrationListener in listeners)
+            {
+                var key = eventRegistrationListener.Key as VisualElement; // VE that sends events
+                if (key?.panel == null)
+                    s_Listeners.Remove(eventRegistrationListener.Key);
+            }
+        }
 
         public static void RegisterListeners<TEventType>(CallbackEventHandler ceh, Delegate callback, TrickleDown useTrickleDown)
         {
-#if UNITY_EDITOR
-            if (!IsEventDebuggerConnected)
+            if (!IsEventDebuggerConnected || typeof(TEventType) == typeof(GeometryChangedEvent))
                 return;
             Dictionary<Type, List<ListenerRecord>> dict;
             if (!s_Listeners.TryGetValue(ceh, out dict))
@@ -64,12 +75,10 @@ namespace UnityEngine.UIElements
                 fileName = callStack.GetFileName(),
                 lineNumber = callStack.GetFileLineNumber()
             });
-#endif
         }
 
         public static void UnregisterListeners<TEventType>(CallbackEventHandler ceh, Delegate callback)
         {
-#if UNITY_EDITOR
             if (!IsEventDebuggerConnected)
                 return;
             Dictionary<Type, List<ListenerRecord>> dict;
@@ -91,7 +100,10 @@ namespace UnityEngine.UIElements
                     callbackRecords.RemoveAt(i);
                 }
             }
-#endif
+
+            s_Listeners.Remove(ceh);
         }
     }
 }
+
+#endif

@@ -613,6 +613,7 @@ namespace UnityEngine.UIElements
             e.pointerId = touch.fingerId + PointerId.touchPointerIdBase;
             e.pointerType = PointerType.touch;
 
+            // TODO: Rethink this logic. When two fingers are down, PointerMoveEvents should still have 1 primary touch.
             bool otherTouchDown = false;
             for (var i = PointerId.touchPointerIdBase;
                  i < PointerId.touchPointerIdBase + PointerId.touchPointerCount;
@@ -713,53 +714,10 @@ namespace UnityEngine.UIElements
                 IPointerEventInternal pointerEventInternal = triggerEvent as IPointerEventInternal;
                 if (pointerEventInternal != null)
                 {
-                    ((IPointerEventInternal)e).triggeredByOS = pointerEventInternal.triggeredByOS;
+                    ((IPointerEventInternal)e).triggeredByOS |= pointerEventInternal.triggeredByOS;
                 }
             }
             return e;
-        }
-
-        internal static T GetPooled(IMouseEvent triggerEvent)
-        {
-            T e = GetPooled();
-            if (triggerEvent != null)
-            {
-                e.pointerId = PointerId.mousePointerId;
-                e.pointerType = PointerType.mouse;
-                e.isPrimary = true;
-                e.button = triggerEvent.button;
-                e.pressedButtons = triggerEvent.pressedButtons;
-                e.position = triggerEvent.mousePosition;
-                e.localPosition = triggerEvent.mousePosition;
-                e.deltaPosition = triggerEvent.mouseDelta;
-                e.deltaTime = default;
-                e.clickCount = triggerEvent.clickCount;
-                e.pressure = triggerEvent.pressedButtons == 0 ? 0 : 0.5f;
-                e.tangentialPressure = default;
-
-                e.altitudeAngle = default;
-                e.azimuthAngle = default;
-                e.twist = default;
-                e.radius = default;
-                e.radiusVariance = default;
-
-                e.modifiers = triggerEvent.modifiers;
-
-                if (triggerEvent is IMouseEventInternal mouseEventInternal)
-                {
-                    ((IPointerEventInternal)e).triggeredByOS = mouseEventInternal.triggeredByOS;
-                }
-            }
-            return e;
-        }
-
-        internal new static T GetPooled(EventBase e)
-        {
-            if (e is IPointerEvent p)
-                return GetPooled(p);
-            if (e is IMouseEvent m)
-                return GetPooled(m);
-            return EventBase<T>.GetPooled(e);
         }
 
         protected internal override void PreDispatch(IPanel panel)
@@ -768,7 +726,7 @@ namespace UnityEngine.UIElements
 
             if (((IPointerEventInternal)this).triggeredByOS)
             {
-                PointerDeviceState.SavePointerPosition(pointerId, position, panel);
+                PointerDeviceState.SavePointerPosition(pointerId, position, panel, panel.contextType);
             }
         }
 
@@ -819,6 +777,7 @@ namespace UnityEngine.UIElements
 
         void LocalInit()
         {
+            ((IPointerEventInternal)this).triggeredByOS = true;
             ((IPointerEventInternal)this).recomputeTopElementUnderPointer = true;
         }
 
@@ -867,6 +826,11 @@ namespace UnityEngine.UIElements
     public sealed class PointerMoveEvent : PointerEventBase<PointerMoveEvent>
     {
         /// <summary>
+        /// Set this variable if the target should have priority when used in a touch enabled scroll view.
+        /// </summary>
+        internal bool isHandledByDraggable { get; set; }
+
+        /// <summary>
         /// Resets the event members to their initial values.
         /// </summary>
         protected override void Init()
@@ -877,7 +841,9 @@ namespace UnityEngine.UIElements
 
         void LocalInit()
         {
+            ((IPointerEventInternal)this).triggeredByOS = true;
             ((IPointerEventInternal)this).recomputeTopElementUnderPointer = true;
+            isHandledByDraggable = false;
         }
 
         /// <summary>
@@ -947,6 +913,7 @@ namespace UnityEngine.UIElements
 
         void LocalInit()
         {
+            ((IPointerEventInternal)this).triggeredByOS = true;
             ((IPointerEventInternal)this).recomputeTopElementUnderPointer = true;
         }
 
@@ -983,6 +950,7 @@ namespace UnityEngine.UIElements
 
         void LocalInit()
         {
+            ((IPointerEventInternal)this).triggeredByOS = true;
             ((IPointerEventInternal)this).recomputeTopElementUnderPointer = true;
         }
 
@@ -1000,7 +968,7 @@ namespace UnityEngine.UIElements
             {
                 panel.ReleasePointer(pointerId);
                 BaseVisualElementPanel basePanel = panel as BaseVisualElementPanel;
-                basePanel?.ClearCachedElementUnderPointer(this);
+                basePanel?.ClearCachedElementUnderPointer(pointerId, this);
             }
 
             if (panel.ShouldSendCompatibilityMouseEvents(this))
@@ -1040,6 +1008,7 @@ namespace UnityEngine.UIElements
         void LocalInit()
         {
             propagation = EventPropagation.Bubbles | EventPropagation.TricklesDown;
+            ((IPointerEventInternal)this).triggeredByOS = true;
             ((IPointerEventInternal)this).recomputeTopElementUnderPointer = true;
         }
 
@@ -1057,7 +1026,7 @@ namespace UnityEngine.UIElements
             {
                 panel.ReleasePointer(pointerId);
                 BaseVisualElementPanel basePanel = panel as BaseVisualElementPanel;
-                basePanel?.ClearCachedElementUnderPointer(this);
+                basePanel?.ClearCachedElementUnderPointer(pointerId, this);
             }
 
             if (panel.ShouldSendCompatibilityMouseEvents(this))

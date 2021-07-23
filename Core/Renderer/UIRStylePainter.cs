@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
+using UnityEngine.Assertions;
+using UnityEngine.TextCore.Text;
 
 namespace UnityEngine.UIElements.UIR.Implementation
 {
@@ -348,7 +350,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 
         public void DrawText(MeshGenerationContextUtils.TextParams textParams, ITextHandle handle, float pixelsPerPoint)
         {
-            if (textParams.font == null && textParams.fontDefinition.IsEmpty())
+            if (!TextUtilities.IsFontAssigned(textParams))
                 return;
 
 #if UNITY_EDITOR
@@ -356,13 +358,18 @@ namespace UnityEngine.UIElements.UIR.Implementation
                 textParams.fontColor *= textParams.playmodeTintColor;
 #endif // UNITY_EDITOR
 
-            handle.DrawText(this, textParams, pixelsPerPoint);
+            if (handle.IsLegacy())
+                DrawTextNative(textParams, pixelsPerPoint);
+            else
+                DrawTextCore(textParams, handle, pixelsPerPoint);
         }
 
-        internal void DrawTextNative(MeshGenerationContextUtils.TextParams textParams, ITextHandle handle, float pixelsPerPoint)
+        internal void DrawTextNative(MeshGenerationContextUtils.TextParams textParams, float pixelsPerPoint)
         {
             float scaling = TextUtilities.ComputeTextScaling(currentElement.worldTransform, pixelsPerPoint);
             TextNativeSettings textSettings = MeshGenerationContextUtils.TextParams.GetTextNativeSettings(textParams, scaling);
+
+            Assert.IsNotNull(textSettings.font);
 
             using (NativeArray<TextVertex> textVertices = TextNative.GetVertices(textSettings))
             {
@@ -386,25 +393,25 @@ namespace UnityEngine.UIElements.UIR.Implementation
 
         internal void DrawTextCore(MeshGenerationContextUtils.TextParams textParams, ITextHandle handle, float pixelsPerPoint)
         {
-            var textInfo = handle.Update(textParams, pixelsPerPoint);
+            TextInfo textInfo = handle.Update(textParams, pixelsPerPoint);
             for (int i = 0; i < textInfo.materialCount; i++)
             {
-                if (textInfo.meshInfos[i].vertexCount == 0)
+                if (textInfo.meshInfo[i].vertexCount == 0)
                     continue;
 
-                if (textInfo.meshInfos[i].material.name.Contains("Sprite"))
+                if (textInfo.meshInfo[i].material.name.Contains("Sprite"))
                 {
                     // Assume a sprite asset
                     m_CurrentEntry.clipRectID = m_ClipRectID;
                     m_CurrentEntry.isStencilClipped = m_StencilClip;
 
-                    var texture = textInfo.meshInfos[i].material.mainTexture;
+                    var texture = textInfo.meshInfo[i].material.mainTexture;
                     TextureId id = TextureRegistry.instance.Acquire(texture);
                     m_CurrentEntry.texture = id;
                     m_Owner.AppendTexture(currentElement, texture, id, false);
 
                     MeshBuilder.MakeText(
-                        textInfo.meshInfos[i],
+                        textInfo.meshInfo[i],
                         textParams.rect.min,
                         new MeshBuilder.AllocMeshData() { alloc = m_AllocRawVertsIndicesDelegate },
                         VertexFlags.IsTextured);
@@ -414,11 +421,11 @@ namespace UnityEngine.UIElements.UIR.Implementation
                     m_CurrentEntry.isTextEntry = true;
                     m_CurrentEntry.clipRectID = m_ClipRectID;
                     m_CurrentEntry.isStencilClipped = m_StencilClip;
-                    m_CurrentEntry.fontTexSDFScale = textInfo.meshInfos[i].material.GetFloat(TextDelegates.GetIDGradientScaleSafe());
-                    m_CurrentEntry.font = textInfo.meshInfos[i].material.mainTexture;
+                    m_CurrentEntry.fontTexSDFScale = textInfo.meshInfo[i].material.GetFloat(TextShaderUtilities.ID_GradientScale);
+                    m_CurrentEntry.font = textInfo.meshInfo[i].material.mainTexture;
 
                     MeshBuilder.MakeText(
-                        textInfo.meshInfos[i],
+                        textInfo.meshInfo[i],
                         textParams.rect.min,
                         new MeshBuilder.AllocMeshData() { alloc = m_AllocRawVertsIndicesDelegate });
                 }
@@ -636,6 +643,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
                 if (UIRUtility.IsVectorImageBackground(currentElement))
                     GenerateStencilClipEntryForSVGBackground();
                 else GenerateStencilClipEntryForRoundedRectBackground();
+                m_StencilClip = true; // Draw operations following this one must be clipped
             }
             m_ClipRectID = currentElement.renderChainData.clipRectID;
         }
@@ -870,7 +878,6 @@ namespace UnityEngine.UIElements.UIR.Implementation
                 m_Entries.Add(m_CurrentEntry);
                 totalVertices += m_CurrentEntry.vertices.Length;
                 totalIndices += m_CurrentEntry.indices.Length;
-                m_StencilClip = true; // Draw operations following this one should be clipped if not already
                 m_ClosingInfo.needsClosing = true;
             }
             m_CurrentEntry = new Entry();
@@ -886,7 +893,6 @@ namespace UnityEngine.UIElements.UIR.Implementation
             Debug.Assert(svgEntry.vertices.Length > 0);
             Debug.Assert(svgEntry.indices.Length > 0);
 
-            m_StencilClip = true; // Draw operations following this one should be clipped if not already
             m_CurrentEntry.vertices = svgEntry.vertices;
             m_CurrentEntry.indices = svgEntry.indices;
             m_CurrentEntry.uvIsDisplacement = svgEntry.uvIsDisplacement;
@@ -991,7 +997,7 @@ namespace UnityEngine.UIElements.UIR.Implementation
 
         public void DrawText(MeshGenerationContextUtils.TextParams textParams, ITextHandle handle, float pixelsPerPoint)
         {
-            if (textParams.font == null && textParams.fontDefinition.IsEmpty())
+            if (!TextUtilities.IsFontAssigned(textParams))
                 return;
 
 #if UNITY_EDITOR

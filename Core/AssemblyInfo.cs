@@ -1,3 +1,4 @@
+#if UIE_PACKAGE
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
@@ -38,7 +39,6 @@ using UnityEngine;
 
 [assembly: InternalsVisibleTo("UnityEditor")]
 [assembly: InternalsVisibleTo("UnityEditor.UIElementsModule")]
-[assembly: InternalsVisibleTo("UnityEngine.UIElementsGameObjectsModule")]
 [assembly: InternalsVisibleTo("Unity.UIElements.InputSystem")]
 [assembly: InternalsVisibleTo("Unity.UIElements.Text")]
 [assembly: InternalsVisibleTo("Unity.UIElements.Editor")]
@@ -46,8 +46,6 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("Unity.UIElements.EditorTests")]
 [assembly: InternalsVisibleTo("Unity.UIElements.PlayModeTests")]
 [assembly: InternalsVisibleTo("Unity.UIElements")] // Graphic tests
-[assembly: InternalsVisibleTo("UnityEngine.UIElementsGameObjectsModule")]
-[assembly: InternalsVisibleTo("UnityEditor.UIElementsGameObjectsModule")]
 [assembly: InternalsVisibleTo("UnityEngine.UIElementsInputSystemModule")]
 [assembly: InternalsVisibleTo("UnityEditor.UIElementsInputSystemModule")]
 [assembly: InternalsVisibleTo("Unity.UIElements.Samples.Editor")]
@@ -55,14 +53,9 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("Assembly-CSharp-Editor-testable")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] // for Moq
 [assembly: InternalsVisibleTo("Unity.2D.Sprite.Editor")]
-
-// UI Builder
 [assembly: InternalsVisibleTo("Unity.UI.Builder.Editor")]
-[assembly: InternalsVisibleTo("Unity.UI.Builder.EditorTests")]
 [assembly: InternalsVisibleTo("UnityEditor.UIBuilderModule")]
-[assembly: InternalsVisibleTo("Unity.UI.Builder")]
-
-
+[assembly: InternalsVisibleTo("Unity.UI.Builder.EditorTests")]
 [assembly: InternalsVisibleTo("Unity.DeviceSimulator.Editor")] // Temporary, see case 1279828
 [assembly: InternalsVisibleTo("UnityEngine.UI")]
 
@@ -97,3 +90,5 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("Unity.InternalAPIEngineBridgeDev.005")]
 
 [assembly: UnityEngineModuleAssembly]
+
+#endif

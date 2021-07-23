@@ -156,11 +156,7 @@ namespace UnityEngine.UIElements
             set
             {
                 m_ScaleModeIsInline = true;
-                if (m_ScaleMode != value)
-                {
-                    m_ScaleMode = value;
-                    IncrementVersion(VersionChangeType.Layout);
-                }
+                SetScaleMode(value);
             }
         }
 
@@ -196,7 +192,7 @@ namespace UnityEngine.UIElements
         {
             AddToClassList(ussClassName);
 
-            m_ScaleMode = ScaleMode.ScaleAndCrop;
+            m_ScaleMode = ScaleMode.ScaleToFit;
             m_TintColor = Color.white;
 
             m_UV = new Rect(0, 0, 1, 1);
@@ -272,16 +268,18 @@ namespace UnityEngine.UIElements
             if (image == null && sprite == null && vectorImage == null)
                 return;
 
+            var alignedRect = GUIUtility.AlignRectToDevice(contentRect);
+
             var rectParams = new MeshGenerationContextUtils.RectangleParams();
             if (image != null)
-                rectParams = MeshGenerationContextUtils.RectangleParams.MakeTextured(contentRect, uv, image, scaleMode, panel.contextType);
+                rectParams = MeshGenerationContextUtils.RectangleParams.MakeTextured(alignedRect, uv, image, scaleMode, panel.contextType);
             else if (sprite != null)
             {
                 var slices = Vector4.zero;
-                rectParams = MeshGenerationContextUtils.RectangleParams.MakeSprite(contentRect, sprite, scaleMode, panel.contextType, false, ref slices);
+                rectParams = MeshGenerationContextUtils.RectangleParams.MakeSprite(alignedRect, sprite, scaleMode, panel.contextType, false, ref slices);
             }
             else if (vectorImage != null)
-                rectParams = MeshGenerationContextUtils.RectangleParams.MakeVectorTextured(contentRect, uv, vectorImage, scaleMode, panel.contextType);
+                rectParams = MeshGenerationContextUtils.RectangleParams.MakeVectorTextured(alignedRect, uv, vectorImage, scaleMode, panel.contextType);
             rectParams.color = tintColor;
             mgc.Rectangle(rectParams);
         }
@@ -324,11 +322,20 @@ namespace UnityEngine.UIElements
 
             if (!m_ScaleModeIsInline && customStyle.TryGetValue(s_ScaleModeProperty, out scaleModeValue))
             {
-                m_ScaleMode = (ScaleMode)StylePropertyUtil.GetEnumIntValue(StyleEnumType.ScaleMode, scaleModeValue);
+                SetScaleMode((ScaleMode)StylePropertyUtil.GetEnumIntValue(StyleEnumType.ScaleMode, scaleModeValue));
             }
 
             if (!m_TintColorIsInline && customStyle.TryGetValue(s_TintColorProperty, out tintValue))
                 m_TintColor = tintValue;
+        }
+
+        private void SetScaleMode(ScaleMode mode)
+        {
+            if (m_ScaleMode != mode)
+            {
+                m_ScaleMode = mode;
+                IncrementVersion(VersionChangeType.Repaint);
+            }
         }
 
         private void CalculateUV(Rect srcRect)

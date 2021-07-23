@@ -40,11 +40,12 @@ namespace UnityEngine.UIElements
 #if UIE_PACKAGE && UNITY_EDITOR
         static bool HasPackageLoaded()
         {
-            var editorAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "UnityEditor.UIElementsGameObjectsModule");
+            string assemblyName = "UnityEditor.UIElementsModule";
+            var editorAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName);
 
             if (editorAssembly == null)
             {
-                Debug.LogError("Can't find UnityEditor.UIElementsGameObjectsModule assembly");
+                Debug.LogError($"Can't find {assemblyName} assembly");
                 return false;
             }
 

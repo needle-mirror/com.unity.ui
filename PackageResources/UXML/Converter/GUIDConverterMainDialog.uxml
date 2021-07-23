@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="../../StyleSheets/Converter/GUIDConverterMainDialog.uss" />
+    <ui:VisualElement class="unity-guid-converter__main-area">
+        <ui:VisualElement class="unity-guid-converter__top-text-area">
+            <ui:Label text="The asset converter scans project assets for UI Toolkit references and converts references to the selected type. You can convert assets to work independently from the UI Toolkit package, or rollback assets to work exclusively with the UI Toolkit package.   &#10;&#10;Assets created with the UI Toolkit package might not work correctly if the package is no longer installed in the project.&#10;&#10;The conversion process runs in the background. Performing modifications to the assets while the tool is running might interfere with the process. We recommend that you wait for the conversion to finish before modifying assets.&#10;&#10;Select the option you want for your project." display-tooltip-when-elided="true" class="unity-guid-converter__text" />
+        </ui:VisualElement>
+        <ui:HelpBox message-type="Warning" text="The conversion tool modifies assets directly. Make sure you have a backup of your assets." />
+        <ui:VisualElement class="unity-guid-converter__button-area" />
+        <ui:VisualElement class="unity-guid-converter__button-area">
+            <ui:VisualElement class="unity-guid-converter__package-assets-area">
+                <ui:Label text="I want my assets to only function with the UI Toolkit package installed." display-tooltip-when-elided="true" class="unity-guid-converter__button-area-text" />
+                <ui:Button text="Revert" display-tooltip-when-elided="true" name="convert-to-package-assets" class="unity-guid-converter__button" />
+            </ui:VisualElement>
+            <ui:VisualElement class="unity-guid-converter__trunk-assets-area">
+                <ui:Label text="I want my assets to function without the UI Toolkit package installed." display-tooltip-when-elided="true" class="unity-guid-converter__button-area-text" />
+                <ui:Button text="Convert" display-tooltip-when-elided="true" name="convert-to-trunk-assets" class="unity-guid-converter__button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

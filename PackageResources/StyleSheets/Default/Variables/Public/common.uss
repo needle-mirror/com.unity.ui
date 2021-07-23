@@ -1,0 +1,390 @@
+:root {
+    /******************/
+    /* COMMON METRICS */
+    /******************/
+
+    /*The normal font size*/
+    --unity-metrics-default-font_normal_size: 11px;
+
+    /*The semi small font size*/
+    --unity-metrics-default-font_semi_small_size: 10px;
+
+    /*The tiny font size*/
+    --unity-metrics-default-font_tiny_size: 8px;
+
+    /*The small font size*/
+    --unity-metrics-default-font_small_size: 9px;
+
+    /*The big font size*/
+    --unity-metrics-default-font_big_size: 12px;
+
+    /*The very big font size*/
+    --unity-metrics-default-font_very_big_size: 16px;
+
+    /*The usual height used for a single Editor control such as a one-line text field.
+    see EditorGUIUtility.singleLineHeight
+    */
+    --unity-metrics-single_line-height: 18px;
+
+    /*The usual height used for a large single Editor control such as an inspector titlebar label.*/
+    --unity-metrics-single_line_large-height: 20px;
+
+    /*The usual height used for a small single Editor control such as a mini toggle, mini text field.*/
+    --unity-metrics-single_line_small-height: 16px;
+
+    /*The color used for error messages.*/
+    --unity-colors-error-text: env(--unity-theme-text-color-8);
+
+    /*The color used for warning messages.*/
+    --unity-colors-warning-text: env(--unity-theme-text-color-9);
+
+    /*The color used to tint the UI in play mode.*/
+    --unity-colors-play_mode-background: env(--unity-theme-background-color-87);
+
+    /* Default */
+
+    /* The default color used for text */
+    --unity-colors-default-text: env(--unity-theme-text-color-1);
+
+    /* The default text color on hover */
+    --unity-colors-default-text-hover: env(--unity-theme-text-color-3);
+
+    /* The default background color of controls */
+    --unity-colors-default-background: env(--unity-theme-background-color-54);
+
+    /* The default border color of controls */
+    --unity-colors-default-border: env(--unity-theme-border-color-7);
+
+    /* The default border radius of controls */
+    --unity-metrics-default-border_radius: 3px;
+
+    /* Highlight */
+
+    /* The background color used for selected items or selected text */
+    --unity-colors-highlight-background: env(--unity-theme-background-color-50);
+
+    /* The background color used for hovered items */
+    --unity-colors-highlight-background-hover: env(--unity-theme-background-color-51);
+    --unity-colors-highlight-background-hover-lighter: env(--unity-theme-background-color-58);
+
+    /* The background color used for selected items or selected text when the control does not have focus */
+    --unity-colors-highlight-background-inactive: env(--unity-theme-background-color-52);
+
+    /* The text color used for selected items or selected text */
+    --unity-colors-highlight-text: env(--unity-theme-text-color-6);
+
+    /* The text color used for selected items or selected text when the control does not have focus */
+    --unity-colors-highlight-text-inactive: env(--unity-theme-text-color-5);
+
+    /* Alternated rows */
+
+    /* The background color used  as the alternate background color for views with alternating row colors */
+    --unity-colors-alternated_rows-background: env(--unity-theme-background-color-80);
+
+    /* Hyperlink */
+
+    /* The text color used for unvisited link */
+    --unity-colors-link-text: env(--unity-theme-text-color-11);
+
+    /* The text color used for visited link */
+    --unity-colors-visited_link-text: env(--unity-theme-text-color-12);
+
+    /* CONTROLS */
+
+    /* App Toolbar */
+
+    /* The background color used for the main toolbar */
+    --unity-colors-app_toolbar-background: env(--unity-theme-background-color-82);
+
+    /* App Toolbar button */
+
+    /* The background color used for buttons in the main toolbar */
+    --unity-colors-app_toolbar_button-background: env(--unity-theme-background-color-17);
+
+    /* The background color used for buttons in the main toolbar when hovered over */
+    --unity-colors-app_toolbar_button-background-hover: env(--unity-theme-background-color-84);
+
+    /* The background color used for buttons in the main toolbar when checked */
+    --unity-colors-app_toolbar_button-background-checked: env(--unity-theme-background-color-83);
+
+    /* The background color used for buttons in the main toolbar when pressed */
+    --unity-colors-app_toolbar_button-background-pressed: env(--unity-theme-background-color-83);
+
+    /* The border color used for buttons in the main toolbar */
+    --unity-colors-app_toolbar_button-border: env(--unity-theme-border-color-21);
+
+    /* The accent border color used for buttons in the main toolbar */
+    --unity-colors-app_toolbar_button-border_accent: env(--unity-theme-border-color-20);
+
+    /* Box */
+
+    /* The background color used for a box control */
+    --unity-colors-box-background: env(--unity-theme-background-color-81);
+
+    /* The border color used for a box */
+    --unity-colors-box-border: transparent;
+
+    /* Button */
+
+    /* The background color used for a button control */
+    --unity-colors-button-background: env(--unity-theme-background-color-1);
+
+    /* The background color used for a button control when pressed */
+    --unity-colors-button-background-pressed: env(--unity-theme-background-color-91);
+
+    /* The background color used for a button control when pressed and hovered */
+    --unity-colors-button-background-hover_pressed: env(--unity-theme-background-color-92);
+
+    /* The background color used for a button control when focused */
+    --unity-colors-button-background-focus: env(--unity-theme-background-color-4);
+
+    /* The background color used for a button control when hovered over */
+    --unity-colors-button-background-hover: env(--unity-theme-background-color-2);
+
+    /* The border color used for a button control when pressed */
+    --unity-colors-button-border: env(--unity-theme-border-color-10);
+
+    /* The border color used for a button control when pressed */
+    --unity-colors-button-border-pressed: env(--unity-theme-border-color-18);
+
+    /* The border accent color used for a button control when focused */
+    --unity-colors-button-border_accent-focus: env(--unity-theme-border-color-24);
+
+    /* The border accent color used for a button control */
+    --unity-colors-button-border_accent: env(--unity-theme-border-color-8);
+
+    /* The text color used for a button control */
+    --unity-colors-button-text: env(--unity-theme-text-color-7);
+
+    /* Dropdown */
+
+    /* The background color used for a dropdown control */
+    --unity-colors-dropdown-background: env(--unity-theme-background-color-8);
+
+    /* The background color used for a dropdown control when hovered over */
+    --unity-colors-dropdown-background-hover: env(--unity-theme-background-color-1);
+
+    /* The border color used for a dropdown control */
+    --unity-colors-dropdown-border: env(--unity-theme-border-color-10);
+
+    /* The border accent color used for a dropdown control */
+    --unity-colors-dropdown-border_accent: env(--unity-theme-border-color-8);
+
+    /* The text color used for a dropdown control */
+    --unity-colors-dropdown-text: env(--unity-theme-text-color-4);
+
+    /* Help Box */
+
+    /* The background color used for a helpbox control */
+    --unity-colors-helpbox-background: env(--unity-theme-background-color-86);
+
+    /* The border color used for a helpbox control */
+    --unity-colors-helpbox-border: env(--unity-theme-border-color-7);
+
+    /* The text color used for a helpbox control */
+    --unity-colors-helpbox-text: env(--unity-theme-text-color-3); /* To fix: light */
+
+    /* Input field */
+
+    /* The background color used for an input field control */
+    --unity-colors-input_field-background: env(--unity-theme-background-color-53);
+
+    /* The border color used for an input field control */
+    --unity-colors-input_field-border: env(--unity-theme-border-color-6);
+
+    /* The border color used for an input field control when focused */
+    --unity-colors-input_field-border-focus: env(--unity-theme-border-color-13);
+
+    /* The border color used for an input field control when hovered over */
+    --unity-colors-input_field-border-hover: env(--unity-theme-border-color-15);
+
+    /* The border accent color used for an input field control */
+    --unity-colors-input_field-border_accent: env(--unity-theme-border-color-1);
+
+    /* Label */
+
+    /* The text color used for a label control */
+    --unity-colors-label-text: env(--unity-theme-text-color-2);
+
+    /* The text color used for a label when focused */
+    --unity-colors-label-text-focus: env(--unity-theme-text-color-10);
+
+    /* Object field */
+
+    /* The background color used for an object field control */
+    --unity-colors-object_field-background: env(--unity-theme-background-color-54);
+
+    /* The border color used for an object field control */
+    --unity-colors-object_field-border: env(--unity-theme-border-color-5);
+
+    /* The border color used for an object field control when focused */
+    --unity-colors-object_field-border-focus: env(--unity-theme-border-color-13);
+
+    /* The border color used for an object field control when hovered over */
+    --unity-colors-object_field-border-hover: env(--unity-theme-border-color-15);
+
+    /* The background color used for the button of an object field control */
+    --unity-colors-object_field_button-background: env(--unity-theme-background-color-55);
+
+    /* The background color used for the button of an object field control when hovered over */
+    --unity-colors-object_field_button-background-hover: env(--unity-theme-background-color-56);
+
+    /* Popup window */
+
+    /* The background color used for a popup window */
+    --unity-colors-popup-background: env(--unity-theme-background-color-85);
+
+    /* Preview */
+
+    /* The background color used for a preview control */
+    --unity-colors-preview-background: env(--unity-theme-background-color-85);
+
+    /* The border color used for a preview control */
+    --unity-colors-preview-border: env(--unity-theme-border-color-7);
+
+    /* The text color used for a preview control */
+    --unity-colors-preview-text: env(--unity-theme-text-color-3);
+
+    /* The text color used for the overlay of a preview control */
+    --unity-colors-preview_overlay-text: env(--unity-theme-text-color-13);
+
+    /* Scrollbar */
+
+    /* The background color used for a scrollbar's groove (background part) */
+    --unity-colors-scrollbar_groove-background: env(--unity-theme-background-color-57);
+
+    /* The border color used for a scrollbar's groove */
+    --unity-colors-scrollbar_groove-border: env(--unity-theme-border-color-19);
+
+    /* The background color used for a scrollbar's thumb/handle */
+    --unity-colors-scrollbar_thumb-background: env(--unity-theme-background-color-58);
+
+    /* The background color used for a scrollbar's thumb/handle when hovered over */
+    --unity-colors-scrollbar_thumb-background-hover: env(--unity-theme-background-color-60);
+
+    /* The border color used for a scrollbar's thumb/handle */
+    --unity-colors-scrollbar_thumb-border: env(--unity-theme-border-color-11);
+
+    /* The border color used for a scrollbar's thumb/handle when hovered */
+    --unity-colors-scrollbar_thumb-border-hover: env(--unity-theme-border-color-17);
+
+    /* The background color used for the scroll buttons of a scrollbar */
+    --unity-colors-scrollbar_button-background: env(--unity-colors-scrollbar_groove-background);
+
+    /* The background color used for the scroll buttons of a scrollbar when hovered over*/
+    --unity-colors-scrollbar_button-background-hover: env(--unity-theme-background-color-59);
+
+    /* Progress bar*/
+    /* The background color used for progress bar (background part) */
+    --unity-colors-progress-background: env(--unity-theme-background-color-90);
+
+    /* Slider */
+
+    /* The background color used for a slider's groove (background part) */
+    --unity-colors-slider_groove-background: env(--unity-theme-background-color-11);
+
+    /* The background color used for a slider's groove when disabled */
+    --unity-colors-slider_groove-background-disabled: env(--unity-theme-background-color-14);
+
+    /* The background color used for a slider's thumb/handle */
+    --unity-colors-slider_thumb-background: env(--unity-theme-background-color-12);
+
+    /* The background color used for a slider's thumb/handle when disabled */
+    --unity-colors-slider_thumb-background-disabled: env(--unity-theme-background-color-15);
+
+    /* The background color used for a slider's thumb/handle when hovered over*/
+    --unity-colors-slider_thumb-background-hover: env(--unity-theme-background-color-13);
+
+    /* The border color used for a slider's thumb */
+    --unity-colors-slider_thumb-border: env(--unity-theme-border-color-22);
+
+    /* The border color used for a slider's thumb when disabled */
+    --unity-colors-slider_thumb-border-disabled: env(--unity-theme-border-color-16);
+
+    /* The background color used for a slider's thumb halo */
+    --unity-colors-slider_thumb_halo-background: env(--unity-theme-background-color-16);
+
+    /* Tab */
+
+    /* The background color used for an Editor window tab */
+    --unity-colors-tab-background: env(--unity-theme-background-color-10);
+
+    /* The background color used for an Editor window tab when selected */
+    --unity-colors-tab-background-checked: env(--unity-theme-background-color-5);
+
+    /* The background color used for an Editor window tab when hovered over */
+    --unity-colors-tab-background-hover: env(--unity-theme-background-color-9);
+
+    /* The text color used for an Editor window tab */
+    --unity-colors-tab-text: env(--unity-theme-text-color-3);
+
+    /* Toolbar */
+
+    /* The background color used for a toolbar control */
+    --unity-colors-toolbar-background: env(--unity-theme-background-color-5);
+
+    /* The border color used for a toolbar control */
+    --unity-colors-toolbar-border: env(--unity-theme-border-color-7);
+
+    /* The height of a toolbar control */
+    --unity-metrics-toolbar-height: 21px;
+
+    /* Toolbar button */
+
+    /* The background color used for a toolbar button control */
+    --unity-colors-toolbar_button-background: env(--unity-theme-background-color-5);
+
+    /* The background color used for a toolbar button control when hovered over */
+    --unity-colors-toolbar_button-background-hover: env(--unity-theme-background-color-6);
+
+    /* The background color used for a toolbar button control when checked */
+    --unity-colors-toolbar_button-background-checked: env(--unity-theme-background-color-7);
+
+    /* The background color used for a toolbar button control when focused */
+    --unity-colors-toolbar_button-background-focus: env(--unity-theme-background-color-6);
+
+    /* The border color used for a toolbar button control */
+    --unity-colors-toolbar_button-border: env(--unity-theme-border-color-7);
+
+    /* The text color used for a toolbar button control */
+    --unity-colors-toolbar_button-text: env(--unity-theme-text-color-2);
+
+    /* The text color used for a toolbar button control */
+    --unity-colors-toolbar_button-text-hover: env(--unity-theme-text-color-3);
+
+    /* The text color used for a toolbar button control when checked */
+    --unity-colors-toolbar_button-text-checked: env(--unity-theme-text-color-2);
+
+    /* The height color of a toolbar button control */
+    --unity-metrics-toolbar_button-height: 20px;
+
+    /* Window */
+
+    /* The background color used for a window */
+    --unity-colors-window-background: env(--unity-theme-background-color-17);
+
+    /* The border color used for a window */
+    --unity-colors-window-border: env(--unity-theme-border-color-8);
+
+    /* The text color used for a window */
+    --unity-colors-window-text: env(--unity-theme-text-color-3);
+
+
+    /* EDITOR WINDOW */
+
+    /* The background color used for a title bar in an inspector view */
+    --unity-colors-inspector_titlebar-background: env(--unity-theme-background-color-88);
+
+    /* The background color used for a title bar in an inspector view when hovered */
+    --unity-colors-inspector_titlebar-background-hover: env(--unity-theme-background-color-89);
+
+
+    /* The border color used for a title bar in an inspector view */
+    --unity-colors-inspector_titlebar-border: env(--unity-theme-border-color-4);
+
+    /* The border accent color used for a title bar in an inspector view */
+    --unity-colors-inspector_titlebar-border_accent: env(--unity-theme-border-color-10);
+
+    /* The height of a title bar in an inspector view */
+    --unity-metrics-inspector_titlebar-height: 22px;
+}

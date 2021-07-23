@@ -161,6 +161,8 @@ namespace UnityEditor.UIElements
                         return "The specified URI does not exist in the current project : {0}";
                     case ImportErrorCode.ReferenceInvalidAssetType:
                         return "The specified URI refers to an invalid asset : {0}";
+                    case ImportErrorCode.TemplateHasCircularDependency:
+                        return "The specified URI contains a circular dependency: {0}";
                     default:
                         throw new ArgumentOutOfRangeException("Unhandled error code " + errorCode);
                 }
@@ -472,21 +474,35 @@ namespace UnityEditor.UIElements
             }
             else if (hasSrc)
             {
-                string errorMessage, projectRelativePath;
+                var response = URIHelpers.ValidateAssetURL(assetPath, src);
+                var result = response.result;
+                var projectRelativePath = response.resolvedProjectRelativePath;
 
-                URIValidationResult result = URIHelpers.ValidAssetURL(assetPath, src, out errorMessage, out projectRelativePath);
+                if (response.hasWarningMessage)
+                {
+                    logger.LogError(ImportErrorType.Semantic, ImportErrorCode.ReferenceInvalidURIProjectAssetPath,
+                        response.warningMessage, Error.Level.Warning, elt);
+                }
 
                 if (result != URIValidationResult.OK)
                 {
-                    logger.LogError(ImportErrorType.Semantic, ConvertErrorCode(result), errorMessage, Error.Level.Fatal, elt);
+                    logger.LogError(ImportErrorType.Semantic, ConvertErrorCode(result), response.errorToken, Error.Level.Fatal, elt);
                 }
                 else
                 {
-                    Object asset = DeclareDependencyAndLoad(projectRelativePath);
-
-                    if (asset is VisualTreeAsset)
+                    var asset = response.resolvedQueryAsset;
+                    if (asset)
                     {
-                        vta.RegisterTemplate(name, asset as VisualTreeAsset);
+                        m_Context.DependsOnSourceAsset(projectRelativePath);
+                    }
+                    else
+                    {
+                        asset = DeclareDependencyAndLoad(projectRelativePath);
+                    }
+
+                    if (asset is VisualTreeAsset treeAsset)
+                    {
+                        vta.RegisterTemplate(name, treeAsset);
                     }
                     else
                     {
@@ -527,22 +543,118 @@ namespace UnityEditor.UIElements
                 }
             }
 
-            if (hasSrc)
+            if (!hasSrc)
             {
-                string errorMessage, projectRelativePath;
+                return;
+            }
 
-                URIValidationResult result = URIHelpers.ValidAssetURL(assetPath, src, out errorMessage, out projectRelativePath);
+            URIValidationResult result = URIHelpers.ValidAssetURL(assetPath, src, out string errorMessage, out string projectRelativePath);
 
-                if (result == URIValidationResult.OK)
-                {
+            if (result != URIValidationResult.OK)
+            {
+                return;
+            }
+
+            switch (templateNode.Name.LocalName)
+            {
+                case k_TemplateNode:
+                    var templateDependencies = new HashSet<string>();
+                    templateDependencies.Add(assetPath);
+
+                    if (!HasTemplateCircularDependencies(projectRelativePath, templateDependencies))
+                    {
+                        dependencies.Add(projectRelativePath);
+                    }
+                    else
+                    {
+                        logger.LogError(ImportErrorType.Semantic, ImportErrorCode.TemplateHasCircularDependency, projectRelativePath, Error.Level.Warning, templateNode);
+                    }
+                    break;
+                default:
                     dependencies.Add(projectRelativePath);
+                    break;
+            }
+        }
+
+        internal static bool HasTemplateCircularDependencies(string templateAssetPath, HashSet<string> templateDependencies)
+        {
+            if (templateDependencies.Contains(templateAssetPath))
+            {
+                return true;
+            }
+
+            templateDependencies.Add(templateAssetPath);
+
+            try
+            {
+                var doc = XDocument.Parse(File.ReadAllText(templateAssetPath), LoadOptions.SetLineInfo);
+
+                if (doc != null)
+                {
+                    return HasTemplateCircularDependencies(doc.Root, templateDependencies, templateAssetPath);
+                }
+                else
+                {
+                    // If there is errors parsing the file, there is no circular dependencies
+                    return false;
                 }
             }
+            catch (Exception)
+            {
+                // If there is errors parsing the file, there is no circular dependencies
+                return false;
+            }
+        }
+
+        internal static bool HasTemplateCircularDependencies(XElement templateElement, HashSet<string> templateDependencies, string rootAssetPath)
+        {
+            bool hasCircularDependencies = false;
+
+            var elements = templateElement.Elements();
+            foreach (var child in elements)
+            {
+                switch (child.Name.LocalName)
+                {
+                    case k_TemplateNode:
+                        var attributes = child.Attributes();
+
+                        foreach (var xAttribute in attributes)
+                        {
+                            if (xAttribute.Name.LocalName != k_GenericSrcAttr)
+                            {
+                                continue;
+                            }
+
+                            var src = xAttribute.Value;
+                            URIValidationResult result = URIHelpers.ValidAssetURL(rootAssetPath, src, out string errorMessage, out string projectRelativePath);
+                            hasCircularDependencies = HasTemplateCircularDependencies(projectRelativePath, templateDependencies);
+
+                            if (!hasCircularDependencies)
+                            {
+                                templateDependencies.Remove(projectRelativePath);
+                            }
+                        }
+
+                        break;
+                    default:
+                        hasCircularDependencies = HasTemplateCircularDependencies(child, templateDependencies, rootAssetPath);
+                        break;
+                }
+
+                if (hasCircularDependencies)
+                {
+                    break;
+                }
+            }
+
+            return hasCircularDependencies;
         }
 
         internal static void PopulateDependencies(string assetPath, XElement elt, List<string> dependencies)
         {
-            foreach (var child in elt.Elements())
+            var elements = elt.Elements();
+
+            foreach (var child in elements)
             {
                 switch (child.Name.LocalName)
                 {
@@ -784,7 +896,6 @@ namespace UnityEditor.UIElements
                         continue;
                     case k_StyleAttr:
                         res.AddProperty(xattr.Name.LocalName, xattr.Value);
-
                         ExCSS.StyleSheet parsed = new Parser().Parse("* { " + xattr.Value + " }");
                         if (parsed.Errors.Count != 0)
                         {
@@ -808,6 +919,7 @@ namespace UnityEditor.UIElements
                         }
                         m_Builder.BeginRule(-1);
                         startedRule = true;
+                        m_CurrentLine = ((IXmlLineInfo)xattr).LineNumber;
                         foreach (Property prop in parsed.StyleRules[0].Declarations)
                         {
                             m_Builder.BeginProperty(prop.Name);
@@ -853,7 +965,8 @@ namespace UnityEditor.UIElements
         ReferenceInvalidURILocation,
         ReferenceInvalidURIScheme,
         ReferenceInvalidURIProjectAssetPath,
-        ReferenceInvalidAssetType
+        ReferenceInvalidAssetType,
+        TemplateHasCircularDependency
     }
 
     internal enum ImportErrorType

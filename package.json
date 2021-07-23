@@ -1,9 +1,9 @@
 {
   "name": "com.unity.ui",
   "displayName": "UI Toolkit",
-  "version": "1.0.0-preview.14",
-  "unity": "2020.2",
-  "unityRelease": "0f1",
+  "version": "1.0.0-preview.15",
+  "unity": "2020.3",
+  "unityRelease": "0b9",
   "keywords": [
     "UI",
     "UIElements",
@@ -14,19 +14,21 @@
   ],
   "description": "UI Toolkit is a set of features, resources and tools for developing user interfaces (UI). Use it to develop custom UI and extensions for the Unity Editor, runtime debugging tools, and runtime UI for games and applications.\r\n\r\nUI Toolkit includes:\r\n\r\n▪ A retained-mode UI system, based on recognized web technologies, that supports stylesheets, and dynamic and contextual event handling.\r\n▪ UXML and USS asset types for building and styling user interfaces. These are inspired by standard web technologies such as XML, HTML, and CSS.\r\n▪ Tools and resources such as a built-in UI debugger, the support for the UI Builder visual UI authoring tool*, and examples available in the editor.\r\n\r\n*Available via the com.unity.ui.builder package",
   "dependencies": {
+    "nuget.moq": "1.0.0",
+    "nuget.castle-core": "1.0.1",
     "com.unity.modules.uielementsnative": "1.0.0",
-    "com.unity.textcore": "1.0.0-preview.2"
+    "com.unity.textcore": "1.0.0-preview.3"
   },
   "relatedPackages": {
-    "com.unity.ui.tests": "1.0.0-preview.14"
+    "com.unity.ui.tests": "1.0.0-preview.15"
   },
   "upmCi": {
-    "footprint": "6dfb99fc4a77feed017300f47c122980cf36f1c1"
+    "footprint": "6b8391d9cfef4779bee8530ee87fdd63254e7405"
   },
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.ui.git",
     "type": "git",
-    "revision": "e2c286830f9d1a8daccdf6dfe2a01aaf86facfed"
+    "revision": "e7b3ccec546b507cf904db52b29db1de38f4a300"
   },
   "samples": [
     {

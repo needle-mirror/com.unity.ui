@@ -1,0 +1,444 @@
+{
+    "infos": [
+	    {
+            "name": "--unity-metrics-default-font_normal_size",
+            "description": "The normal font size"
+        },
+		{
+            "name": "--unity-metrics-default-font_semi_small_size",
+            "description": "The semi small font size"
+        },
+		{
+            "name": "--unity-metrics-default-font_tiny_size",
+            "description": "The tiny font size"
+        },
+		{
+            "name": "--unity-metrics-default-font_small_size",
+            "description": "The small font size"
+        },
+		{
+            "name": "--unity-metrics-default-font_big_size",
+            "description": "The big font size"
+        },
+		{
+            "name": "--unity-metrics-default-font_very_big_size",
+            "description": "The very big font size"
+        },
+        {
+            "name": "--unity-metrics-single_line-height",
+            "description": "The usual height for a single-line Editor control, for example, a one-line text field.\n See EditorGUIUtility.singleLineHeight"
+        },
+        {
+            "name": "--unity-metrics-single_line_large-height",
+            "description": "The usual height for a large single-line Editor control, for example, an Inspector title bar label"
+        },
+        {
+            "name": "--unity-metrics-single_line_small-height",
+            "description": "The usual height for a small single-line Editor control, for example, a mini toggle or a mini text field"
+        },
+        {
+            "name": "--unity-colors-error-text",
+            "description": "The text color for error messages"
+        },
+        {
+            "name": "--unity-colors-warning-text",
+            "description": "The text color for warning messages"
+        },
+        {
+            "name": "--unity-colors-play_mode-background",
+            "description": "The color used to tint the UI in Play Mode"
+        },
+        {
+            "name": "--unity-colors-default-text",
+            "description": "The default text color"
+        },
+        {
+            "name": "--unity-colors-default-text-hover",
+            "description": "The default text color when the mouse pointer hovers over the text"
+        },
+        {
+            "name": "--unity-colors-default-background",
+            "description": "The default background color for controls"
+        },
+        {
+            "name": "--unity-colors-default-border",
+            "description": "The default border color for controls"
+        },
+        {
+            "name": "--unity-metrics-default-border_radius",
+            "description": "The default border radius for controls"
+        },
+        {
+            "name": "--unity-colors-highlight-background",
+            "description": "The background color for selected items or selected text"
+        },
+        {
+            "name": "--unity-colors-highlight-background-hover",
+            "description": "The background color for items when the mouse pointer hovers over them"
+        },
+        {
+            "name": "--unity-colors-highlight-background-inactive",
+            "description": "The background color for selected items or selected text when the control does not have focus"
+        },
+        {
+            "name": "--unity-colors-highlight-text",
+            "description": "The text color for selected items or selected text"
+        },
+        {
+            "name": "--unity-colors-highlight-text-inactive",
+            "description": "The text color for selected items or selected text when the control does not have focus"
+        },
+        {
+            "name": "--unity-colors-alternated_rows-background",
+            "description": "The alternate background color for views with alternating row colors"
+        },
+        {
+            "name": "--unity-colors-link-text",
+            "description": "The text color for unvisited links"
+        },
+        {
+            "name": "--unity-colors-visited_link-text",
+            "description": "The text color for visited links"
+        },
+        {
+            "name": "--unity-colors-app_toolbar-background",
+            "description": "The background color for the main toolbar"
+        },
+        {
+            "name": "--unity-colors-app_toolbar_button-background",
+            "description": "The background color for a button in the main toolbar"
+        },
+        {
+            "name": "--unity-colors-app_toolbar_button-background-hover",
+            "description": "The background color for a button in the main toolbar when the mouse pointer hovers over them"
+        },
+        {
+            "name": "--unity-colors-app_toolbar_button-background-checked",
+            "description": "The background color for a button in the main toolbar when it is checked"
+        },
+        {
+            "name": "--unity-colors-app_toolbar_button-background-pressed",
+            "description": "The background color for a button in the main toolbar when it is pressed"
+        },
+        {
+            "name": "--unity-colors-app_toolbar_button-border",
+            "description": "The border color for a button in the main toolbar"
+        },
+        {
+            "name": "--unity-colors-app_toolbar_button-border_accent",
+            "description": "The accent border color for a button in the main toolbar"
+        },
+        {
+            "name": "--unity-colors-box-background",
+            "description": "The background color for a box control"
+        },
+        {
+            "name": "--unity-colors-box-border",
+            "description": "The border color for a box control"
+        },
+        {
+            "name": "--unity-colors-button-background",
+            "description": "The background color for a button control"
+        },
+        {
+            "name": "--unity-colors-button-background-pressed",
+            "description": "The background color for a button control when it is pressed"
+        },
+        {
+            "name": "--unity-colors-button-background-hover_pressed",
+            "description": "The background color for a button control when it is hoverd and pressed"
+        },
+        {
+            "name": "--unity-colors-button-background-focus",
+            "description": "The background color for a button control when it has focus"
+        },
+        {
+            "name": "--unity-colors-button-background-hover",
+            "description": "The background color for a button control when the mouse pointer hovers over it"
+        },
+        {
+            "name": "--unity-colors-button-border",
+            "description": "The border color for a button control"
+        },
+        {
+            "name": "--unity-colors-button-border-pressed",
+            "description": "The border color for a button control when it is pressed"
+        },
+        {
+            "name": "--unity-colors-button-border_accent",
+            "description": "The border accent color for a button control"
+        },
+        {
+            "name": "--unity-colors-button-border_accent-focus",
+            "description": "The border accent color used for a button control when focused"
+        },
+        {
+            "name": "--unity-colors-button-text",
+            "description": "The text color for a button control"
+        },
+        {
+            "name": "--unity-colors-dropdown-background",
+            "description": "The background color for a dropdown control"
+        },
+        {
+            "name": "--unity-colors-dropdown-background-hover",
+            "description": "The background color for a dropdown control when the mouse pointer hovers over it"
+        },
+        {
+            "name": "--unity-colors-dropdown-border",
+            "description": "The border color for a dropdown control"
+        },
+        {
+            "name": "--unity-colors-dropdown-border_accent",
+            "description": "The border accent color for a dropdown control"
+        },
+        {
+            "name": "--unity-colors-dropdown-text",
+            "description": "The text color for a dropdown control"
+        },
+        {
+            "name": "--unity-colors-helpbox-background",
+            "description": "The background color for a helpbox control"
+        },
+        {
+            "name": "--unity-colors-helpbox-border",
+            "description": "The border color for a helpbox control"
+        },
+        {
+            "name": "--unity-colors-helpbox-text",
+            "description": "The text color for a helpbox control"
+        },
+        {
+            "name": "--unity-colors-input_field-background",
+            "description": "The background color for an input field control"
+        },
+        {
+            "name": "--unity-colors-input_field-border",
+            "description": "The border color for an input field control"
+        },
+        {
+            "name": "--unity-colors-input_field-border-focus",
+            "description": "The border color for an input field control when it has focus"
+        },
+        {
+            "name": "--unity-colors-input_field-border-hover",
+            "description": "The border color for an input field control when the mouse pointer hovers over it"
+        },
+        {
+            "name": "--unity-colors-input_field-border_accent",
+            "description": "The border accent color for an input field control"
+        },
+        {
+            "name": "--unity-colors-label-text",
+            "description": "The text color for a label control"
+        },
+        {
+            "name": "--unity-colors-label-text-focus",
+            "description": "The text color for a label when it has focus"
+        },
+        {
+            "name": "--unity-colors-object_field-background",
+            "description": "The background color for an object field control"
+        },
+        {
+            "name": "--unity-colors-object_field-border",
+            "description": "The border color for an object field control"
+        },
+        {
+            "name": "--unity-colors-object_field-border-focus",
+            "description": "The border color for an object field control when it has focus"
+        },
+        {
+            "name": "--unity-colors-object_field-border-hover",
+            "description": "The border color for an object field control when the mouse pointer hovers over it"
+        },
+        {
+            "name": "--unity-colors-object_field_button-background",
+            "description": "The background color for the button in an object field control"
+        },
+        {
+            "name": "--unity-colors-object_field_button-background-hover",
+            "description": "The background color for the button in an object field control when the mouse pointer hovers over it"
+        },
+        {
+            "name": "--unity-colors-popup-background",
+            "description": "The background color for a popup window"
+        },
+        {
+            "name": "--unity-colors-preview-background",
+            "description": "The background color for a preview control"
+        },
+        {
+            "name": "--unity-colors-preview-border",
+            "description": "The border color for a preview control"
+        },
+        {
+            "name": "--unity-colors-preview-text",
+            "description": "The text color for a preview control"
+        },
+        {
+            "name": "--unity-colors-preview_overlay-text",
+            "description": "The text color for a preview control overlay"
+        },
+        {
+            "name": "--unity-colors-scrollbar_groove-background",
+            "description": "The background color for a scrollbar's groove (background)"
+        },
+        {
+            "name": "--unity-colors-scrollbar_groove-border",
+            "description": "The border color for a scrollbar's groove"
+        },
+        {
+            "name": "--unity-colors-scrollbar_thumb-background",
+            "description": "The background color for a scrollbar's thumb/handle"
+        },
+        {
+            "name": "--unity-colors-scrollbar_thumb-background-hover",
+            "description": "The background color for a scrollbar's thumb/handle when the mouse pointer hovers over it"
+        },
+        {
+            "name": "--unity-colors-scrollbar_thumb-border",
+            "description": "The border color for a scrollbar's thumb/handle"
+        },
+        {
+            "name": "--unity-colors-scrollbar_thumb-border-hover",
+            "description": "The border color for a scrollbar's thumb/handle when the mouse pointer hovers over it"
+        },
+        {
+            "name": "--unity-colors-scrollbar_button-background",
+            "description": "The background color for a scrollbar's scroll buttons"
+        },
+        {
+            "name": "--unity-colors-scrollbar_button-background-hover",
+            "description": "The background color for a scrollbar's scroll buttons when the mouse pointer hovers over them"
+        },
+        {
+            "name": "--unity-colors-slider_groove-background",
+            "description": "The background color for a slider's groove (background)"
+        },
+        {
+            "name": "--unity-colors-slider_groove-background-disabled",
+            "description": "The background color for a slider's groove when it is disabled"
+        },
+        {
+            "name": "--unity-colors-slider_thumb-background",
+            "description": "The background color for a slider's thumb/handle"
+        },
+        {
+            "name": "--unity-colors-slider_thumb-background-disabled",
+            "description": "The background color for a slider's thumb/handle when it is disabled"
+        },
+        {
+            "name": "--unity-colors-slider_thumb-background-hover",
+            "description": "The background color for a slider's thumb/handle when the mouse pointer hovers over it"
+        },
+        {
+            "name": "--unity-colors-slider_thumb-border",
+            "description": "The border color for a slider's thumb"
+        },
+        {
+            "name": "--unity-colors-slider_thumb-border-disabled",
+            "description": "The border color for a slider's thumb when it is disabled"
+        },
+        {
+            "name": "--unity-colors-slider_thumb_halo-background",
+            "description": "The background color for a slider's thumb halo"
+        },
+        {
+            "name": "--unity-colors-tab-background",
+            "description": "The background color for an Editor window tab"
+        },
+        {
+            "name": "--unity-colors-tab-background-checked",
+            "description": "The background color for an Editor window tab when it is selected"
+        },
+        {
+            "name": "--unity-colors-tab-background-hover",
+            "description": "The background color for an Editor window tab when the mouse pointer hovers over it"
+        },
+        {
+            "name": "--unity-colors-tab-text",
+            "description": "The text color for an Editor window tab"
+        },
+        {
+            "name": "--unity-colors-toolbar-background",
+            "description": "The background color for a toolbar control"
+        },
+        {
+            "name": "--unity-colors-toolbar-border",
+            "description": "The border color for a toolbar control"
+        },
+        {
+            "name": "--unity-metrics-toolbar-height",
+            "description": "The height of a toolbar control"
+        },
+        {
+            "name": "--unity-colors-toolbar_button-background",
+            "description": "The background color for a toolbar button control"
+        },
+        {
+            "name": "--unity-colors-toolbar_button-background-hover",
+            "description": "The background color for a toolbar button control when the mouse pointer hovers over it"
+        },
+        {
+            "name": "--unity-colors-toolbar_button-background-checked",
+            "description": "The background color for a toolbar button control when it is checked"
+        },
+        {
+            "name": "--unity-colors-toolbar_button-background-focus",
+            "description": "The background color for a toolbar button control when it has focus"
+        },
+        {
+            "name": "--unity-colors-toolbar_button-border",
+            "description": "The border color for a toolbar button control"
+        },
+        {
+            "name": "--unity-colors-toolbar_button-text",
+            "description": "The text color for a toolbar button control"
+        },
+        {
+            "name": "--unity-colors-toolbar_button-text-hover",
+            "description": "The text color for a toolbar button control"
+        },
+        {
+            "name": "--unity-colors-toolbar_button-text-checked",
+            "description": "The text color for a toolbar button control when it is checked"
+        },
+        {
+            "name": "--unity-metrics-toolbar_button-height",
+            "description": "The height of a toolbar button control"
+        },
+        {
+            "name": "--unity-colors-window-background",
+            "description": "The background color for a window"
+        },
+        {
+            "name": "--unity-colors-window-border",
+            "description": "The border color for a window"
+        },
+        {
+            "name": "--unity-colors-window-text",
+            "description": "The text color for a window"
+        },
+        {
+            "name": "--unity-colors-inspector_titlebar-background",
+            "description": "The background color for a title bar in an Inspector view"
+        },
+        {
+            "name": "--unity-colors-inspector_titlebar-background-hover",
+            "description": "The background color for a title bar in an Inspector view when the mouse pointer hovers over it"
+        },
+        {
+            "name": "--unity-colors-inspector_titlebar-border",
+            "description": "The border color for a title bar in an Inspector view"
+        },
+        {
+            "name": "--unity-colors-inspector_titlebar-border_accent",
+            "description": "The border accent color for a title bar in an Inspector view"
+        },
+        {
+            "name": "--unity-metrics-inspector_titlebar-height",
+            "description": "The height of a title bar in an Inspector view"
+        }
+    ]
+}

@@ -334,15 +334,34 @@ namespace UnityEditor.UIElements
             if (bindEvent == null)
                 return;
 
+            // Case 1336093. nested InspectorElement for other editors have their own BindTree processes,
+            // so we need to ignore SerializedObjectBindEvent that aren't meant for them.
+            // We use the DataSource property to store a reference to the target object that is being bound
+            // so we can ignore the binding process that targets a parent inspector.
+            var dataSource = this.GetProperty(BindingExtensions.s_DataSourceProperty);
+            if (dataSource != null && dataSource != bindEvent.bindObject)
+            {
+                evt.StopPropagation();
+                return;
+            }
+
             Reset(bindEvent.bindObject);
         }
 
         private Editor GetOrCreateEditor(SerializedObject serializedObject)
         {
-            if (editor != null)
-                return editor;
-
             var target = serializedObject?.targetObject;
+
+            if (editor != null)
+            {
+                if (editor.target == target || editor.serializedObject == serializedObject)
+                    return editor;
+
+                if (ownsEditor)
+                {
+                    DestroyOwnedEditor();
+                }
+            }
 
             foreach (var inspectorWindow in InspectorWindow.GetInspectors())
             {
@@ -579,12 +598,14 @@ namespace UnityEditor.UIElements
                         {
                             EditorGUILayout.BeginVertical(editorWrapper);
                             {
+                                #if UNITY_2021_2_OR_NEWER
                                 // we have no guarantees regarding what happens in the try/catch block below,
                                 // so we need to save state here and restore it afterwards,
                                 // the natural thing to do would be using SavedGUIState,
                                 // but it implicitly resets keyboards bindings and it breaks functionality.
                                 // We have identified issues with layout so we just save that for the time being.
-                                var layoutCache = new GUILayoutUtility.LayoutCache(GUILayoutUtility.current);
+                                var layoutCacheState = GUILayoutUtility.current.State;
+                                #endif
                                 try
                                 {
                                     var rebuildOptimizedGUIBlocks = GetRebuildOptimizedGUIBlocks(editor.target);
@@ -627,10 +648,12 @@ namespace UnityEditor.UIElements
                                     if (!m_IgnoreOnInspectorGUIErrors)
                                         Debug.LogException(e);
                                 }
+                                #if UNITY_2021_2_OR_NEWER
                                 finally
                                 {
-                                    GUILayoutUtility.current = layoutCache;
+                                    GUILayoutUtility.current.CopyState(layoutCacheState);
                                 }
+                                #endif
                             }
                             EditorGUILayout.EndVertical();
                         }

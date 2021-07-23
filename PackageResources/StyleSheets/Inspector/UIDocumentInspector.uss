@@ -11,3 +11,8 @@
 {
     display: none;
 }
+
+.unity-ui-document-inspector--panel-missing--hidden
+{
+    display: none;
+}

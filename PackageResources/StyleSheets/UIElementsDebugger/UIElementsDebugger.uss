@@ -253,7 +253,7 @@ StylesDebugger {
     padding-right: 0;
     margin-right: 0;
     margin-left: 0;
-    -unity-font: resource("Fonts/consola.ttf");
+    -unity-font-definition: url("/Packages/com.unity.ui/PackageResources/Fonts/RobotoMono/RobotoMono-Regular SDF.asset");
     font-size: 14px;
     -unity-text-align: middle-center;
 }

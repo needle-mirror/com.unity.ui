@@ -1,0 +1,183 @@
+/**********************************************************************************************************************/
+/* Variables
+/**********************************************************************************************************************/
+.unity-theme-env-variables {
+    --unity-text-color: env(--unity-colors-default-text);
+    --unity-active-text-color: env(--unity-colors-label-text-focus);
+
+    --theme-window-text-color: env(--unity-colors-window-text);
+    --theme-window-border-color: #666666;
+    --theme-window-background-color: rgba(179, 179, 179, 0.95);
+
+    --theme-label-text-color: env(--unity-colors-label-text);
+
+    --theme-input-text-cursor: initial;
+    --theme-input-text-color: env(--unity-colors-default-text);
+    --theme-input-background-color: env(--unity-colors-input_field-background);
+    /*border not compatible, replacing "--theme-input-border: 1px solid #0D0D0D;"*/
+    --theme-input-border-width: 1px;
+    --theme-input-border-color: env(--unity-colors-input_field-border);
+    /*border not compatible, replacing "--theme-input-border-focus: 1px solid #3A79BB;"*/
+    --theme-input-border-focus-width: 1px;
+    --theme-input-border-focus-color: env(--unity-colors-input_field-border-focus);
+     /*border not compatible, replacing "--theme-input-border-hover: 1px solid #545454;"*/
+    --theme-input-border-hover-width: 1px;
+    --theme-input-border-hover-color: env(--unity-colors-input_field-border-hover);
+    --theme-input-border-checked-width: 1px;
+    --theme-input-border-checked-width: env(--theme-input-border-hover-width);
+    --theme-input-border-checked-color: env(--theme-input-border-hover-color);
+
+    --theme-button-text-color: env(--unity-colors-button-text);
+    --theme-button-background-color: env(--unity-colors-button-background);
+    --theme-button-background-color-hover: env(--unity-colors-button-background-hover);
+    --theme-button-background-color-checked: env(--unity-colors-button-background-pressed);
+    --theme-button-border-width: 1px;
+    --theme-button-border-color: env(--unity-colors-button-border);
+    --theme-dropdown-accent-border-color: env(--unity-colors-dropdown-border_accent);
+
+    --theme-scrollbar-thumb-background-color: env(--unity-colors-scrollbar_thumb-background);
+    --theme-scrollbar-thumb-border-width: 1px;
+    --theme-scrollbar-thumb-border-color: env(--unity-colors-scrollbar_thumb-border);
+    --theme-scrollbar-thumb-background-color-hover: env(--unity-colors-scrollbar_thumb-background-hover);
+    --theme-scrollbar-background-color: env(--unity-colors-scrollbar_groove-background);
+    --theme-scrollbar-border-color: env(--unity-colors-scrollbar_groove-border);
+    --theme-scrollbar-button-background-color: env(--unity-colors-scrollbar_button-background);
+    --theme-scrollbar-button-background-color-hover: env(--unity-colors-scrollbar_button-background-hover);
+
+    --theme-slider-background-color: env(--unity-colors-slider_groove-background);
+    --theme-slider-background-color-disabled: env(--unity-colors-slider_groove-background-disabled);
+    --theme-slider-thumb-border-width: 1px;
+    --theme-slider-thumb-border-color: env(--unity-colors-slider_thumb-border);
+    --theme-slider-thumb-border-color-disabled: env(--unity-colors-slider_thumb-border-disabled);
+    --theme-slider-thumb-background-color: env(--unity-colors-slider_thumb-background);
+    --theme-slider-thumb-background-color-hover: env(--unity-colors-slider_thumb-background-hover);
+    --theme-slider-thumb-background-color-disabled: env(--unity-colors-slider_thumb-background-disabled);
+    --theme-slider-thumb-extent-background-color-focus: env(--unity-colors-slider_thumb_halo-background);
+
+    --theme-box-background-color: env(--unity-colors-box-background);
+    --theme-box-border-color: env(--unity-colors-box-border);
+
+    --theme-help-box-background-color: #CACACA;
+    --theme-help-box-border-color: #9A9A9A;
+    --theme-help-box-icon-info: url("/Packages/com.unity.ui/PackageResources/Images/console.infoicon.png");
+    --theme-help-box-icon-warning: url("/Packages/com.unity.ui/PackageResources/Images/console.warnicon.png");
+    --theme-help-box-icon-error: url("/Packages/com.unity.ui/PackageResources/Images/console.erroricon.png");
+
+    --theme-list-view-drag-hover-bar-color: #3356DA;
+    --theme-list-view-drag-hover-item-background-color: #3E5F96;
+
+    --theme-image-toggle-checkmark: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/check.png");
+    --theme-image-foldout: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/arrow-right.png");
+    --theme-image-foldout-on: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/arrow-down.png");
+
+    --theme-image-pulldown: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/dropdown-arrow.png");
+    --theme-image-dropdown: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/dropdown-arrow.png");
+    --theme-image-checkmark: url("/Packages/com.unity.ui/PackageResources/Images/checkmark.png");
+
+    --theme-image-scroll-up: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/arrow-up.png");
+    --theme-image-scroll-down: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/arrow-down.png");
+    --theme-image-scroll-left: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/arrow-left.png");
+    --theme-image-scroll-right: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/arrow-right.png");
+
+    --theme-image-scroll-up: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/arrow-up.png");
+    --theme-image-scroll-down: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/arrow-down.png");
+    --theme-image-scroll-left: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/arrow-left.png");
+    --theme-image-scroll-right: url("/Packages/com.unity.ui/PackageResources/Images/Vanilla/arrow-right.png");
+
+    --theme-radio-button-checkmark-background-color: #555555;
+
+    --theme-view-background-color: #C2C2C2;
+    --theme-line-background-color-hover: #B2B2B2;
+
+    --theme-background-color-alternate: #BCBCBC;
+    --theme-line-selection-background-color: #AEAEAE;
+    --theme-line-selection-background-color-focus: #3A72B0;
+    --theme-line-selection-text-color: #FFFFFF;
+
+    --progress-bar-back-background-color: #B6B6B6;
+    --progress-bar-back-border-color: #808080;
+    --progress-bar-progress-color: #4E8DD3;
+    --progress-bar-text-color: env(--unity-colors-label-text);
+
+    --theme-base-field-label-mixed-values-color: rgba(9, 9, 9, 0.5);
+
+    /**********************************************************************************************************************/
+    /* Slider                                                                                                             */
+    /**********************************************************************************************************************/
+    --unity-metrics-slider-width: 40px;
+    --unity-metrics-slider-margin_top: 1px;
+    --unity-metrics-slider-margin_bottom: 1px;
+    --unity-metrics-slider_groove-safety-stroke-border-width: 1px;
+    --unity-metrics-slider_groove-safety-stroke-border-radius: 2px;
+    --unity-metrics-slider-vertical_tracker-width: 6px;
+    --unity-metrics-slider-horizontal_tracker-height: 6px;
+    --unity-metrics-slider_groove-height: 6px;
+    --unity-metrics-slider_groove-margin_top: -3px;
+    --unity-metrics-slider_thumb-width: 8px;
+    --unity-metrics-slider_thumb-height: 24px;
+    --unity-metrics-slider_thumb-offset: -12px;
+    --unity-metrics-slider_thumb-border-width: 6px;
+    --unity-metrics-slider_thumb-border-radius: 10px;
+
+    /**********************************************************************************************************************/
+    /* Min Max Slider                                                                                                             */
+    /**********************************************************************************************************************/
+
+    --unity-metrics-minmax_slider_thumb-height: 6px;
+    --unity-metrics-minmax_slider_thumb-offset: -3px;
+    --unity-metrics-minmax_slider_minmax_thumb-height: 24px;
+    --unity-metrics-minmax_slider_minmax_thumb-offset: -10px;
+}
+
+/* Following are selectors which are specifying colors used in a single place / can't be named to meaningful variable */
+
+/**********************************************************************************************************************/
+/* Bindings                                                                                                           */
+/**********************************************************************************************************************/
+
+.unity-binding__prefab-override-bar {
+    background-color: rgb(50, 163, 225);
+}
+
+.unity-binding--animation-animated,
+.unity-binding--animation-animated > .unity-toggle__checkmark {
+    -unity-background-image-tint-color: rgb(209, 247, 255);
+}
+
+.unity-binding--animation-recorded,
+.unity-binding--animation-recorded > .unity-toggle__checkmark {
+    -unity-background-image-tint-color: rgb(255, 153, 153);
+}
+
+.unity-binding--animation-candidate,
+.unity-binding--animation-candidate > .unity-toggle__checkmark {
+    -unity-background-image-tint-color: rgb(255, 178, 153);
+}
+
+/**********************************************************************************************************************/
+/* InputField, FloatInput, DoubleInput, IntegerInput, LongInput, TextInput                                            */
+/**********************************************************************************************************************/
+
+.unity-base-text-field {
+    /* color: #000; */
+    /* background-image: url("Builtin Skins/LightSkin/Images/TextField.png"); */
+    --unity-cursor-color:#000;
+}
+
+/**********************************************************************************************************************/
+/* ListView                                                                                                           */
+/**********************************************************************************************************************/
+.unity-list-view__item:hover
+{
+    background-color: #b2b2b2;
+}
+
+.unity-list-view__item--selected{
+    background-color: #8f8f8f;
+    color: #FFFFFF;
+}
+
+.unity-list-view__item--selected:hover,
+.unity-list-view:focus > .unity-list-view__item--selected  {
+    background-color: #3d80df;
+}

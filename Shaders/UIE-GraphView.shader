@@ -67,13 +67,15 @@ Shader "Hidden/UIE-GraphView"
     fixed4 frag(v2f IN) : SV_Target
     {
         uie_fragment_clip(IN);
+        fixed4 col = fixed4(0, 0, 0, 0);
         if (IN.typeTexSettings.x == 100.0f) // Is it an edge?
         {
             float distanceSat = saturate((IN.uvXY.y - abs(IN.uvXY.x)) * IN.typeTexSettings.y + 0.5);
-            return fixed4(IN.color.rgb, IN.color.a * distanceSat);
+            col = fixed4(IN.color.rgb, IN.color.a * distanceSat);
         }
-
-        return uie_editor_frag(IN);
+        else
+            col = uie_editor_frag(IN);
+        return col;
     }
     ENDCG
 

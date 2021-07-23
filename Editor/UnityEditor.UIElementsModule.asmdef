@@ -2,8 +2,12 @@
     "name": "UnityEditor.UIElementsModule",
     "rootNamespace": "",
     "references": [
+        "UnityEditor.TextCoreTextEngineModule",
+        "UnityEngine.TextCoreTextEngineModule",
         "UnityEngine.UIElementsModule",
-        "UnityEngine"
+        "UnityEngine",
+        "Unity.UIElements.Text",
+        "Unity.TextCore"
     ],
     "includePlatforms": [
         "Editor"
@@ -14,7 +18,7 @@
     "precompiledReferences": [
         "ExCSS.Unity.dll"
     ],
-    "autoReferenced": true,
+    "autoReferenced": false,
     "defineConstraints": [
         "UIE_PACKAGE",
         "UNITY_2020_2_OR_NEWER"

@@ -21,7 +21,6 @@ namespace Samples.Utils
 
         static void InitializeTextAlignmentTagsScene()
         {
-            TextDelegates.OnTextSettingsImported -= InitializeTextAlignmentTagsScene;
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects);
             var go = new GameObject("Sample Object");
             var component = go.AddComponent<AlignmentTags>();

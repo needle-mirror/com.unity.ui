@@ -1,0 +1,22 @@
+.unity-theme-env-variables {
+
+    --unity-font-standard-padding-bottom: 0;
+    --unity-font-standard-padding-bottom-with-border: 0;
+
+    --unity-font-popup-padding-top: 0;
+    --unity-font-popup-padding-bottom: 1px;
+
+    --unity-font-button-padding-top: 1px;
+    --unity-font-button-padding-bottom: 1px;
+
+    --current-font: url("/Packages/com.unity.ui/PackageResources/Fonts/Inter/Inter-Regular SDF.asset");
+}
+
+:root {
+    --unity-metrics-default-font_normal_size: 12px;
+    --unity-metrics-default-font_semi_small_size: 11px;
+    --unity-metrics-default-font_tiny_size: 9px;
+    --unity-metrics-default-font_small_size: 10px;
+    --unity-metrics-default-font_big_size: 14px;
+    --unity-metrics-default-font_very_big_size: 19px;
+}

@@ -1,0 +1,34 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace UnityEngine.UIElements
+{
+    [System.Obsolete(@"EventSystem no longer supports input override for legacy input. Install Input System package for full input binding functionality.")] public class InputWrapper : UnityEngine.MonoBehaviour
+    {
+        public virtual UnityEngine.Vector2 compositionCursorPos { get; set; }
+        public virtual string compositionString { get; }
+        public virtual UnityEngine.IMECompositionMode imeCompositionMode { get; set; }
+        public virtual UnityEngine.Vector2 mousePosition { get; }
+        public virtual bool mousePresent { get; }
+        public virtual UnityEngine.Vector2 mouseScrollDelta { get; }
+        public virtual int touchCount { get; }
+        public virtual bool touchSupported { get; }
+        public InputWrapper() {}
+        public virtual float GetAxisRaw(string axisName);
+        public virtual bool GetButtonDown(string buttonName);
+        public virtual bool GetMouseButton(int button);
+        public virtual bool GetMouseButtonDown(int button);
+        public virtual bool GetMouseButtonUp(int button);
+        public virtual UnityEngine.Touch GetTouch(int index);
+    }
+}
+
+namespace UnityEngine.UIElements.InputSystem
+{
+    [UnityEngine.AddComponentMenu(@"UI Toolkit/Input System Event System (UI Toolkit)")] public class InputSystemEventSystem : UnityEngine.MonoBehaviour
+    {
+        [System.Obsolete(@"EventSystem no longer supports input override for legacy input. Install Input System package for full input binding functionality.")] public UnityEngine.UIElements.InputWrapper inputOverride { get; set; }
+        public bool isAppFocused { get; }
+        protected InputSystemEventSystem() {}
+    }
+}
