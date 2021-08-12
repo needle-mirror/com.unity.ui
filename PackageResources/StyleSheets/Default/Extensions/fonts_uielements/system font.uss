@@ -1,0 +1,4 @@
+.unity-theme-env-variables {
+    --unity-font-standard-padding-bottom: 1px;
+    --unity-font-standard-padding-bottom-with-border: 0;
+}

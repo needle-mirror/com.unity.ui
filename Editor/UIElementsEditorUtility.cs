@@ -160,5 +160,82 @@ namespace UnityEditor.UIElements
                 }
             }
         }
+
+        #if UIE_PACKAGE
+        public static string[] s_Path =
+        {
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/GlobalFallback - Linux.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/GlobalFallback - OSX.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/GlobalFallback - Win.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/Linux/DejavuSans SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/Linux/DroidSans SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/Linux/FreeSans SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/Linux/LiberationSans SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/OSX/Arial SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/OSX/Arial Unicode SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/OSX/Helvetica SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/OSX/LastResort SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/Windows/Gulim SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/Windows/MS Gothic SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/GlobalFallback/Windows/Microsoft YaHei SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/ChineseSimplified - Linux.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/ChineseSimplified - OSX.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/ChineseSimplified - Win.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/ChineseTraditional - Linux.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/ChineseTraditional - OSX.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/ChineseTraditional - Win.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/English - Linux.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/English - OSX.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/English - Win.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Japanese - Linux.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Japanese - OSX.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Japanese - Win.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Korean - Linux.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Korean - OSX.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Korean - Win.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Linux/NotoSansCJKjp-Bold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Linux/NotoSansCJKjp-Regular SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Linux/NotoSansCJKkr-Bold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Linux/NotoSansCJKkr-Regular SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Linux/NotoSansCJKsc-Bold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Linux/NotoSansCJKsc-Regular SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Linux/NotoSansCJKtc-Bold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Linux/NotoSansCJKtc-Regular SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/OSX/AppleSDGothicNeo Bold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/OSX/AppleSDGothicNeo SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/OSX/Hiragino Sans W3 SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/OSX/Hiragino Sans W6 SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/OSX/Microsoft Sans Serif SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/OSX/PingFang SC Medium SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/OSX/PingFang SC SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/OSX/PingFang TC Medium SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/OSX/PingFang TC SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Windows/Malgun Gothic Bold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Windows/Malgun Gothic SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Windows/Microsoft JhengHei Bold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Windows/Microsoft JhengHei SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Windows/Microsoft YaHei UI Bold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Windows/Microsoft YaHei UI SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Windows/Yu Gothic UI Bold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/FontAssets/DynamicOSFontAssets/Localization/Windows/Yu Gothic UI SDF.asset",
+            "Packages/com.unity.ui/PackageResources/Fonts/Lucida Grande Bold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/Fonts/Lucida Grande SDF.asset",
+            "Packages/com.unity.ui/PackageResources/Fonts/Inter/Inter-Italic SDF.asset",
+            "Packages/com.unity.ui/PackageResources/Fonts/Inter/Inter-Regular SDF.asset",
+            "Packages/com.unity.ui/PackageResources/Fonts/Inter/Inter-SemiBold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/Fonts/Inter/Inter-SemiBoldItalic SDF.asset",
+            "Packages/com.unity.ui/PackageResources/Fonts/RobotoMono/RobotoMono-Bold SDF.asset",
+            "Packages/com.unity.ui/PackageResources/Fonts/RobotoMono/RobotoMono-BoldItalic SDF.asset",
+            "Packages/com.unity.ui/PackageResources/Fonts/RobotoMono/RobotoMono-Italic SDF.asset",
+            "Packages/com.unity.ui/PackageResources/Fonts/RobotoMono/RobotoMono-Regular SDF.asset"
+        };
+
+        [InitializeOnLoadMethod]
+        public static void AllowUITKResourcesToBeModified()
+        {
+            UnityEditor.PackageManager.ImmutableAssets.SetAssetsAllowedToBeModified(s_Path);
+        }
+
+        #endif
     }
 }

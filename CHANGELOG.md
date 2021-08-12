@@ -4,6 +4,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-preview.16] - 2021-08-12
+---
+
+### Fixed
+
+- Fixed Editor fonts missing when using System Fonts (case 1357686)
+- Removed warning on console about .meta for folder that doesn't exist (case 1357693)
+- Fixed Editor fonts get messed up after saving or building player (case 1357698)
+
 ## [1.0.0-preview.15] - 2021-07-23
 ---
 
