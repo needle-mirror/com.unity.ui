@@ -4,6 +4,19 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-preview.17] - 2021-08-26
+---
+
+### Fixed
+
+- Removed dependency on moq
+- Fixed corrupted text after upgrading/removing/adding a new package. (case 1358577)
+- Fixed some NullReferenceException issues related to text
+- Fixed ObjectField label alignment issues (case 1320031)
+- Drag and drop in ListView will not bind negative index. (case 1319543)
+- Submit event on a ListView focuses in the content to allow keyboard navigation. (case 1311688)
+- Fixed selection on pointer up on mobile to allow touch scrolling. (case 1312139)
+
 ## [1.0.0-preview.16] - 2021-08-12
 ---
 

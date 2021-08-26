@@ -23,7 +23,7 @@
 }
 
 .unity-base-field__label {
-    min-width: 150px;
+    min-width: 120px;
     padding-left: 2px;
     padding-top: env(--unity-font-standard-padding-top);
     padding-bottom: env(--unity-font-standard-padding-bottom);

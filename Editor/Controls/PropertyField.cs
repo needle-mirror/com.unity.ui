@@ -472,7 +472,8 @@ namespace UnityEditor.UIElements
                 }
             });
 
-            if (!(parent is InspectorElement inspectorElement))
+            var inspectorElement = GetFirstAncestorOfType<InspectorElement>();
+            if (inspectorElement == null)
                 return field;
 
             field.RegisterCallback<GeometryChangedEvent>(evt =>

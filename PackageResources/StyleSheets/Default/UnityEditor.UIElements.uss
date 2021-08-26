@@ -121,6 +121,7 @@ to handle this difference we need to add padding and remove them when using the 
     width: 18px;
     height: 16px;
     align-self: center;
+    flex-shrink: 0;
     background-color: env(--theme-object-field-button-background-color);
     background-image: env(--theme-image-pick);
     -unity-slice-left: 1;
@@ -281,7 +282,12 @@ to handle this difference we need to add padding and remove them when using the 
 }
 .unity-inspector-element .unity-property-field__label,
 .unity-inspector-element > .unity-property-field > .unity-base-field > .unity-base-field__label {
-    padding-left: 0;
+    padding-left: 1px;
+    overflow: hidden;
+}
+
+.unity-inspector-element .unity-property-field > .unity-base-field {
+    margin-right: -2px;
 }
 
 /**********************************************************************************************************************/

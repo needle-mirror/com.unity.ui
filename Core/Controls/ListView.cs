@@ -418,6 +418,8 @@ namespace UnityEngine.UIElements
         private bool m_IsRangeSelectionDirectionUp;
         private ListViewDragger m_Dragger;
 
+        internal ListViewDragger dragger => m_Dragger;
+
         /// <summary>
         /// Returns or sets the selected item's index in the data source. If multiple items are selected, returns the
         /// first selected item's index. If multiple items are provided, sets them all as selected.
@@ -824,7 +826,6 @@ namespace UnityEngine.UIElements
             }
         }
 
-        private long m_TouchDownTime = 0;
         private Vector3 m_TouchDownPosition;
 
         private void OnPointerMove(PointerMoveEvent evt)
@@ -845,7 +846,19 @@ namespace UnityEngine.UIElements
 
         private void OnPointerDown(PointerDownEvent evt)
         {
-            ProcessPointerDown(evt);
+            if (evt.pointerType != PointerType.mouse)
+            {
+                ProcessPointerDown(evt);
+                panel.PreventCompatibilityMouseEvents(evt.pointerId);
+            }
+            else
+            {
+#if  !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+                panel.PreventCompatibilityMouseEvents(evt.pointerId);
+#else
+                ProcessPointerDown(evt);
+#endif
+            }
         }
 
         private void OnPointerCancel(PointerCancelEvent evt)
@@ -861,7 +874,20 @@ namespace UnityEngine.UIElements
 
         private void OnPointerUp(PointerUpEvent evt)
         {
-            ProcessPointerUp(evt);
+            if (evt.pointerType != PointerType.mouse)
+            {
+                ProcessPointerUp(evt);
+
+                panel.PreventCompatibilityMouseEvents(evt.pointerId);
+            }
+            else
+            {
+#if  !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+                panel.PreventCompatibilityMouseEvents(evt.pointerId);
+#else
+                ProcessPointerUp(evt);
+#endif
+            }
         }
 
         private void ProcessPointerDown(IPointerEvent evt)
@@ -877,7 +903,6 @@ namespace UnityEngine.UIElements
 
             if (evt.pointerType != PointerType.mouse)
             {
-                m_TouchDownTime = ((EventBase)evt).timestamp;
                 m_TouchDownPosition = evt.position;
                 return;
             }
@@ -898,9 +923,8 @@ namespace UnityEngine.UIElements
 
             if (evt.pointerType != PointerType.mouse)
             {
-                var delay = ((EventBase)evt).timestamp - m_TouchDownTime;
                 var delta = evt.position - m_TouchDownPosition;
-                if (delay < 500 && delta.sqrMagnitude <= 100)
+                if (delta.sqrMagnitude <= ScrollView.ScrollThresholdSquared)
                 {
                     DoSelect(evt.localPosition, evt.clickCount, evt.actionKey, evt.shiftKey);
                 }
@@ -1255,6 +1279,13 @@ namespace UnityEngine.UIElements
                 else
                 {
                     m_LastFocusedElementIndex = -1;
+                }
+            }
+            else if (evt.eventTypeId == NavigationSubmitEvent.TypeId())
+            {
+                if (evt.target == this)
+                {
+                    m_ScrollView.contentContainer.Focus();
                 }
             }
         }
