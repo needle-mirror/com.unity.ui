@@ -48,6 +48,13 @@ namespace UnityEngine.UIElements
             return Mathf.Max(Mathf.Max(a, b), Mathf.Max(c, d));
         }
 
+#if UNITY_2020_3
+        internal static Rect CalculateConservativeRect(Matrix4x4 matrix, Rect rect)
+        {
+            return CalculateConservativeRect(ref matrix, rect);
+        }
+
+#endif
         internal static Rect CalculateConservativeRect(ref Matrix4x4 matrix, Rect rect)
         {
             //Mathf.Min does not check for NAN
@@ -81,6 +88,14 @@ namespace UnityEngine.UIElements
             return new Rect(min.x, min.y, max.x - min.x, max.y - min.y);
         }
 
+#if UNITY_2020_3
+        internal static void TransformAlignedRect(Matrix4x4 matrix, ref Rect rect)
+        {
+            rect =  CalculateConservativeRect(ref matrix, rect);
+        }
+
+#endif
+
         internal static void TransformAlignedRect(ref Matrix4x4 matrix, ref Rect rect)
         {
             rect =  CalculateConservativeRect(ref matrix, rect);
@@ -99,6 +114,15 @@ namespace UnityEngine.UIElements
                 rect.height = -rect.height;
             }
         }
+
+#if UNITY_2020_3
+        [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
+        internal static Vector2 MultiplyMatrix44Point2(Matrix4x4 lhs, Vector2 point)
+        {
+            return MultiplyMatrix44Point2(ref lhs, point);
+        }
+
+#endif
 
         [MethodImpl(MethodImplOptionsEx.AggressiveInlining)]
         internal static Vector2 MultiplyMatrix44Point2(ref Matrix4x4 lhs, Vector2 point)
@@ -125,6 +149,14 @@ namespace UnityEngine.UIElements
             r.size = MultiplyVector2(ref lhs, r.size);
             return r;
         }
+
+    #if UNITY_2020_3
+        internal static void MultiplyMatrix34(Matrix4x4 lhs, ref Matrix4x4 rhs, out Matrix4x4 res)
+        {
+            MultiplyMatrix34(ref lhs, ref rhs, out res);
+        }
+
+    #endif
 
         internal static void MultiplyMatrix34(ref Matrix4x4 lhs, ref Matrix4x4 rhs, out Matrix4x4 res)
         {
@@ -169,7 +201,11 @@ namespace UnityEngine.UIElements
                 throw new ArgumentNullException(nameof(ele));
             }
 
+#if UNITY_2020_3
+            return VisualElement.MultiplyMatrix44Point2(ele.worldTransformInverse, p);
+#else
             return VisualElement.MultiplyMatrix44Point2(ref ele.worldTransformInverse, p);
+#endif
         }
 
         /// <summary>
@@ -209,7 +245,11 @@ namespace UnityEngine.UIElements
                 throw new ArgumentNullException(nameof(ele));
             }
 
+#if UNITY_2020_3
+            return VisualElement.CalculateConservativeRect(ele.worldTransformInverse, r);
+#else
             return VisualElement.CalculateConservativeRect(ref ele.worldTransformInverse, r);
+#endif
         }
 
         /// <summary>

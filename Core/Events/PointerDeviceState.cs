@@ -89,7 +89,7 @@ namespace UnityEngine.UIElements
             s_PressedButtons[pointerId] = 0;
         }
 
-        public static Vector2 GetPointerPosition(int pointerId, ContextType contextType)
+        public static Vector2 GetPointerPosition(int pointerId, ContextType contextType = ContextType.Editor)
         {
             switch (contextType)
             {

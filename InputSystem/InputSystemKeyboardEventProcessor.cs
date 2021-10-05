@@ -12,7 +12,6 @@ namespace UnityEngine.UIElements.InputSystem
     internal class InputSystemKeyboardEventProcessor : IKeyboardEventProcessor
     {
         private readonly HashSet<Keyboard> m_DirtyKeyboards = new HashSet<Keyboard>();
-        private readonly List<(Keyboard keyboard, char c, EventModifiers modifiers)> m_TextEventQueue = new List<(Keyboard keyboard, char c, EventModifiers modifiers)>();
 
         public void OnEnable()
         {
@@ -28,29 +27,7 @@ namespace UnityEngine.UIElements.InputSystem
         {
             if (eventPtr.handled || !(device is Keyboard keyboard))
                 return;
-
-            if (eventPtr.IsA<TextEvent>())
-            {
-                unsafe
-                {
-                    int character = ((TextEvent*)eventPtr.ToPointer())->character;
-
-                    if (character != 0)
-                    {
-                        char c = (char)character;
-                        if (c == '\r') c = '\n';
-                        var modifiers = GetEventModifiers(keyboard);
-                        m_TextEventQueue.Add((keyboard, c, modifiers));
-                    }
-                }
-            }
-
             m_DirtyKeyboards.Add(keyboard);
-        }
-
-        void OnTextInput(InputSystemEventSystem eventSystem, char c, EventModifiers modifiers, Keyboard keyboard)
-        {
-            SendEvent(eventSystem, keyboard, t => KeyDownEvent.GetPooled(t.c, KeyCode.None, t.modifiers), (c, modifiers));
         }
 
         private int m_LastPressedKey = -1;
@@ -83,14 +60,16 @@ namespace UnityEngine.UIElements.InputSystem
                     m_LastPressedTime = Time.unscaledTime;
                     m_LastPressedKeyboard = keyboard;
 
-                    SendEvent(eventSystem, keyboard,  t => KeyDownEvent.GetPooled(t.c, t.eventKeyCode, t.modifiers), (c, eventKeyCode, modifiers));
+                    SendEvent(eventSystem, keyboard,  t => KeyDownEvent.GetPooled('\0', t.eventKeyCode, t.modifiers), (eventKeyCode, modifiers));
+                    if (c != '\0')
+                        SendEvent(eventSystem, keyboard, t => KeyDownEvent.GetPooled(t.c, KeyCode.None, t.modifiers), (c, modifiers));
                 }
                 if (keys[i].wasReleasedThisFrame)
                 {
                     if (m_LastPressedKey == i)
                         m_LastPressedKey = -1;
 
-                    SendEvent(eventSystem, keyboard,  t => KeyUpEvent.GetPooled(t.c, t.eventKeyCode, t.modifiers), (c, eventKeyCode, modifiers));
+                    SendEvent(eventSystem, keyboard,  t => KeyUpEvent.GetPooled('\0', t.eventKeyCode, t.modifiers), (eventKeyCode, modifiers));
                 }
             }
         }
@@ -140,7 +119,9 @@ namespace UnityEngine.UIElements.InputSystem
                 var modifiers = GetEventModifiers(keyboard);
                 char c = GetCharacterFromKeyCode(keyCode, ref modifiers);
 
-                SendEvent(eventSystem, keyboard,  t => KeyDownEvent.GetPooled(t.c, t.keyCode, t.modifiers), (c, keyCode, modifiers));
+                SendEvent(eventSystem, keyboard,  t => KeyDownEvent.GetPooled('\0', t.keyCode, t.modifiers), (keyCode, modifiers));
+                if (c != '\0')
+                    SendEvent(eventSystem, keyboard, t => KeyDownEvent.GetPooled(t.c, KeyCode.None, t.modifiers), (c, modifiers));
             }
         }
 
@@ -230,9 +211,11 @@ namespace UnityEngine.UIElements.InputSystem
         static char GetCharacterFromKeyCode(KeyCode keyCode, ref EventModifiers modifiers)
         {
             var c = (char)keyCode;
+            if (c == '\r')
+                c = '\n';
             if (c == '\t' || c == '\n' || (c >= 32 && c < 256 && keyCode != KeyCode.Delete))
             {
-                return '\0'; //not "shift ? char.ToUpper(c) : c" because IMGUI expects 0 everywhere except text input;
+                return (modifiers & EventModifiers.Shift) != 0 ? char.ToUpper(c) : c;
             }
             modifiers |= EventModifiers.FunctionKey;
             return '\0';
@@ -247,12 +230,6 @@ namespace UnityEngine.UIElements.InputSystem
             m_DirtyKeyboards.Clear();
 
             CheckForRepeatedEvents(eventSystem);
-
-            foreach (var textEvent in m_TextEventQueue)
-            {
-                OnTextInput(eventSystem, textEvent.c, textEvent.modifiers, textEvent.keyboard);
-            }
-            m_TextEventQueue.Clear();
         }
     }
 }

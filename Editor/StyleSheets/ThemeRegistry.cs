@@ -7,7 +7,18 @@ namespace UnityEditor.UIElements.StyleSheets
 {
     static class ThemeRegistry
     {
-        internal static readonly string k_DefaultStyleSheetPath = Path.Combine(UIElementsPackageUtility.EditorResourcesBasePath, "StyleSheets/Generated/Default.tss.asset");
+        internal static string k_DefaultStyleSheetPath
+        {
+            get
+            {
+#if UIE_PACKAGE
+                return "Packages/com.unity.ui/PackageResources/StyleSheets/Generated/Default.tss.asset";
+#else
+                return "StyleSheets/Generated/Default.tss.asset";
+#endif
+            }
+        }
+
         public const string kThemeScheme = "unity-theme";
         public const string kUnityThemesPath = "Assets/UI Toolkit/UnityThemes";
         public const string kUnityRuntimeThemeFileName = "UnityDefaultRuntimeTheme.tss";
@@ -37,5 +48,18 @@ namespace UnityEditor.UIElements.StyleSheets
         {
             themes.Remove(themeName);
         }
+
+#if UIE_PACKAGE
+        private static bool s_IsDefaultThemeReady = false;
+        internal static void RefreshDefaultThemes()
+        {
+            if (!s_IsDefaultThemeReady)
+            {
+                RegisterTheme("default", k_DefaultStyleSheetPath);
+                s_IsDefaultThemeReady = UIElementsPackageUtility.IsUIEPackageLoaded;
+            }
+        }
+
+#endif // UIE_PACKAGE
     }
 }

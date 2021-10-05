@@ -367,7 +367,8 @@ namespace UnityEngine.UIElements.StyleSheets
                 {
                     valueType = GetValueType(i);
                     var valueType2 = GetValueType(i + 1);
-                    if (valueType == StyleValueType.Dimension && valueType2 == StyleValueType.Dimension)
+                    if ((valueType == StyleValueType.Dimension || valueType == StyleValueType.Float) &&
+                        (valueType2 == StyleValueType.Dimension || valueType2 == StyleValueType.Float))
                     {
                         var valueX = GetValue(i++);
                         var valueY = GetValue(i++);
@@ -380,7 +381,7 @@ namespace UnityEngine.UIElements.StyleSheets
                 if (i < valueCount)
                 {
                     valueType = GetValueType(i);
-                    if (valueType == StyleValueType.Dimension)
+                    if (valueType == StyleValueType.Dimension || valueType == StyleValueType.Float)
                     {
                         var valueBlur = GetValue(i++);
                         blurRadius = valueBlur.sheet.ReadDimension(valueBlur.handle).value;

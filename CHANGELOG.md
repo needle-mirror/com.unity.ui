@@ -4,6 +4,25 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-preview.18] - 2021-10-05
+
+### Fixed
+- Fixed default.tss.asset failing to load while the UI Toolkit package is being imported
+- Fixed asset dependencies preventing references to TSS resources from UXML inline styles (case 1357255)
+- Fixed ClickEvent unpredictably not being sent on Android and iOS when the touch sequence spans over multiple update frames
+- Fixed binary compatibility error when using GraphView and minimaps
+- Fixed compbatibility error with Graph Tools Foundation package
+- Fixed inconsistencies of underline/strikethrough text visuals
+- Fixed exception thrown when repainting a panel that uses a destroyed texture
+- Fixed UIDebugger element picking in the Game View on mac
+- Fixed Tab key being ignored on Mac builds
+- Fixed Text Shadow Color being resetted in the UI Builder after reopening a project
+
+### Changed
+- Removed default auto assignment of PanelSettings's default runtime theme
+- Popupfields choices are now accessible through c# property
+
+
 ## [1.0.0-preview.17] - 2021-08-26
 ---
 

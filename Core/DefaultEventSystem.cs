@@ -90,9 +90,9 @@ namespace UnityEngine.UIElements
                 }
                 else if (!m_SendingTouchEvents && input.mousePresent)
                 {
+                    var screenPosition = GetLocalScreenPosition(m_Event, out var targetDisplay);
                     if (m_Event.type == EventType.ScrollWheel)
                     {
-                        var screenPosition = GetLocalScreenPosition(m_Event, out var targetDisplay);
                         SendPositionBasedEvent(screenPosition, m_Event.delta, PointerId.mousePointerId, targetDisplay, (panelPosition, panelDelta, self) =>
                         {
                             self.m_Event.mousePosition = panelPosition;
@@ -101,7 +101,6 @@ namespace UnityEngine.UIElements
                     }
                     else
                     {
-                        var screenPosition = GetLocalScreenPosition(m_Event, out var targetDisplay);
                         SendPositionBasedEvent(screenPosition, m_Event.delta, PointerId.mousePointerId, targetDisplay, (panelPosition, panelDelta, self) =>
                         {
                             self.m_Event.mousePosition = panelPosition;

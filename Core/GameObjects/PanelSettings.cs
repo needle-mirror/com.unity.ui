@@ -740,12 +740,7 @@ namespace UnityEngine.UIElements
                     isDirty = true;
                 }
 
-                if (themeUss == null)
-                {
-                    themeUss = GetOrCreateDefaultTheme?.Invoke();
-                    isDirty = true;
-                }
-                else if (m_OldThemeUss != themeUss)
+                if (m_OldThemeUss != themeUss)
                 {
                     var root = visualTree;
                     if (root != null)
@@ -775,13 +770,6 @@ namespace UnityEngine.UIElements
             else
             {
                 m_IsLoaded = true;
-
-                // We still need to check on the theme, because if it's not assigned nothing gets rendered.
-                if (themeUss == null)
-                {
-                    themeUss = GetOrCreateDefaultTheme?.Invoke();
-                    isDirty = true;
-                }
             }
 
             m_OldReferenceDpi = m_ReferenceDpi;

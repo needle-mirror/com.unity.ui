@@ -79,6 +79,11 @@ namespace UnityEditor.UIElements.StyleSheets
             {
                 var themeName = path.Substring(kThemePrefix.Length);
 
+#if UIE_PACKAGE
+                // The stored default theme will remain stale until the package is loaded
+                ThemeRegistry.RefreshDefaultThemes();
+#endif // UIE_PACKAGE
+
                 if (!ThemeRegistry.themes.TryGetValue(themeName, out var themePath))
                     return null;
 

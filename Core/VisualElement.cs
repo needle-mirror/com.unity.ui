@@ -767,13 +767,21 @@ namespace UnityEngine.UIElements
             }
         }
 
+#if UNITY_2020_3
+        internal Matrix4x4 worldTransformInverse
+#else
         internal ref Matrix4x4 worldTransformInverse
+#endif
         {
             get
             {
                 if (isWorldTransformDirty || isWorldTransformInverseDirty)
                     UpdateWorldTransformInverse();
+#if UNITY_2020_3
+                return m_WorldTransformInverseCache;
+#else
                 return ref m_WorldTransformInverseCache;
+#endif
             }
         }
 

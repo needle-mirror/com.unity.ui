@@ -13,12 +13,19 @@ namespace UnityEngine.UIElements
 #if UIE_PACKAGE
         internal static readonly string UIEPackageRootFolder = "Packages/com.unity.ui/";
 #endif //UIE_PACKAGE
-        internal static readonly string EditorResourcesBasePath;
-        internal static readonly bool IsUIEPackageLoaded;
+        internal static bool IsUIEPackageLoaded { get; private set; }
+        internal static string EditorResourcesBasePath { get; private set; }
 
         static UIElementsPackageUtility()
         {
+            Refresh();
+        }
+
+        internal static void Refresh()
+        {
 #if UIE_PACKAGE
+            if (IsUIEPackageLoaded)
+                return;
 #if UNITY_EDITOR
             if (!HasPackageLoaded())
             {

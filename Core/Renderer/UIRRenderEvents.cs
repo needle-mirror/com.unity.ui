@@ -68,7 +68,15 @@ namespace UnityEngine.UIElements.UIR.Implementation
             Debug.Assert(RenderChainVEData.AllocatesID(ve.renderChainData.transformID) || (ve.renderHints & (RenderHints.GroupTransform)) != 0);
             Matrix4x4 transform;
             if (ve.renderChainData.groupTransformAncestor != null)
-                VisualElement.MultiplyMatrix34(ref ve.renderChainData.groupTransformAncestor.worldTransformInverse, ref ve.worldTransformRef, out transform);
+            {
+#if UNITY_2020_3
+                VisualElement.MultiplyMatrix34(ve.renderChainData.groupTransformAncestor.worldTransformInverse,
+                    ref ve.worldTransformRef, out transform);
+#else
+                VisualElement.MultiplyMatrix34(ref ve.renderChainData.groupTransformAncestor.worldTransformInverse,
+                    ref ve.worldTransformRef, out transform);
+#endif
+            }
             else transform = ve.worldTransform;
             transform.m22 = 1.0f; // Once world-space mode is introduced, this should become conditional
             return transform;
@@ -82,7 +90,11 @@ namespace UnityEngine.UIElements.UIR.Implementation
 
             Rect rect = ve.worldClipMinusGroup;
             // Subtract the transform of the group transform ancestor
+#if UNITY_2020_3
+            VisualElement.TransformAlignedRect(ve.renderChainData.groupTransformAncestor.worldTransformInverse, ref rect);
+#else
             VisualElement.TransformAlignedRect(ref ve.renderChainData.groupTransformAncestor.worldTransformInverse, ref rect);
+#endif
             return UIRUtility.ToVector4(rect);
         }
 
@@ -91,9 +103,25 @@ namespace UnityEngine.UIElements.UIR.Implementation
             if (RenderChainVEData.AllocatesID(ve.renderChainData.transformID) || (ve.renderHints & (RenderHints.GroupTransform)) != 0)
                 transform = Matrix4x4.identity;
             else if (ve.renderChainData.boneTransformAncestor != null)
-                VisualElement.MultiplyMatrix34(ref ve.renderChainData.boneTransformAncestor.worldTransformInverse, ref ve.worldTransformRef, out transform);
+            {
+#if UNITY_2020_3
+                VisualElement.MultiplyMatrix34(ve.renderChainData.boneTransformAncestor.worldTransformInverse,
+                    ref ve.worldTransformRef, out transform);
+#else
+                VisualElement.MultiplyMatrix34(ref ve.renderChainData.boneTransformAncestor.worldTransformInverse,
+                    ref ve.worldTransformRef, out transform);
+#endif
+            }
             else if (ve.renderChainData.groupTransformAncestor != null)
-                VisualElement.MultiplyMatrix34(ref ve.renderChainData.groupTransformAncestor.worldTransformInverse, ref ve.worldTransformRef, out transform);
+            {
+#if UNITY_2020_3
+                VisualElement.MultiplyMatrix34(ve.renderChainData.groupTransformAncestor.worldTransformInverse,
+                    ref ve.worldTransformRef, out transform);
+#else
+                VisualElement.MultiplyMatrix34(ref ve.renderChainData.groupTransformAncestor.worldTransformInverse,
+                    ref ve.worldTransformRef, out transform);
+#endif
+            }
             else transform = ve.worldTransform;
             transform.m22 = 1.0f; // Once world-space mode is introduced, this should become conditional
         }

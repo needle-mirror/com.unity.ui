@@ -455,24 +455,27 @@ float TestForValue(float value, inout float flags)
 // isoPerimeter : Dilate / Contract the shape
 float sd_to_coverage(float sd, float2 uv, float sdfSizeRCP, float sdfScale, float isoPerimeter)
 {
-    float ta = ddx(uv.x) * ddy(uv.y) - ddy(uv.x) * ddx(uv.y);   // Texel area (parallelogram)
-    float ssr = rsqrt(abs(ta)) * sdfSizeRCP;                    // Texture to Screen Space Ratio
+    float ta = ddx(uv.x) * ddy(uv.y) - ddy(uv.x) * ddx(uv.y);   // Texel area covered by this pixel (parallelogram area)
+    float ssr = rsqrt(abs(ta)) * sdfSizeRCP;                    // Texture to Screen Space Ratio (unit is Texel/Pixel)
     sd = (sd - 0.5) * sdfScale + isoPerimeter;                  // Signed Distance to edge (in texture space)
     return saturate(0.5 + 2.0 * sd * ssr);                      // Screen pixel coverage : center + (1 / sampling radius) * signed distance
 }
 
 // 3 Layers : Face, Outline, Underlay
 // sd           : Signed distance / sdfScale + 0.5
-// sdfSizeRCP   : 1 / texture width
+// sdfSize      : texture height
 // sdfScale     : Signed Distance Field Scale
 // isoPerimeter : Dilate / Contract the shape
 // softness     : softness of each outer edges
-float3 sd_to_coverage(float3 sd, float2 uv, float sdfSizeRCP, float sdfScale, float3 isoPerimeter, float3 softness)
+float3 sd_to_coverage(float3 sd, float2 uv, float sdfSize, float sdfScale, float3 isoPerimeter, float3 softness)
 {
-    float ta = ddx(uv.x) * ddy(uv.y) - ddy(uv.x) * ddx(uv.y);         // Texel area (parallelogram)
-    float ssr = rsqrt(abs(ta)) * sdfSizeRCP;                          // Texture to Screen Space Ratio
+    // Case 1349202: The underline stretches its middle quad, making parallelogram area evaluation invalid and resulting
+    //               in visual artifacts. For that reason, we can only rely on uv.y for the length ratio leading in some
+    //               error when a rotation/skew/non-uniform scaling takes place.
+    float ps = abs(ddx(uv.y)) + abs(ddy(uv.y));                       // Size of a pixel in texel space (approximation)
+    float stsr = sdfSize * ps;                                        // Screen to Texture Space Ratio (unit is Pixel/Texel)
     sd = (sd - 0.5) * sdfScale + isoPerimeter;                        // Signed Distance to edge (in texture space)
-    return saturate(0.5 + 2.0 * sd * ssr / (1.0 + softness * ssr));   // Screen pixel coverage : center + (1 / sampling radius) * signed distance
+    return saturate(0.5 + 2.0 * sd / (stsr + softness));              // Screen pixel coverage : center + (1 / sampling radius) * signed distance
 }
 
 UIE_FRAG_T uie_textcore(float textAlpha, float2 uv, float2 textCoreUV, float4 faceColor, float extraDilate)
@@ -495,7 +498,7 @@ UIE_FRAG_T uie_textcore(float textAlpha, float2 uv, float2 textCoreUV, float4 fa
     // Distance to Alpha
     float alpha1 = textAlpha;
     float alpha2 = tex2D(_FontTex, uv + underlayOffset * _FontTex_TexelSize.x).a;
-    float3 alpha = sd_to_coverage(float3(alpha1, alpha1, alpha2), uv, _FontTex_TexelSize.x, _FontTexSDFScale, dilate + extraDilate, softness);
+    float3 alpha = sd_to_coverage(float3(alpha1, alpha1, alpha2), uv, _FontTex_TexelSize.w, _FontTexSDFScale, dilate + extraDilate, softness);
 
     // Blending of the 3 ARGB layers
     underlayColor.a *= alpha.z;
